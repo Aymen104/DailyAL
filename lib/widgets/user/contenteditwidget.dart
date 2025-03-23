@@ -858,10 +858,13 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                     },
                     option: FilterOption(
                         value: contentDetailed?.myListStatus?.comments,
-                        fieldName: "Comments")),
+                        fieldName: "Comments",
+                        openTextFormAsModal: true
+                    ),
+                ),
               ),
               null,
-              null,
+              100.0,
               CrossAxisAlignment.start,
               EdgeInsets.only(left: 20, bottom: 8)),
           Padding(

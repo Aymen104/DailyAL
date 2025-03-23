@@ -17,6 +17,7 @@ class FilterRange {
   final double? minValue;
   double? startValue;
   double? endValue;
+
   FilterRange({this.maxValue, this.minValue, this.endValue, this.startValue});
 }
 
@@ -36,8 +37,10 @@ class FilterOption {
   final List<TextInputFormatter>? inputFormatters;
   final Map<String, Map<String, String>?>? singleList;
   bool hideOption = false;
+  bool openTextFormAsModal = false;
   String? value;
   String? modalField;
+
   FilterOption({
     this.type,
     this.fieldName,
@@ -56,6 +59,7 @@ class FilterOption {
     this.dependent,
     this.modalField,
     this.hideOption = false,
+    this.openTextFormAsModal = false,
   });
 
   FilterOption clone() {
@@ -77,6 +81,7 @@ class FilterOption {
       dependent: dependent,
       modalField: modalField,
       hideOption: hideOption,
+      openTextFormAsModal: openTextFormAsModal,
     );
   }
 
@@ -103,6 +108,7 @@ class FilterModal extends StatelessWidget {
   final bool showBottombar;
   final bool showClearAll;
   final EdgeInsetsGeometry? padding;
+
   const FilterModal({
     Key? key,
     required this.filterOptions,
@@ -410,6 +416,7 @@ class TextFormFilter extends StatefulWidget {
   final FilterOption option;
   final Function(String?)? onEdit;
   final Function(String?)? onFieldSubmitted;
+
   const TextFormFilter(
       {Key? key, required this.option, this.onEdit, this.onFieldSubmitted})
       : super(key: key);
@@ -443,116 +450,233 @@ class _TextFormFilterState extends State<TextFormFilter> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: TextFormField(
-                  keyboardType: widget.option.keyboardType,
-                  controller: controller,
-                  focusNode: focusNode,
-                  inputFormatters: widget.option.inputFormatters ?? [],
-                  autofocus: false,
-                  onFieldSubmitted: (value) {
-                    if (value != null && widget.onFieldSubmitted != null) {
-                      widget.onFieldSubmitted!(value);
-                    }
-                  },
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText:
-                        'Type ${widget.option.fieldName?.toLowerCase()} here..',
-                    hintStyle: TextStyle(fontSize: 14),
-                    errorStyle: TextStyle(fontSize: 14),
+              _buildTextField(),
+              if (!widget.option.openTextFormAsModal) ...[
+                if (controller.text.isNotEmpty)
+                  IconButton(
+                    icon: Icon(Icons.done),
+                    onPressed: () {
+                      if (widget.onFieldSubmitted != null) {
+                        widget.onFieldSubmitted!(controller.text);
+                      }
+                      focusNode.unfocus();
+                    },
+                    iconSize: 16,
                   ),
-                ),
-              ),
-              if (controller.text.isNotEmpty)
                 IconButton(
-                  icon: Icon(Icons.done),
+                  icon: Icon(Icons.clear),
                   onPressed: () {
-                    if (widget.onFieldSubmitted != null) {
-                      widget.onFieldSubmitted!(controller.text);
-                    }
-                    focusNode.unfocus();
+                    controller.text = "";
                   },
                   iconSize: 16,
                 ),
-              IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: () {
-                  controller.text = "";
-                },
-                iconSize: 16,
-              ),
+              ],
             ],
           )),
     );
+  }
+
+  Expanded _buildTextField() {
+    final hintText = 'Type ${widget.option.fieldName?.toLowerCase()} here..';
+    if (widget.option.openTextFormAsModal) {
+      final text = controller.text;
+      return Expanded(
+        child: InkWell(
+          onTap: () async {
+            await onTap();
+          },
+          child: Text(text.isEmpty ? hintText : text, maxLines: 3),
+        ),
+      );
+    }
+    return Expanded(
+      child: TextFormField(
+        keyboardType: widget.option.keyboardType,
+        controller: controller,
+        focusNode: focusNode,
+        inputFormatters: widget.option.inputFormatters ?? [],
+        autofocus: false,
+        onFieldSubmitted: (value) {
+          if (widget.onFieldSubmitted != null) {
+            widget.onFieldSubmitted!(value);
+          }
+        },
+        style: TextStyle(fontSize: 14),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hintText,
+          hintStyle: TextStyle(fontSize: 14),
+          errorStyle: TextStyle(fontSize: 14),
+        ),
+      ),
+    );
+  }
+
+  Future<void> onTap() async {
+    TextEditingController _controller =
+        TextEditingController(text: controller.text);
+    final value = await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return SizedBox(
+            height: 400.0,
+            child: Column(
+              children: [
+                SB.h10,
+                Text(S.current.Comments,
+                    style: Theme.of(context).textTheme.titleMedium),
+                SB.h10,
+                Expanded(
+                  child: CustomTextForm(
+                    value: _controller.text,
+                    controller: _controller,
+                    useRow: false,
+                    fieldName: widget.option.modalField ?? "",
+                    maxLines: 20,
+                    onFieldSubmitted: (value) {
+                      Navigator.pop(context, value);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+    if (value != null) {
+      controller.text = value;
+      if (widget.onFieldSubmitted != null) widget.onFieldSubmitted!(value);
+    }
   }
 }
 
 class CustomTextForm extends StatelessWidget {
   final String value;
   final String fieldName;
+  final int? maxLines;
   final Function(String?)? onEdit;
   final Function(String?)? onFieldSubmitted;
-  CustomTextForm(
-      {Key? key,
-      this.onEdit,
-      this.onFieldSubmitted,
-      required this.value,
-      required this.fieldName})
-      : super(key: key);
+  final bool useRow;
+  final TextEditingController? controller;
+
+  CustomTextForm({
+    Key? key,
+    this.onEdit,
+    this.onFieldSubmitted,
+    required this.value,
+    required this.fieldName,
+    this.useRow = true,
+    this.maxLines,
+    this.controller,
+  }) : super(key: key);
 
   final FocusNode focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: EdgeInsets.symmetric(horizontal: 0),
       child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
+        padding: EdgeInsets.symmetric(horizontal: useRow ? 30 : 0, vertical: 0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: buildView(context),
+      ),
+    );
+  }
+
+  Widget buildView(BuildContext context) {
+    if (useRow) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          buildTextFormField(),
+          buildOkButton(),
+          buildClearButton(),
+        ],
+      );
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: buildTextFormField(),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: TextFormField(
-                  focusNode: focusNode,
-                  autofocus: false,
-                  initialValue: value ?? "",
-                  onFieldSubmitted: (value) {
-                    if (value != null && onFieldSubmitted != null) {
-                      onFieldSubmitted!(value);
-                    }
-                  },
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Type ${fieldName.toLowerCase()} here..',
-                    hintStyle: TextStyle(fontSize: 14),
-                    errorStyle: TextStyle(fontSize: 14),
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.done),
-                onPressed: () {
-                  focusNode.unfocus();
-                },
-                iconSize: 16,
-              ),
-              IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: () {
-                  if (onFieldSubmitted != null) {
-                    onFieldSubmitted!('');
-                  }
-                },
-                iconSize: 16,
-              ),
-            ],
-          )),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            PlainButton(
+              onPressed: () {
+                if (onFieldSubmitted != null) {
+                  onFieldSubmitted!(controller?.text ?? '');
+                }
+              },
+              child: iconAndText(Icons.done, S.current.Save),
+            ),
+            PlainButton(
+              onPressed: () {
+                controller?.clear();
+              },
+              child: iconAndText(Icons.clear, S.current.Clear),
+            ),
+            PlainButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: iconAndText(Icons.close, S.current.Cancel),
+            )
+          ],
+        )
+      ],
+    );
+  }
+
+  IconButton buildClearButton() {
+    return IconButton(
+      icon: Icon(Icons.clear),
+      onPressed: () {
+        if (onFieldSubmitted != null) {
+          onFieldSubmitted!('');
+        }
+      },
+      iconSize: 16,
+    );
+  }
+
+  IconButton buildOkButton() {
+    return IconButton(
+      icon: Icon(Icons.done),
+      onPressed: () {
+        focusNode.unfocus();
+      },
+      iconSize: 16,
+    );
+  }
+
+  Expanded buildTextFormField() {
+    return Expanded(
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        autofocus: false,
+        maxLines: maxLines,
+        initialValue: controller == null ? (value ?? "") : null,
+        onFieldSubmitted: (value) {
+          if (onFieldSubmitted != null) {
+            onFieldSubmitted!(value);
+          }
+        },
+        style: TextStyle(fontSize: 14),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: 'Type ${fieldName.toLowerCase()} here..',
+          hintStyle: TextStyle(fontSize: 14),
+          errorStyle: TextStyle(fontSize: 14),
+        ),
+      ),
     );
   }
 }
