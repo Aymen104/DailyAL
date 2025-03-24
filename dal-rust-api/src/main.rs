@@ -14,7 +14,6 @@ mod cache_service;
 mod file_storage_service;
 mod image_service;
 mod gemini_api;
-mod move_cache_to_aws;
 
 pub struct AppState {
     pub config: Config,
@@ -28,11 +27,6 @@ async fn main() {
 
     let config = Config::init();
     let app = routes::setup_app(config.await).await;
-    let config2 = Config::init();
-    let aws = move_cache_to_aws::MoveToAWSService {
-        config: config2.await,
-    };
-    aws.move_cache_to_aws().await;
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8001".to_string());
     let addr = format!("0.0.0.0:{}", port);

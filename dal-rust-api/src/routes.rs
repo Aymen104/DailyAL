@@ -19,6 +19,7 @@ pub async fn setup_app(config: Config) -> Router {
     let cache_service = CacheService {
         config: config.clone(),
     };
+    cache_service.check_aws_get_item().await;
     let mal_api = MalAPI {
         config: config.clone(),
     };

@@ -69,7 +69,8 @@ impl CacheService {
     ) -> Option<()> {
         let key = format!("{}_{}", content_type, id);
         let pk = format!("CACHE#{}", key);
-        let value = serde_json::to_string(data).unwrap();
+        let vec_data = vec![data];
+        let value = serde_json::to_string(&vec_data).unwrap();
         let mut item_builder = self
             .config
             .secrets
@@ -111,7 +112,7 @@ fn deserialize_item<T: DeserializeOwned + Clone>(
     item: std::collections::HashMap<String, AttributeValue>,
 ) -> Option<T> {
     let json = item
-        .get("data")
+        .get("cached_data")
         .unwrap()
         .as_s()
         .as_ref()
