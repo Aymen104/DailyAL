@@ -25,6 +25,8 @@ tower-http = { version = "0.5.0", features = ["cors"] }
 uuid = { version = "1.6.1", features = ["serde", "v4"] }
 seahash = "4.1.0"
 openssl = { version = "0.10.59", features = ["vendored"] }
+aws-sdk-dynamodb = "1.69.0"
+aws-config = { version = "1.6.0", features = ["behavior-version-latest"] }
 
 [profile.release]
 overflow-checks = true

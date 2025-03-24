@@ -1,0 +1,1 @@
+/home/jica/StudioProjects/DailyAL/build/app/intermediates/cxx/Debug/4t1v1i4t/obj/arm64-v8a
