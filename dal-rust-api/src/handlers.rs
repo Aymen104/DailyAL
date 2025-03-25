@@ -21,7 +21,7 @@ pub async fn get_related_anime(
 pub async fn get_anime(
     headers: HeaderMap,
     State(data): State<Arc<AppState>>,
-) -> Json<AnimeLinkDTO> {
+) -> Json<Vec<AnimeLinkDTO>> {
     let anime_query = AnimeQuery::from_headers(headers);
     Json(data.anime_service.get_anime(anime_query).await)
 }

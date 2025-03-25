@@ -163,6 +163,7 @@ impl From<crate::model::RelationType> for RelationTypeDTO {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnimeLinkDTO {
+    pub title: Option<String>,
     #[serde(rename(serialize = "malId", deserialize = "malId"))]
     pub mal_id: Option<String>,
     #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
@@ -176,6 +177,7 @@ pub struct AnimeLinkDTO {
 impl From<AnimeLink> for AnimeLinkDTO {
     fn from(anime: AnimeLink) -> Self {
         AnimeLinkDTO { 
+            title: anime.title,
             anilist_id: anime.anilist_id,
             mal_id: anime.mal_id,
             kitsu_id: anime.kitsu_id,

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -80,12 +82,14 @@ pub enum RelationType {
 
 #[derive(Debug, Clone)]
 pub struct AnimeQuery {
-    pub mal_id: String
+    pub mal_id: Option<String>,
+    pub query: Option<String>,
 }
 impl AnimeQuery {
     pub fn from_headers(headers: axum::http::HeaderMap) -> AnimeQuery {
         AnimeQuery {
-            mal_id: headers.get("mal_id").unwrap().to_str().unwrap().to_string()
+            mal_id: headers.get("mal_id").map(|v| v.to_str().unwrap().to_string()),
+            query: headers.get("query").map(|v| v.to_str().unwrap().to_string()),
         }
     }
 }
@@ -136,6 +140,7 @@ pub struct Parts {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnimeLink {
+    pub title: Option<String>,
     #[serde(rename(serialize = "malId", deserialize = "malId"))]
     pub mal_id: Option<String>,
     #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
@@ -144,4 +149,16 @@ pub struct AnimeLink {
     pub kitsu_id: Option<String>,
     #[serde(rename(serialize = "animePlanet", deserialize = "animePlanet"))]
     pub anime_planet: Option<String>,
+}
+
+impl From<HashMap<String, String>> for AnimeLink {
+    fn from(map: HashMap<String, String>) -> AnimeLink {
+        AnimeLink {
+            title: map.get("title").cloned(),
+            mal_id: map.get("malId").cloned(),
+            anilist_id: map.get("anilistId").cloned(),
+            kitsu_id: map.get("kitsuId").cloned(),
+            anime_planet: map.get("animePlanet").cloned(),
+        }
+    }
 }

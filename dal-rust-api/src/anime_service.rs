@@ -4,7 +4,10 @@ use std::error::Error;
 use std::hash::Hasher;
 use std::sync::{Arc, Mutex};
 
-use crate::model::{Anime, AnimeLink, AnimeQuery, Edge, RelatedAnime, RelationType, ReviewResponse, ReviewResponseData};
+use crate::model::{
+    Anime, AnimeLink, AnimeQuery, Edge, RelatedAnime, RelationType, ReviewResponse,
+    ReviewResponseData,
+};
 
 use crate::config::Config;
 use crate::model_dto::{AnimeLinkDTO, ContentGraphDTO, ContentNodeDTO};
@@ -19,6 +22,7 @@ pub struct AnimeService {
     pub mal_api: crate::mal_api::MalAPI,
     pub cache_service: crate::cache_service::CacheService,
     pub ai_service: crate::gemini_api::GeminiAPI,
+    pub anime_link_service: crate::anime_link_service::AnimeLinkService,
 }
 
 impl AnimeService {
@@ -146,7 +150,11 @@ impl AnimeService {
     async fn get_anime_by_id(&self, id: i64, from_cache: bool) -> Result<Anime, Box<dyn Error>> {
         let now = chrono::Utc::now();
         let result = match from_cache {
-            true => self.cache_service.get_cache_by_id("anime", id.to_string()).await,
+            true => {
+                self.cache_service
+                    .get_cache_by_id("anime", id.to_string())
+                    .await
+            }
             false => None,
         };
 
@@ -205,8 +213,10 @@ impl AnimeService {
 
         println!("Using hash_key: {}", hash_str);
 
-        let cached_review: Option<ReviewResponse> =
-            self.cache_service.get_cache_by_id("reviews", hash_str.clone()).await;
+        let cached_review: Option<ReviewResponse> = self
+            .cache_service
+            .get_cache_by_id("reviews", hash_str.clone())
+            .await;
 
         if cached_review.is_some() {
             return Ok(cached_review.unwrap());
@@ -216,8 +226,9 @@ impl AnimeService {
                 .ai_service
                 .talk(REVIEW_SYSTEM, reviews)
                 .await
-                .map(|text| serde_json::from_str(&text).unwrap()).unwrap();
-            
+                .map(|text| serde_json::from_str(&text).unwrap())
+                .unwrap();
+
             let review_response = review_response_data.data.clone();
 
             self.cache_service
@@ -226,9 +237,24 @@ impl AnimeService {
             return Ok(review_response);
         }
     }
-    
-    pub async fn get_anime(&self, query: AnimeQuery) -> AnimeLinkDTO {
-        let anime_link: AnimeLink = self.cache_service.get_link_by_id("anime", query.mal_id).await.unwrap();
-        anime_link.into()
+
+    pub async fn get_anime(&self, query: AnimeQuery) -> Vec<AnimeLinkDTO> {
+        if query.query.is_some() {
+            return self
+                .anime_link_service
+                .search(query.query.unwrap())
+                .await
+                .into_iter()
+                .map(|f| f.into())
+                .collect();
+        }
+        if query.mal_id.is_some() {
+            let anime_link: AnimeLink = self
+                .anime_link_service
+                .get_link_by_id(query.mal_id.unwrap())
+                .await;
+            return Vec::from([anime_link.into()]);
+        }
+        panic!("Invalid query");
     }
 }
