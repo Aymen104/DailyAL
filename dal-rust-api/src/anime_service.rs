@@ -4,7 +4,7 @@ use std::error::Error;
 use std::hash::Hasher;
 use std::sync::{Arc, Mutex};
 
-use crate::model::{Anime, Edge, RelatedAnime, RelationType, ReviewResponse};
+use crate::model::{Anime, Edge, RelatedAnime, RelationType, ReviewResponse, ReviewResponseData};
 
 use crate::config::Config;
 use crate::model_dto::{ContentGraphDTO, ContentNodeDTO};
@@ -12,7 +12,7 @@ use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
 use futures::{stream, StreamExt};
 
-const REVIEW_SYSTEM: &str = "You are an anime/manga review critic, you are given the task to go through all the user reviews and provide a review under 500 words. Pros/Cons are optional but atleast one should be present and 3 at max along with a final verdict. Don't hallucinate and don't contradict yourself in pros/cons. Output should be in the format { pros: [ { title, description }, cons: [ { title, description }  ], verdict }";
+const REVIEW_SYSTEM: &str = "You are an anime/manga review critic, you are given the task to go through all the user reviews and provide a review under 500 words. Pros/Cons are optional but atleast one should be present and 3 at max along with a final verdict. Don't hallucinate and don't contradict yourself in pros/cons. Output should be in the format { data: { pros: [ { title, description }, cons: [ { title, description }  ], verdict } }";
 
 pub struct AnimeService {
     pub config: Config,
@@ -212,11 +212,13 @@ impl AnimeService {
             return Ok(cached_review.unwrap());
         } else {
             println!("Cache miss for {}", hash_str);
-            let review_response: ReviewResponse = self
+            let review_response_data: ReviewResponseData = self
                 .ai_service
                 .talk(REVIEW_SYSTEM, reviews)
                 .await
                 .map(|text| serde_json::from_str(&text).unwrap()).unwrap();
+            
+            let review_response = review_response_data.data.clone();
 
             self.cache_service
                 .set_by_id("reviews", hash_str, &review_response, Some(3600 * 24 * 30))

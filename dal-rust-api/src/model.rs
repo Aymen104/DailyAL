@@ -80,6 +80,11 @@ pub struct ReviewResponse {
     verdict: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReviewResponseData {
+    pub data: ReviewResponse,
+}
+
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct ReviewItem {
     title: String,
