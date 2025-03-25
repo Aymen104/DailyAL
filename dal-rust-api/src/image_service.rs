@@ -12,7 +12,7 @@ impl ImageService {
         check_image_type(&image_type);
         let cached_image: Option<SignedURLResponse> = self
             .cache_service
-            .get_by_id(image_type.as_str(), image_id.clone())
+            .get_cache_by_id(image_type.as_str(), image_id.clone())
             .await;
         match cached_image {
             Some(response) => response,

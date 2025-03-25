@@ -30,13 +30,28 @@ impl CacheService {
             }
         }
     }
-    pub async fn get_by_id<T: DeserializeOwned + Clone>(
+    pub async fn get_cache_by_id<T: DeserializeOwned + Clone>(
         &self,
         content_type: &str,
         id: String,
     ) -> Option<T> {
+        self.get_by_id(content_type, id, "CACHE").await
+    }
+    pub async fn get_link_by_id<T: DeserializeOwned + Clone>(
+        &self,
+        content_type: &str,
+        id: String,
+    ) -> Option<T> {
+        self.get_by_id(content_type, id, "LINK").await
+    }
+    pub async fn get_by_id<T: DeserializeOwned + Clone>(
+        &self,
+        content_type: &str,
+        id: String,
+        pk_type: &str,
+    ) -> Option<T> {
         let client = self.config.secrets.dynamo_db.clone();
-        let pk = format!("CACHE#{}_{}", content_type, id);
+        let pk = format!("{}#{}_{}", pk_type, content_type, id);
         let result = client
             .get_item()
             .table_name(self.config.secrets.table_name.clone())
@@ -113,6 +128,7 @@ fn deserialize_item<T: DeserializeOwned + Clone>(
 ) -> Option<T> {
     let json = item
         .get("cached_data")
+        .or(item.get("data"))
         .unwrap()
         .as_s()
         .as_ref()

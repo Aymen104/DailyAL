@@ -54,17 +54,40 @@ pub struct Edge {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RelationType {
-    sequel,
-    prequel,
-    alternative_setting,
-    alternative_version,
-    side_story,
-    parent_story,
-    summary,
-    full_story,
-    spin_off,
-    character,
-    other,
+    #[serde(rename = "sequel")]
+    Sequel,
+    #[serde(rename = "prequel")]
+    Prequel,
+    #[serde(rename = "alternative_setting")]
+    AlternativeSetting,
+    #[serde(rename = "alternative_version")]
+    AlternativeVersion,
+    #[serde(rename = "side_story")]
+    SideStory,
+    #[serde(rename = "parent_story")]
+    ParentStory,
+    #[serde(rename = "summary")]
+    Summary,
+    #[serde(rename = "full_story")]
+    FullStory,
+    #[serde(rename = "spin_off")]
+    SpinOff,
+    #[serde(rename = "character")]
+    Character,
+    #[serde(rename = "other")]
+    Other,
+}
+
+#[derive(Debug, Clone)]
+pub struct AnimeQuery {
+    pub mal_id: String
+}
+impl AnimeQuery {
+    pub fn from_headers(headers: axum::http::HeaderMap) -> AnimeQuery {
+        AnimeQuery {
+            mal_id: headers.get("mal_id").unwrap().to_str().unwrap().to_string()
+        }
+    }
 }
 
 pub struct File {
@@ -109,4 +132,12 @@ pub struct Content {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Parts {
     pub text: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AnimeLink {
+    #[serde(rename(serialize = "malId", deserialize = "malId"))]
+    pub mal_id: Option<String>,
+    #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
+    pub anilist_id: Option<String>,
 }

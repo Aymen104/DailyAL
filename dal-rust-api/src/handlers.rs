@@ -2,11 +2,11 @@ use core::panic;
 use std::sync::Arc;
 
 use crate::{
-    file_storage_service::SignedURLResponse, model::{File, ReviewResponse}, model_dto::ContentGraphDTO, AppState,
+    file_storage_service::SignedURLResponse, model::{AnimeQuery, File, ReviewResponse}, model_dto::{AnimeLinkDTO, ContentGraphDTO}, AppState,
 };
 
 use axum::{
-    extract::{Multipart, Path, State}, Json
+    extract::{Multipart, Path, State}, http::HeaderMap, Json
 };
 
 /// A function to handle GET requests at /anime/{id}/related
@@ -15,6 +15,15 @@ pub async fn get_related_anime(
     State(data): State<Arc<AppState>>,
 ) -> Json<ContentGraphDTO> {
     Json(data.anime_service.get_related_anime(mal_id).await.unwrap())
+}
+
+/// A function to handle GET requests at /anime
+pub async fn get_anime(
+    headers: HeaderMap,
+    State(data): State<Arc<AppState>>,
+) -> Json<AnimeLinkDTO> {
+    let anime_query = AnimeQuery::from_headers(headers);
+    Json(data.anime_service.get_anime(anime_query).await)
 }
 
 /// A function to GET downloadURL of images

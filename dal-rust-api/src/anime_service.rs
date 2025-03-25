@@ -4,10 +4,10 @@ use std::error::Error;
 use std::hash::Hasher;
 use std::sync::{Arc, Mutex};
 
-use crate::model::{Anime, Edge, RelatedAnime, RelationType, ReviewResponse, ReviewResponseData};
+use crate::model::{Anime, AnimeLink, AnimeQuery, Edge, RelatedAnime, RelationType, ReviewResponse, ReviewResponseData};
 
 use crate::config::Config;
-use crate::model_dto::{ContentGraphDTO, ContentNodeDTO};
+use crate::model_dto::{AnimeLinkDTO, ContentGraphDTO, ContentNodeDTO};
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
 use futures::{stream, StreamExt};
@@ -129,24 +129,24 @@ impl AnimeService {
 
     fn valid_relation(&self, relation_type: &RelationType, include_others: bool) -> bool {
         match relation_type {
-            RelationType::alternative_setting => true,
-            RelationType::sequel => true,
-            RelationType::prequel => true,
-            RelationType::alternative_version => true,
-            RelationType::side_story => true,
-            RelationType::parent_story => true,
-            RelationType::summary => true,
-            RelationType::full_story => true,
-            RelationType::spin_off => true,
-            RelationType::character => false,
-            RelationType::other => include_others,
+            RelationType::AlternativeSetting => true,
+            RelationType::Sequel => true,
+            RelationType::Prequel => true,
+            RelationType::AlternativeVersion => true,
+            RelationType::SideStory => true,
+            RelationType::ParentStory => true,
+            RelationType::Summary => true,
+            RelationType::FullStory => true,
+            RelationType::SpinOff => true,
+            RelationType::Character => false,
+            RelationType::Other => include_others,
         }
     }
 
     async fn get_anime_by_id(&self, id: i64, from_cache: bool) -> Result<Anime, Box<dyn Error>> {
         let now = chrono::Utc::now();
         let result = match from_cache {
-            true => self.cache_service.get_by_id("anime", id.to_string()).await,
+            true => self.cache_service.get_cache_by_id("anime", id.to_string()).await,
             false => None,
         };
 
@@ -206,7 +206,7 @@ impl AnimeService {
         println!("Using hash_key: {}", hash_str);
 
         let cached_review: Option<ReviewResponse> =
-            self.cache_service.get_by_id("reviews", hash_str.clone()).await;
+            self.cache_service.get_cache_by_id("reviews", hash_str.clone()).await;
 
         if cached_review.is_some() {
             return Ok(cached_review.unwrap());
@@ -225,5 +225,10 @@ impl AnimeService {
                 .await;
             return Ok(review_response);
         }
+    }
+    
+    pub async fn get_anime(&self, query: AnimeQuery) -> AnimeLinkDTO {
+        let anime_link: AnimeLink = self.cache_service.get_link_by_id("anime", query.mal_id).await.unwrap();
+        anime_link.into()
     }
 }

@@ -42,6 +42,7 @@ pub async fn setup_app(config: Config) -> Router {
         },
     });
     Router::new()
+        .route("/anime", get(handlers::get_anime))
         .route("/anime/:id/related", get(handlers::get_related_anime))
         .route(
             "/types/:image_type/images/:image_id",
