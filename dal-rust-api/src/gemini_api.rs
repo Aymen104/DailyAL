@@ -5,9 +5,6 @@ use crate::{
     model::GeminiReponse,
 };
 
-const GEMINI_API_URL: &str =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
-
 #[derive(Debug, Clone)]
 pub struct GeminiAPI {
     pub config: Config,
@@ -56,7 +53,7 @@ impl GeminiAPI {
 
     pub async fn talk(&self, system: &str, prompt: &str) -> Result<String, reqwest::Error> {
         let gemini_api_key = self.config.secrets.gemini_api_key.as_str();
-        let gemini_api_url = format!("{}{}", GEMINI_API_URL, gemini_api_key);
+        let gemini_api_url = format!("{}{}", self.config.secrets.ai_api_url, gemini_api_key);
         println!("Calling Gemini API with url");
 
         let value = self.review_request(&system, &prompt);

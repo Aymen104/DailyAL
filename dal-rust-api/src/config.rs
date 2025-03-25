@@ -10,6 +10,7 @@ pub struct Secrets {
     pub gemini_api_key: String,
     pub dynamo_db: aws_sdk_dynamodb::Client,
     pub table_name: String,
+    pub ai_api_url: String,
 }
 
 #[derive(Debug, Clone)]
@@ -35,6 +36,7 @@ impl Config {
         let shared_config = aws_config::from_env().region(region_provider).load().await;
         let dynamo_db = aws_sdk_dynamodb::Client::new(&shared_config);
         let table_name = std::env::var("TABLE_NAME").expect("missing TABLE_NAME");
+        let ai_api_url = std::env::var("AI_API_URL").expect("missing AI_API_URL");
         let secrets = Secrets {
             mal_client_id,
             bearer_secret,
@@ -44,6 +46,7 @@ impl Config {
             gemini_api_key,
             dynamo_db,
             table_name,
+            ai_api_url,
         };
 
         Config { secrets, base_url }
