@@ -167,6 +167,10 @@ pub struct AnimeLinkDTO {
     pub mal_id: Option<String>,
     #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
     pub anilist_id: Option<String>,
+    #[serde(rename(serialize = "kitsuId", deserialize = "kitsuId"))]
+    pub kitsu_id: Option<String>,
+    #[serde(rename(serialize = "animePlanet", deserialize = "animePlanet"))]
+    pub anime_planet: Option<String>,
 }
 
 impl From<AnimeLink> for AnimeLinkDTO {
@@ -174,6 +178,8 @@ impl From<AnimeLink> for AnimeLinkDTO {
         AnimeLinkDTO { 
             anilist_id: anime.anilist_id,
             mal_id: anime.mal_id,
+            kitsu_id: anime.kitsu_id,
+            anime_planet: anime.anime_planet,
         }
     }
 }

@@ -140,4 +140,8 @@ pub struct AnimeLink {
     pub mal_id: Option<String>,
     #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
     pub anilist_id: Option<String>,
+    #[serde(rename(serialize = "kitsuId", deserialize = "kitsuId"))]
+    pub kitsu_id: Option<String>,
+    #[serde(rename(serialize = "animePlanet", deserialize = "animePlanet"))]
+    pub anime_planet: Option<String>,
 }

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::config::Config;
 use aws_sdk_dynamodb::types::AttributeValue;
 use serde::{de::DeserializeOwned, Serialize};
@@ -75,15 +77,24 @@ impl CacheService {
         return current_time + ttl;
     }
 
-    pub async fn set_by_id<T: Serialize + std::marker::Sync + std::marker::Send>(
+    pub async fn set_cache_by_id<T: Serialize + std::marker::Sync + std::marker::Send>(
         &self,
         content_type: &str,
         id: String,
         data: &T,
         expiry: Option<i64>,
     ) -> Option<()> {
-        let key = format!("{}_{}", content_type, id);
-        let pk = format!("CACHE#{}", key);
+        self.set_by_id("CACHE", format!("{}_{}", content_type, id), data, expiry).await
+    }
+
+    pub async fn set_by_id<T: Serialize + std::marker::Sync + std::marker::Send>(
+        &self,
+        pk_type: &str,
+        id: String,
+        data: &T,
+        expiry: Option<i64>,
+    ) -> Option<()> {
+        let pk = format!("{}#{}", pk_type, id);
         let vec_data = vec![data];
         let value = serde_json::to_string(&vec_data).unwrap();
         let mut item_builder = self
@@ -95,6 +106,36 @@ impl CacheService {
             .item("pk".to_string(), AttributeValue::S(pk))
             .item("sk".to_string(), AttributeValue::S("metadata".to_string()))
             .item("cached_data".to_string(), AttributeValue::S(value));
+        if expiry.is_some() {
+            let ttl = self.add_ttl_in_secs_to_current_time(expiry.unwrap());
+            item_builder = item_builder.item("ttl".to_string(), AttributeValue::N(ttl.to_string()));
+        }
+        let result = item_builder.send().await;
+        match result {
+            Ok(_) => Some(()),
+            Err(_) => None,
+        }
+    }
+
+
+    pub async fn set_link_by_id(
+        &self,
+        id: &str,
+        data: HashMap<String, String>,
+        expiry: Option<i64>,
+    ) -> Option<()> {
+        let pk = format!("LINK#{}", id);
+        let mut item_builder = self
+            .config
+            .secrets
+            .dynamo_db
+            .put_item()
+            .table_name(self.config.secrets.table_name.clone())
+            .item("pk".to_string(), AttributeValue::S(pk))
+            .item("sk".to_string(), AttributeValue::S("metadata".to_string()));
+        for (key, value) in data {
+            item_builder = item_builder.item(key, AttributeValue::S(value));
+        }
         if expiry.is_some() {
             let ttl = self.add_ttl_in_secs_to_current_time(expiry.unwrap());
             item_builder = item_builder.item("ttl".to_string(), AttributeValue::N(ttl.to_string()));

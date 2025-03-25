@@ -161,7 +161,7 @@ impl AnimeService {
 
             // Store the anime in the cache for future use
             self.cache_service
-                .set_by_id("anime", id.to_string(), &anime, None)
+                .set_cache_by_id("anime", id.to_string(), &anime, None)
                 .await;
             let then = chrono::Utc::now();
             self.log_anime(&anime, "Saved".to_string(), then, now);
@@ -221,7 +221,7 @@ impl AnimeService {
             let review_response = review_response_data.data.clone();
 
             self.cache_service
-                .set_by_id("reviews", hash_str, &review_response, Some(3600 * 24 * 30))
+                .set_cache_by_id("reviews", hash_str, &review_response, Some(3600 * 24 * 30))
                 .await;
             return Ok(review_response);
         }

@@ -11,6 +11,7 @@ pub struct Secrets {
     pub dynamo_db: aws_sdk_dynamodb::Client,
     pub table_name: String,
     pub ai_api_url: String,
+    pub anime_db_url: String,
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +38,7 @@ impl Config {
         let dynamo_db = aws_sdk_dynamodb::Client::new(&shared_config);
         let table_name = std::env::var("TABLE_NAME").expect("missing TABLE_NAME");
         let ai_api_url = std::env::var("AI_API_URL").expect("missing AI_API_URL");
+        let anime_db_url = std::env::var("ANIME_DB_URL").expect("missing ANIME_DB_URL");
         let secrets = Secrets {
             mal_client_id,
             bearer_secret,
@@ -47,6 +49,7 @@ impl Config {
             dynamo_db,
             table_name,
             ai_api_url,
+            anime_db_url,
         };
 
         Config { secrets, base_url }

@@ -24,7 +24,7 @@ impl ImageService {
                     .get_image_url(image_type.to_string(), image_path, expiry)
                     .await;
                 self.cache_service
-                    .set_by_id(&image_type, image_id, &signed_urlresponse, Some(expiry))
+                    .set_cache_by_id(&image_type, image_id, &signed_urlresponse, Some(expiry))
                     .await;
                 signed_urlresponse
             }

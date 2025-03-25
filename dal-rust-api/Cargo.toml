@@ -26,6 +26,7 @@ seahash = "4.1.0"
 openssl = { version = "0.10.59", features = ["vendored"] }
 aws-sdk-dynamodb = "1.69.0"
 aws-config = { version = "1.6.0", features = ["behavior-version-latest"] }
+tokio-cron-scheduler = { version = "0.13.0", features = ["signal"] }
 
 [profile.release]
 overflow-checks = true
