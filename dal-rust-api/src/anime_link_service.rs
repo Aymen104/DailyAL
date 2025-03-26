@@ -1,9 +1,12 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{cmp::min, collections::HashMap, sync::Arc};
 
 use serde_json::Value;
 use simsearch::SimSearch;
 
-use crate::{config::Config, model::AnimeLink};
+use crate::{
+    config::Config,
+    model::{AnimeLink, AnimeQuery},
+};
 use futures::{lock::Mutex, TryFutureExt};
 
 pub struct AnimeLinkService {
@@ -25,22 +28,19 @@ impl AnimeLinkService {
             .ok()
     }
 
-    fn parse_link(&self, link: String) -> Option<(String, String)> {
-        let parts: Vec<&str> = link.split("/").collect();
-        let id = parts.last().unwrap_or(&"").to_string();
-        if id.is_empty() {
+    fn extract_sources(&self, anime: &Value) -> Option<(String, AnimeLink)> {
+        let sources_opt = anime.get("sources").map(|f| f.as_array()).flatten();
+        if sources_opt.is_none() {
             return None;
+        } else {
+            let anime_link: AnimeLink = anime.clone().into();
+            let mal_id = anime_link.mal_id.clone();
+            if mal_id.is_none() {
+                return None;
+            }
+            let mal_id = mal_id.unwrap();
+            return Some((mal_id, anime_link));
         }
-        if link.contains("myanimelist") {
-            return Some(("malId".to_string(), id));
-        } else if link.contains("anilist") {
-            return Some(("anilistId".to_string(), id));
-        } else if link.contains("kitsu") {
-            return Some(("kitsuId".to_string(), id));
-        } else if link.contains("anime-planet") {
-            return Some(("animePlanetId".to_string(), id));
-        }
-        return None;
     }
 
     fn parse_db_links(&self, anime_db: Value) -> HashMap<String, AnimeLink> {
@@ -55,29 +55,6 @@ impl AnimeLinkService {
             .map(|(mal_id, map)| (mal_id, map.into()))
             .collect();
         sources
-    }
-
-    fn extract_sources(&self, anime: &Value) -> Option<(String, HashMap<String, String>)> {
-        let sources_opt = anime.get("sources").unwrap().as_array();
-        if sources_opt.is_none() {
-            return None;
-        } else {
-            let sources = sources_opt.unwrap();
-            let mut collect: HashMap<String, String> = sources
-                .iter()
-                .filter_map(|source| {
-                    let link = source.as_str().unwrap().to_string();
-                    self.parse_link(link)
-                })
-                .collect();
-            let mal_id = collect.get("malId").cloned();
-            if mal_id.is_none() {
-                return None;
-            }
-            let title = anime.get("title").unwrap().as_str().unwrap().to_string();
-            collect.insert("title".to_string(), title);
-            Some((mal_id.unwrap().to_string(), collect))
-        }
     }
 
     pub(crate) async fn setup_links(&self) {
@@ -106,24 +83,29 @@ impl AnimeLinkService {
         for (mal_id, sources) in links {
             let title = sources.title.or(Some("".to_string())).unwrap();
             let search_string = format!("{} {}", title, mal_id);
-            search_engine.insert(mal_id, search_string.as_str());
+            search_engine.insert(mal_id.clone(), search_string.as_str());
         }
     }
 
-    pub(crate) async fn search(&self, query: String) -> Vec<AnimeLink> {
-        let search_engine = self.search_engine.clone();
-        let search_engine = search_engine.lock().await;
-        let results = search_engine.search(&query);
+    pub(crate) async fn search(&self, anime_query: &AnimeQuery) -> Vec<AnimeLink> {
+        let query = anime_query.query.clone().unwrap();
+        let page = anime_query.page.unwrap_or(1);
+        let size = anime_query.size.unwrap_or(20);
         let mut links = vec![];
         let link_map = self.link_map.clone();
         let link_map = link_map.lock().await;
-        for result in results {
-            if link_map.get(&result).is_none() {
+        let search_engine = self.search_engine.clone();
+        let search_engine = search_engine.lock().await;
+        let results = search_engine.search(&query);
+        let start = min(0, (page - 1) * size);
+        let end = min(start.saturating_add(size), results.len());
+        for result in &results[start..end] {
+            if link_map.get(&result.clone()).is_none() {
                 continue;
             }
-            links.push(link_map.get(&result).unwrap().clone());
+            links.push(link_map.get(&result.clone()).unwrap().clone());
         }
-        links[0..10].to_vec()
+        links
     }
 
     pub(crate) async fn get_link_by_id(&self, mal_id: String) -> AnimeLink {
@@ -137,6 +119,9 @@ impl AnimeLinkService {
                 anilist_id: None,
                 kitsu_id: None,
                 anime_planet: None,
+                picture: None,
+                year: None,
+                synonyms: None,
             };
         }
         link.unwrap().clone()

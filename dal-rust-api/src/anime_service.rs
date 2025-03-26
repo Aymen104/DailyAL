@@ -242,7 +242,7 @@ impl AnimeService {
         if query.query.is_some() {
             return self
                 .anime_link_service
-                .search(query.query.unwrap())
+                .search(&query)
                 .await
                 .into_iter()
                 .map(|f| f.into())
