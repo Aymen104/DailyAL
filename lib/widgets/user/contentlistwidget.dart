@@ -611,31 +611,40 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
             contentTypes.contains(widget.category))
         ? CFutureBuilder(
             future: DalApi.i.scheduleForMalIds,
-            loadingChild: SB.z,
-            done: (AsyncSnapshot<Map<int, ScheduleData>> data) => AnimeGridCard(
-              scheduleData: data.data?[id],
-              node: widget.dynContent?.content,
-              category: widget.category,
-              showEdit: widget.showEdit,
-              myListStatus: myListStatus,
-              showCardBar: true,
-              updateCache: false,
-              showGenres: true,
-              showTime: widget.showTime,
-              height: widget.cardHeight,
-              width: widget.cardWidth,
-              parentNsv: nsv,
-              onClose: widget.onClose,
-              onEdit: () => showEditSheet(context),
-              onTap: () => _onTileTap(),
-              showSelfScoreInsteadOfStatus: widget.showSelfScoreInsteadOfStatus,
-              addtionalWidget: _unseenWidget(),
-              homePageTileSize: widget.homePageTileSize,
-              displaySubType: widget.displaySubType,
-              gridHeight: widget.gridHeight,
-            ),
+            loadingChild: _buildAnimeGridCard(null, nsv, context),
+            done: (AsyncSnapshot<Map<int, ScheduleData>> data) =>
+                _buildAnimeGridCard(data.data, nsv, context),
           )
         : _buildListTile(nsv, nodeTitle);
+  }
+
+  AnimeGridCard _buildAnimeGridCard(
+    Map<int, ScheduleData>? data,
+    NodeStatusValue nsv,
+    BuildContext context,
+  ) {
+    return AnimeGridCard(
+      scheduleData: data?[id],
+      node: widget.dynContent?.content,
+      category: widget.category,
+      showEdit: widget.showEdit,
+      myListStatus: myListStatus,
+      showCardBar: true,
+      updateCache: false,
+      showGenres: true,
+      showTime: widget.showTime,
+      height: widget.cardHeight,
+      width: widget.cardWidth,
+      parentNsv: nsv,
+      onClose: widget.onClose,
+      onEdit: () => showEditSheet(context),
+      onTap: () => _onTileTap(),
+      showSelfScoreInsteadOfStatus: widget.showSelfScoreInsteadOfStatus,
+      addtionalWidget: _unseenWidget(),
+      homePageTileSize: widget.homePageTileSize,
+      displaySubType: widget.displaySubType,
+      gridHeight: widget.gridHeight,
+    );
   }
 
   void _onTileTap() {
@@ -1012,7 +1021,8 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
     final detailed = widget.dynContent?.content;
     if ((detailed is AnimeDetailed || detailed is MangaDetailed)) {
       final mediaText = mediaTypeText;
-      final [genreText, content] = getGenreText(detailed, category: widget.category);
+      final [genreText, content] =
+          getGenreText(detailed, category: widget.category);
       return Container(
         // width: width,
         child: Padding(
@@ -1437,7 +1447,8 @@ Widget countdownWidget({
 }) {
   if (category.equals('anime')) {
     return usingScheduler(id, (data) {
-      var child = CountDownWidget.expandedCountdownWidget(data, padding: padding, context: context);
+      var child = CountDownWidget.expandedCountdownWidget(data,
+          padding: padding, context: context);
       return wrapper != null ? wrapper(child) : child;
     });
   }

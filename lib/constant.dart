@@ -841,17 +841,18 @@ Widget iconAndText(
   );
 }
 
-Widget loadingBelowText({
-  String? text,
-  EdgeInsetsGeometry padding = EdgeInsets.zero,
-  MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center,
-}) {
+Widget loadingBelowText(
+    {String? text,
+    EdgeInsetsGeometry padding = EdgeInsets.zero,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center,
+    double topPadding = 0}) {
   if (text == null) {
     text = S.current.Loading_Content;
   }
   return Column(
     mainAxisAlignment: mainAxisAlignment,
     children: [
+      SizedBox(height: topPadding),
       loadingCenterColored,
       const SizedBox(height: 20),
       Padding(

@@ -187,3 +187,52 @@ class GEnumValues<T> {
         return reverseMap;
     }
 }
+
+class AnimeAutoComplete {
+    final String? title;
+    final String? picture;
+    final int? year;
+    final String? malId;
+    final String? anilistId;
+    final String? kitsuId;
+    final String? animePlanet;
+
+    AnimeAutoComplete({
+        this.title,
+        this.picture,
+        this.year,
+        this.malId,
+        this.anilistId,
+        this.kitsuId,
+        this.animePlanet,
+    });
+
+    static List<AnimeAutoComplete> fromList(List<dynamic> list) {
+        return list.map((e) => AnimeAutoComplete.fromJson(e)).toList();
+    }
+
+    factory AnimeAutoComplete.fromJson(Map<String, dynamic> json) {
+        return AnimeAutoComplete(
+            title: json['title'],
+            picture: json['picture'],
+            year: json['year'],
+            malId: json['malId'],
+            anilistId: json['anilistId'],
+            kitsuId: json['kitsuId'],
+            animePlanet: json['animePlanet'],
+        );
+    }
+
+    Map<String, dynamic> toJson() {
+        return {
+            'title': title,
+            'picture': picture,
+            'year': year,
+            'malId': malId,
+            'anilistId': anilistId,
+            'kitsuId': kitsuId,
+            'animePlanet': animePlanet,
+        };
+    }
+}
+

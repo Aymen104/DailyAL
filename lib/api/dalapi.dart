@@ -423,20 +423,22 @@ class DalApi {
     );
   }
 
-  Future<dynamic> _apiGET(String endpoint) async {
+  Future<dynamic> _apiGET(String endpoint,
+      {Map<String, String>? customHeaders}) async {
     final apiURL = await _getAPIBaseUrl();
     return MalConnect.getContent(
       '$apiURL/$endpoint',
       retryOnFail: false,
       withNoHeaders: true,
       includeNsfw: false,
-      headers: _headers,
+      headers: _headers(customHeaders),
     );
   }
 
-  Map<String, String> get _headers {
+  Map<String, String> _headers([Map<String, String>? customHeaders]) {
     return {
       'Authorization': 'Bearer ${CredMal.apiSecret}',
+      if (customHeaders != null) ...customHeaders,
     };
   }
 
@@ -460,7 +462,7 @@ class DalApi {
       logDal('Sending reviews to $apiURL');
       final response = await http.post(
         Uri.parse(apiURL),
-        headers: _headers,
+        headers: _headers(),
         body: jsonEncode(reviews),
       );
       final body = response.body;
@@ -516,6 +518,22 @@ class DalApi {
       throw Exception('Failed to delete image');
     }
     await CacheManager.instance.setValue(url, '');
+  }
+
+  Future<List<AnimeAutoComplete>> autoCompleteAnime(String text) async {
+    try {
+      final apiURL = await _getAPIBaseUrl();
+      print("Searching anime: ${text}");
+      final response = await http.get(Uri.parse('${apiURL}/anime'), headers: {
+        "query": text,
+        "size": "5",
+        ..._headers(),
+      });
+      return AnimeAutoComplete.fromList(jsonDecode(response.body));
+    } catch (e) {
+      logDal(e);
+      return [];
+    }
   }
 }
 
