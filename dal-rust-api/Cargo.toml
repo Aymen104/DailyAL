@@ -27,6 +27,7 @@ openssl = { version = "0.10.59", features = ["vendored"] }
 aws-sdk-dynamodb = "1.69.0"
 aws-config = { version = "1.6.0", features = ["behavior-version-latest"] }
 simsearch = "0.2.5"
+tokio-cron-scheduler = "0.13.0"
 
 [profile.release]
 overflow-checks = true

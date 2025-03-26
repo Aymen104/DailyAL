@@ -1,7 +1,14 @@
 use std::sync::Arc;
 
 use crate::{
-    anime_link_service, anime_service, auth, cache_service::CacheService, config::Config, file_storage_service::FileStorageService, handlers, image_service, mal_api::MalAPI, AppState
+    anime_link_service::{self},
+    anime_service, auth,
+    cache_service::CacheService,
+    config::Config,
+    file_storage_service::FileStorageService,
+    handlers, image_service,
+    mal_api::MalAPI,
+    AppState,
 };
 use axum::{
     http::{
@@ -64,14 +71,11 @@ pub async fn setup_app(config: Config) -> Router {
             "/types/:image_type/images/:image_id",
             delete(handlers::delete_image),
         )
-        .route(
-            "/reviews",
-            post(handlers::get_review_summary),
-        )
+        .route("/schedules", post(handlers::start_schedules))
+        .route("/reviews", post(handlers::get_review_summary))
         .route_layer(middleware::from_fn_with_state(state.clone(), auth::auth))
         .with_state(state)
         .layer(get_cors_layer())
-    
 }
 
 fn get_cors_layer() -> CorsLayer {

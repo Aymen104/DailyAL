@@ -1,6 +1,7 @@
 use config::Config;
 use dotenv::dotenv;
 use reqwest;
+use scheduler_service::run_schedulers;
 
 mod anime_link_service;
 mod anime_service;
@@ -15,6 +16,7 @@ mod mal_api;
 mod model;
 mod model_dto;
 mod routes;
+mod scheduler_service;
 
 pub struct AppState {
     pub config: Config,
@@ -33,6 +35,6 @@ async fn main() {
     let addr = format!("0.0.0.0:{}", port);
     println!("Server started at http://{}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    // run_schedulers().await;
+    run_schedulers().await;
     axum::serve(listener, app).await.unwrap();
 }

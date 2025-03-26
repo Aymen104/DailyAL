@@ -96,6 +96,7 @@ impl AnimeLinkService {
         let mut link_map = link_map.lock().await;
 
         for (mal_id, sources) in links.clone() {
+            search_engine.delete(&mal_id);
             link_map.insert(mal_id.clone(), sources.clone());
         }
 
