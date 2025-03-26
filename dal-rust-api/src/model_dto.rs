@@ -49,11 +49,12 @@ impl From<Anime> for ContentNodeDTO {
             media_type: anime.media_type,
             status: anime.status,
             start_season: anime.start_season.map(|season| season.into()),
-            alternative_titles: anime.alternative_titles.map(|alternate_titles| alternate_titles.into()),
+            alternative_titles: anime
+                .alternative_titles
+                .map(|alternate_titles| alternate_titles.into()),
         }
     }
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AlternateTitlesDTO {
@@ -164,6 +165,8 @@ impl From<crate::model::RelationType> for RelationTypeDTO {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnimeLinkDTO {
     pub title: Option<String>,
+    pub picture: Option<String>,
+    pub year: Option<String>,
     #[serde(rename(serialize = "malId", deserialize = "malId"))]
     pub mal_id: Option<String>,
     #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
@@ -176,12 +179,14 @@ pub struct AnimeLinkDTO {
 
 impl From<AnimeLink> for AnimeLinkDTO {
     fn from(anime: AnimeLink) -> Self {
-        AnimeLinkDTO { 
+        AnimeLinkDTO {
             title: anime.title,
             anilist_id: anime.anilist_id,
             mal_id: anime.mal_id,
             kitsu_id: anime.kitsu_id,
             anime_planet: anime.anime_planet,
+            picture: anime.picture,
+            year: anime.year,
         }
     }
 }
