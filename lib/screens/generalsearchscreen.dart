@@ -893,8 +893,8 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
       if (showAutoCompleteProgress)
         SliverToBoxAdapter(
             child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: loadingCenter(width: 1, containerSide: 15.0),
+          padding: const EdgeInsets.only(top: 16, bottom: 560),
+          child: SB.z,
         )),
       if (queryHistory.isEmpty &&
           recentManga.isEmpty &&

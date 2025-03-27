@@ -1605,6 +1605,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.4"
+  woozy_search:
+    dependency: "direct main"
+    description:
+      name: woozy_search
+      sha256: c453181e0c3d03002b68094fe1869a8a5033d844541d48937288a75b3b923a15
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   xdg_directories:
     dependency: transitive
     description:

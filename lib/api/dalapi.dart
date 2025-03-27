@@ -6,16 +6,14 @@ import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/malconnect.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
-import 'package:dailyanimelist/cache/history_data.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dal_api/handlers/handler_core.dart';
-import 'package:dal_api/services/helpers.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:dal_commons/dal_commons.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/src/media_type.dart';
+import 'package:woozy_search/woozy_search.dart';
 
 enum FeatureFlag { aireviews }
 
@@ -25,6 +23,7 @@ class DalApi {
   late Future<Servers?> _dalConfigFuture;
   late Future<String> _preferredServer;
   late Future<Map<int, ScheduleData>> _scheduleForMalIds;
+  late Future<Woozy<AnimeAutoComplete>?> _autoCompleteFuture;
   Map<int, ScheduleData> _scheduleForMalIdsSync = {};
   bool _debugMode = kDebugMode;
 
@@ -51,6 +50,7 @@ class DalApi {
     _dalConfigFuture = _getDalConfigFuture();
     _preferredServer = _getPreferredServer();
     _scheduleForMalIds = _getScheduleForMalIds();
+    _autoCompleteFuture = _getAutoCompleteFuture();
   }
 
   void resetScheduleForMalIds() {
@@ -521,18 +521,32 @@ class DalApi {
   }
 
   Future<List<AnimeAutoComplete>> autoCompleteAnime(String text) async {
+    var woozy = await _autoCompleteFuture;
+    if (woozy == null) {
+      return [];
+    }
+    var search = woozy.search(text);
+    return search
+        .map((e) => e.value)
+        .where((e) => e != null)
+        .map((e) => e!)
+        .toList();
+  }
+
+  Future<Woozy<AnimeAutoComplete>?> _getAutoCompleteFuture() async {
     try {
       final apiURL = await _getAPIBaseUrl();
-      print("Searching anime: ${text}");
       final response = await http.get(Uri.parse('${apiURL}/anime'), headers: {
-        "query": text,
-        "size": "5",
+        "fields": "title,picture,malId",
         ..._headers(),
       });
-      return AnimeAutoComplete.fromList(jsonDecode(response.body));
+      final ac = AnimeAutoComplete.fromList(jsonDecode(response.body));
+      final woozy = Woozy<AnimeAutoComplete>();
+      ac.forEach((e) => woozy.addEntry(e.title ?? '', value: e));
+      return woozy;
     } catch (e) {
       logDal(e);
-      return [];
+      return null;
     }
   }
 }
