@@ -1,0 +1,1 @@
+web: cd dal-rust-api && ./target/release/dal-rust-api
