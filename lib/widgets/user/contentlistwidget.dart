@@ -62,6 +62,7 @@ class ContentListWidget extends StatelessWidget {
   final void Function(int index, dynamic node)? onClose;
   final double cardHeight;
   final double cardWidth;
+  final DisplaySubType? displaySubType;
 
   const ContentListWidget({
     Key? key,
@@ -88,6 +89,7 @@ class ContentListWidget extends StatelessWidget {
     this.shrinkWrap = false,
     this.physics,
     this.showSelfScoreInsteadOfStatus = false,
+    this.displaySubType,
   }) : super(key: key);
 
   @override
@@ -172,6 +174,7 @@ class ContentListWidget extends StatelessWidget {
         displayType: displayType ?? DisplayType.list_vert,
         cardHeight: cardHeight,
         cardWidth: cardWidth,
+        displaySubType: displaySubType,
         onClose: onClose != null ? () => onClose!(entry.key, dynContent) : null,
         showSelfScoreInsteadOfStatus: showSelfScoreInsteadOfStatus,
       );
@@ -236,6 +239,7 @@ Widget _baseBaseNode(
   bool showTime = false,
   bool? showIndex,
   bool? showStatus,
+  VoidCallback? onClose,
 }) {
   return ContentAllWidget(
     key: Key(MalAuth.codeChallenge(10)),
@@ -255,6 +259,7 @@ Widget _baseBaseNode(
     showTime: showTime,
     showIndex: showIndex ?? false,
     showStatus: showStatus ?? true,
+    onClose: onClose,
   );
 }
 
@@ -273,6 +278,7 @@ Widget buildBaseNodePageItem(
   bool? showIndex,
   bool? showStatus,
   String? id,
+  ValueChanged<int>? onClose,
 }) {
   Widget fromItem(int index, BaseNode node, [HomePageTileSize? tileSize]) {
     if (node.content == null) {
@@ -291,6 +297,7 @@ Widget buildBaseNodePageItem(
       showTime: showTime,
       showIndex: showIndex,
       showStatus: showStatus,
+      onClose: onClose != null ? () => onClose(index) : null,
     );
   }
 
@@ -343,12 +350,14 @@ Widget horizontalList({
   double? height,
   bool showTime = false,
   EdgeInsetsGeometry? padding,
+  ValueChanged<int>? onClose,
 }) {
   return ContentListWithDisplayType(
     category: category,
     items: items,
     showTime: showTime,
     padding: padding,
+    onClose: onClose,
     sortFilterDisplay: SortFilterDisplay(
       sort: SortOption(name: '_', value: '_'),
       displayOption: DisplayOption(
@@ -375,6 +384,7 @@ class ContentListWithDisplayType extends StatelessWidget {
   final bool? showEdit;
   final bool? updateCacheOnEdit;
   final bool? showStatus;
+  final ValueChanged<int>? onClose;
   const ContentListWithDisplayType({
     super.key,
     required this.category,
@@ -386,6 +396,7 @@ class ContentListWithDisplayType extends StatelessWidget {
     this.showIndex,
     this.showEdit,
     this.updateCacheOnEdit,
+    this.onClose,
     this.showStatus,
   });
 
@@ -426,6 +437,7 @@ class ContentListWithDisplayType extends StatelessWidget {
           showIndex: showIndex,
           showStatus: showStatus,
           id: sortFilterDisplay.displayOption.id,
+          onClose: onClose,
         ),
       );
     }

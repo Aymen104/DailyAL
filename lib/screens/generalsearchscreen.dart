@@ -1038,22 +1038,17 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     return SliverToBoxAdapter(
       child: Container(
         height: 250,
-        child: ContentListWidget(
-          returnSlivers: false,
-          cardHeight: 170,
-          cardWidth: 160,
+        child: horizontalList(
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          contentList: nodes.map((e) => BaseNode(content: e)).toList(),
-          displayType: DisplayType.list_horiz,
+          items: nodes.map((e) => BaseNode(content: e)).toList(),
           category: category,
-          onClose: (i, _) => HistoryData.setHistory(
+          onClose: (i) => HistoryData.setHistory(
             remove: true,
             value: nodes.elementAt(i),
             dataType: category.equals("anime")
                 ? HistoryDataType.anime
                 : HistoryDataType.manga,
           ),
-          updateCacheOnEdit: true,
         ),
       ),
     );
