@@ -242,7 +242,9 @@ class AnimeDetailed extends Node with AnimeDetailedMixin {
         season: j.season,
       ),
       status: j.status,
-      studios: j.studios?.map((e) => AnimeStudio(id: e.malId, name: e.name)).toList(),
+      studios: j.studios
+          ?.map((e) => AnimeStudio(id: e.malId, name: e.name))
+          .toList(),
       title: j.title,
       alternateTitles: AlternateTitles(
         en: j.titleEnglish,
@@ -261,5 +263,43 @@ class AnimeDetailed extends Node with AnimeDetailedMixin {
                 ))
             .toList() ??
         [];
+  }
+
+  int calculateTotalEpisodes() {
+    int totalEpisodes = 0;
+    if (startSeason != null) {
+      final year = startSeason?.year;
+      final season = startSeason?.season;
+      if (year != null && season != null) {
+        // Get approximate start date based on season and year
+        DateTime? startDate = _getSeasonStartDate(year, season);
+        if (startDate != null) {
+          // Calculate weeks since anime started
+          final now = DateTime.now();
+          final weeksSinceStart = now.difference(startDate).inDays ~/ 7;
+
+          // Add 1 because the first episode airs on the start date
+          totalEpisodes = weeksSinceStart + 1;
+        }
+      }
+    }
+    return totalEpisodes;
+  }
+
+  DateTime? _getSeasonStartDate(int year, String season) {
+    // Approximate season start dates
+    switch (season.toLowerCase()) {
+      case 'winter':
+        return DateTime(year, 1, 1); // January
+      case 'spring':
+        return DateTime(year, 4, 1); // April
+      case 'summer':
+        return DateTime(year, 7, 1); // July
+      case 'fall':
+      case 'autumn':
+        return DateTime(year, 10, 1); // October
+      default:
+        return null;
+    }
   }
 }

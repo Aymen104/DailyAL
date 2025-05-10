@@ -901,6 +901,7 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 100),
                 child: ContentEditWidget(
+                  id: _id,
                   applyHero: false,
                   editMode: EditMode.floating,
                   category: widget.category,
@@ -1700,18 +1701,18 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
   void _onMultiGenreSearch() {
     if (nullOrEmpty(contentDetailed?.genres)) return;
     final genresL = contentDetailed.genres as List<MalGenre>;
-    final genres = genresL.take(5).map((g) => convertGenre(g, widget.category)).toList();
+    final genres =
+        genresL.take(5).map((g) => convertGenre(g, widget.category)).toList();
     final filter = (widget.category.equals("anime")
         ? CustomFilters.genresAnimeFilter
         : CustomFilters.genresMangaFilter)
       ..includedOptions = [...genres];
     gotoPage(
       context: context,
-
       newPage: GeneralSearchScreen(
         autoFocus: false,
         category: widget.category,
-        filterOutputs: { 'genres': filter },
+        filterOutputs: {'genres': filter},
       ),
     );
   }

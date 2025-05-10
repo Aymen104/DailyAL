@@ -157,13 +157,26 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     return length != null && length > 10;
   }
 
-  Map<String, FilterOption> get _filterOutputs =>
-      _sortFilterDisplay.filterOutputs;
+  Map<String, FilterOption> get _filterOutputs {
+    try {
+      return _sortFilterDisplay.filterOutputs;
+    } catch (e) {
+      return {};
+    }
+  }
+
   set _filterOutputs(Map<String, FilterOption> value) {
     _sortFilterDisplay = _sortFilterDisplay.copyWith(filterOutputs: value);
   }
 
-  String get category => _sortFilterDisplay.category;
+  String get category {
+    try {
+      return _sortFilterDisplay.category;
+    } catch (e) {
+      return 'all';
+    }
+  }
+
   set category(String value) {
     _sortFilterDisplay = _sortFilterDisplay.copyWith(category: value);
   }
@@ -1491,37 +1504,41 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   }
 
   Widget _filterSection() {
-    return ExpandedSection(
-      expand: showFilter,
-      child: Container(
-        width: double.infinity,
-        child: SortFilterPopup(
-          sortFilterDisplay: _sortFilterDisplay,
-          onSortFilterChange: _onFilterChange,
-          showText: category.equals("featured"),
-          additional: S.current.Tags_unApplied,
-          independent: false,
-          sortFilterOptions: SortFilterOptions(
-            sortOptions: [],
-            filterOptions: isSpecialQuery
-                ? []
-                : _removeExclusiveFilters(getFilterOptions()),
-            displayOptions: _getDisplayOptions(),
-            categories:
-                (widget.exclusiveScreen || isSpecialQuery) ? [] : searchTypes,
+    try {
+      return ExpandedSection(
+        expand: showFilter,
+        child: Container(
+          width: double.infinity,
+          child: SortFilterPopup(
+            sortFilterDisplay: _sortFilterDisplay,
+            onSortFilterChange: _onFilterChange,
+            showText: category.equals("featured"),
+            additional: S.current.Tags_unApplied,
+            independent: false,
+            sortFilterOptions: SortFilterOptions(
+              sortOptions: [],
+              filterOptions: isSpecialQuery
+                  ? []
+                  : _removeExclusiveFilters(getFilterOptions()),
+              displayOptions: _getDisplayOptions(),
+              categories:
+                  (widget.exclusiveScreen || isSpecialQuery) ? [] : searchTypes,
+            ),
+            onCategoryChange: (value) {
+              _onCategorySelect(value);
+            },
+            onClose: () {
+              if (mounted)
+                setState(() {
+                  showFilter = false;
+                });
+            },
           ),
-          onCategoryChange: (value) {
-            _onCategorySelect(value);
-          },
-          onClose: () {
-            if (mounted)
-              setState(() {
-                showFilter = false;
-              });
-          },
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      return SB.z;
+    }
   }
 
   List<SelectDisplayOption> _getDisplayOptions() {
