@@ -1,4 +1,4 @@
-use std::{cmp::min, collections::HashMap, sync::Arc};
+use std::{cmp::{min, Ordering}, collections::HashMap, sync::Arc};
 
 use serde_json::Value;
 
@@ -105,6 +105,7 @@ impl AnimeLinkService {
                 picture: None,
                 year: None,
                 synonyms: None,
+                mean: 0.0,
             };
         }
         link.unwrap().clone()
@@ -113,11 +114,21 @@ impl AnimeLinkService {
     pub(crate) async fn get_all_anime(&self) -> Vec<AnimeLink> {
         let link_map = self.link_map.clone();
         let link_map = link_map.lock().await;
-        let mut links = vec![];
-        for (_, anime) in link_map.iter() {
-            links.push(anime.clone());
-        }
+        let mut links: Vec<AnimeLink> = link_map.values().cloned().collect();
+        links.sort_by(|a, b| self.compare_anime_links_by_mean_score(a, b));
         links
+    }
+
+    fn compare_anime_links_by_mean_score(&self, a: &AnimeLink, b: &AnimeLink) -> Ordering {
+        let a_mean = a.mean;
+        let b_mean = b.mean;
+        if a_mean < b_mean {
+            Ordering::Less
+        } else if a_mean > b_mean {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
     }
 }
 

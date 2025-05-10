@@ -119,6 +119,7 @@ fn default_fields() -> Vec<String> {
         "anilistId".to_string(),
         "kitsuId".to_string(),
         "animePlanet".to_string(),
+        "mean".to_string(),
     ]
 }
 
@@ -182,6 +183,7 @@ pub struct AnimeLink {
     pub picture: Option<String>,
     pub year: Option<String>,
     pub synonyms: Option<Vec<String>>,
+    pub mean: f64,
     #[serde(rename(serialize = "malId", deserialize = "malId"))]
     pub mal_id: Option<String>,
     #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
@@ -200,6 +202,7 @@ impl From<HashMap<String, String>> for AnimeLink {
             anilist_id: map.get("anilistId").cloned(),
             kitsu_id: map.get("kitsuId").cloned(),
             anime_planet: map.get("animePlanet").cloned(),
+            mean: 0.0,
             picture: None,
             year: None,
             synonyms: None,
@@ -227,6 +230,7 @@ impl From<Value> for AnimeLink {
         anime_link.title = title.map(|f| f.to_string());
         anime_link.picture = picture.map(|f| f.to_string());
         anime_link.year = get_year(&anime);
+        anime_link.mean = get_score(&anime);
         anime_link
     }
 }
@@ -276,4 +280,17 @@ fn get_year(anime: &Value) -> Option<String> {
         .map(|f| f.as_str())
         .flatten()
         .map(|f| f.to_string())
+}
+
+fn get_score(anime: &Value) -> f64 {
+    anime
+        .get("score")
+        .map(|f| f.as_object())
+        .flatten()
+        .map(|f| f.get("median"))
+        .flatten()
+        .map(|f| f.to_string())
+        .map(|f| f.parse::<f64>().unwrap())
+        .or_else(|| Some(0.0))
+        .unwrap_or(0.0)
 }

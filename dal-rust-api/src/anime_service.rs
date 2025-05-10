@@ -338,6 +338,9 @@ fn create_map_using_fields(
                         hash_map.insert("year".to_string(), anime.year.clone().unwrap_or_default());
                     }
                 }
+                "mean" => {
+                    hash_map.insert("mean".to_string(), anime.mean.to_string());
+                }
                 _ => {}
             }
         }

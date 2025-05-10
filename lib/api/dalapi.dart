@@ -9,11 +9,9 @@ import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dal_api/handlers/handler_core.dart';
 import 'package:dal_commons/commons.dart';
-import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/src/media_type.dart';
-import 'package:woozy_search/woozy_search.dart';
 
 enum FeatureFlag { aireviews }
 
@@ -23,7 +21,7 @@ class DalApi {
   late Future<Servers?> _dalConfigFuture;
   late Future<String> _preferredServer;
   late Future<Map<int, ScheduleData>> _scheduleForMalIds;
-  late Future<Woozy<AnimeAutoComplete>?> _autoCompleteFuture;
+  late Future<List<AnimeAutoComplete>?> _autoCompleteFuture;
   Map<int, ScheduleData> _scheduleForMalIdsSync = {};
   bool _debugMode = kDebugMode;
 
@@ -521,29 +519,26 @@ class DalApi {
   }
 
   Future<List<AnimeAutoComplete>> autoCompleteAnime(String text) async {
-    var woozy = await _autoCompleteFuture;
-    if (woozy == null) {
+    final autoCompleteList = await _autoCompleteFuture;
+    if (autoCompleteList == null) {
       return [];
     }
-    var search = woozy.search(text);
-    return search
-        .map((e) => e.value)
-        .where((e) => e != null)
-        .map((e) => e!)
+    final lowerCase = text.toLowerCase().toLowerCase();
+    return autoCompleteList
+        .where((e) =>
+            e.title.toLowerCase().contains(lowerCase) ||
+            e.synonyms.contains(lowerCase))
+        .take(10)
         .toList();
   }
 
-  Future<Woozy<AnimeAutoComplete>?> _getAutoCompleteFuture() async {
+  Future<List<AnimeAutoComplete>?> _getAutoCompleteFuture() async {
     try {
       final apiURL = await _getAPIBaseUrl();
       final response = await http.get(Uri.parse('${apiURL}/anime'), headers: {
-        "fields": "title,picture,malId",
         ..._headers(),
       });
-      final ac = AnimeAutoComplete.fromList(jsonDecode(response.body));
-      final woozy = Woozy<AnimeAutoComplete>();
-      ac.forEach((e) => woozy.addEntry(e.title ?? '', value: e));
-      return woozy;
+      return AnimeAutoComplete.fromList(jsonDecode(response.body));
     } catch (e) {
       logDal(e);
       return null;
