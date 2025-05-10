@@ -87,6 +87,7 @@ pub struct AnimeQuery {
     pub query: Option<String>,
     pub size: Option<usize>,
     pub page: Option<usize>,
+    pub fields: Vec<String>,
 }
 impl AnimeQuery {
     pub fn from_headers(headers: axum::http::HeaderMap) -> AnimeQuery {
@@ -103,8 +104,32 @@ impl AnimeQuery {
             page: headers
                 .get("page")
                 .map(|v| v.to_str().unwrap().parse().unwrap()),
+            fields: extract_fields(headers).unwrap_or(default_fields()),
         }
     }
+}
+
+fn default_fields() -> Vec<String> {
+    vec![
+        "title".to_string(),
+        "picture".to_string(),
+        "year".to_string(),
+        "synonyms".to_string(),
+        "malId".to_string(),
+        "anilistId".to_string(),
+        "kitsuId".to_string(),
+        "animePlanet".to_string(),
+    ]
+}
+
+fn extract_fields(headers: axum::http::HeaderMap) -> Option<Vec<String>> {
+    headers.get("fields").map(|v| {
+        v.to_str()
+            .unwrap()
+            .split(",")
+            .map(|s| s.to_string().trim().to_string())
+            .collect()
+    })
 }
 
 pub struct File {

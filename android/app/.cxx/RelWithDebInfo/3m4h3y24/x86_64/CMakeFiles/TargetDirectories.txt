@@ -1,0 +1,2 @@
+/home/jica/StudioProjects/DailyAL/android/app/.cxx/RelWithDebInfo/3m4h3y24/x86_64/CMakeFiles/edit_cache.dir
+/home/jica/StudioProjects/DailyAL/android/app/.cxx/RelWithDebInfo/3m4h3y24/x86_64/CMakeFiles/rebuild_cache.dir

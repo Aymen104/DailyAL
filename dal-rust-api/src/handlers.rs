@@ -1,10 +1,10 @@
 use core::panic;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
     file_storage_service::SignedURLResponse,
     model::{AnimeQuery, File, ReviewResponse},
-    model_dto::{AnimeLinkDTO, ContentGraphDTO},
+    model_dto::ContentGraphDTO,
     AppState,
 };
 
@@ -27,7 +27,7 @@ pub async fn get_related_anime(
 pub async fn get_anime(
     headers: HeaderMap,
     State(data): State<Arc<AppState>>,
-) -> Json<Vec<AnimeLinkDTO>> {
+) -> Json<Vec<HashMap<String, String>>> {
     let anime_query = AnimeQuery::from_headers(headers);
     Json(data.anime_service.get_anime(anime_query).await)
 }

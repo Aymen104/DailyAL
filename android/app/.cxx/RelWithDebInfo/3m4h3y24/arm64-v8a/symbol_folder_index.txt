@@ -1,0 +1,1 @@
+/home/jica/StudioProjects/DailyAL/build/app/intermediates/cxx/RelWithDebInfo/3m4h3y24/obj/arm64-v8a

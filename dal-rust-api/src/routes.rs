@@ -20,7 +20,6 @@ use axum::{
     Router,
 };
 use futures::lock::Mutex;
-use simsearch::SimSearch;
 use tower_http::cors::CorsLayer;
 
 pub async fn setup_app(config: Config) -> Router {
@@ -39,7 +38,6 @@ pub async fn setup_app(config: Config) -> Router {
     };
     let anime_link_service = anime_link_service::AnimeLinkService {
         config: config.clone(),
-        search_engine: Arc::new(Mutex::new(SimSearch::new())),
         link_map: Arc::new(Mutex::new(std::collections::HashMap::new())),
     };
     let _ = &anime_link_service.setup_links().await;

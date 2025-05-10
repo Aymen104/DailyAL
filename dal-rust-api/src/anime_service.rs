@@ -1,5 +1,5 @@
 use seahash::SeaHasher;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::hash::Hasher;
 use std::sync::{Arc, Mutex};
@@ -10,7 +10,7 @@ use crate::model::{
 };
 
 use crate::config::Config;
-use crate::model_dto::{AnimeLinkDTO, ContentGraphDTO, ContentNodeDTO};
+use crate::model_dto::{ContentGraphDTO, ContentNodeDTO};
 use async_recursion::async_recursion;
 use chrono::{DateTime, Utc};
 use futures::{stream, StreamExt};
@@ -238,23 +238,110 @@ impl AnimeService {
         }
     }
 
-    pub async fn get_anime(&self, query: AnimeQuery) -> Vec<AnimeLinkDTO> {
+    pub async fn get_anime(&self, query: AnimeQuery) -> Vec<HashMap<String, String>> {
+        let link: Vec<AnimeLink>;
         if query.query.is_some() {
-            return self
-                .anime_link_service
-                .search(&query)
-                .await
-                .into_iter()
-                .map(|f| f.into())
-                .collect();
+            link = self.get_anime_by_query(&query).await;
+        } else if query.mal_id.is_some() {
+            link = self.get_anime_by_mal_id(&query).await;
+        } else {
+            link = self.get_all_anime().await;
         }
-        if query.mal_id.is_some() {
-            let anime_link: AnimeLink = self
-                .anime_link_service
-                .get_link_by_id(query.mal_id.unwrap())
-                .await;
-            return Vec::from([anime_link.into()]);
-        }
-        panic!("Invalid query");
+        create_map_using_fields(link, &query.fields)
     }
+
+    async fn get_all_anime(&self) -> Vec<AnimeLink> {
+        self.anime_link_service.get_all_anime().await
+    }
+
+    async fn get_anime_by_mal_id(&self, query: &AnimeQuery) -> Vec<AnimeLink> {
+        let mal_id = &query.mal_id.clone().unwrap().clone();
+        let anime_link: AnimeLink = self.anime_link_service.get_link_by_id(mal_id).await;
+        return Vec::from([anime_link]);
+    }
+
+    async fn get_anime_by_query(&self, query: &AnimeQuery) -> Vec<AnimeLink> {
+        self.anime_link_service.search(query).await
+    }
+}
+
+fn create_map_using_fields(
+    link: Vec<AnimeLink>,
+    fields: &Vec<String>,
+) -> Vec<HashMap<String, String>> {
+    let mut map: Vec<HashMap<String, String>> = Vec::new();
+    for anime in &link {
+        let mut hash_map: HashMap<String, String> = HashMap::new();
+        for field in fields.iter() {
+            match field.as_str() {
+                "title" => {
+                    if anime.title.is_some() {
+                        hash_map
+                            .insert("title".to_string(), anime.title.clone().unwrap_or_default());
+                    }
+                }
+                "malId" => {
+                    if anime.mal_id.is_some() {
+                        hash_map.insert(
+                            "malId".to_string(),
+                            anime.mal_id.clone().unwrap_or_default(),
+                        );
+                    }
+                }
+                "anilistId" => {
+                    if anime.anilist_id.is_some() {
+                        hash_map.insert(
+                            "anilistId".to_string(),
+                            anime.anilist_id.clone().unwrap_or_default(),
+                        );
+                    }
+                }
+                "kitsuId" => {
+                    if anime.kitsu_id.is_some() {
+                        hash_map.insert(
+                            "kitsuId".to_string(),
+                            anime.kitsu_id.clone().unwrap_or_default(),
+                        );
+                    }
+                }
+                "animePlanet" => {
+                    if anime.anime_planet.is_some() {
+                        hash_map.insert(
+                            "animePlanet".to_string(),
+                            anime.anime_planet.clone().unwrap_or_default(),
+                        );
+                    }
+                }
+                "picture" => {
+                    if anime.picture.is_some() {
+                        hash_map.insert(
+                            "picture".to_string(),
+                            anime.picture.clone().unwrap_or_default(),
+                        );
+                    }
+                }
+                "synonyms" => {
+                    if anime.synonyms.is_some() {
+                        hash_map.insert(
+                            "synonyms".to_string(),
+                            anime
+                                .synonyms
+                                .clone()
+                                .unwrap_or_default()
+                                .join(",")
+                                .to_string(),
+                        );
+                    }
+                }
+                "year" => {
+                    if anime.year.is_some() {
+                        hash_map.insert("year".to_string(), anime.year.clone().unwrap_or_default());
+                    }
+                }
+                _ => {}
+            }
+        }
+        map.push(hash_map);
+    }
+    map
 }
