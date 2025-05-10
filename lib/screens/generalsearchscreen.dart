@@ -683,7 +683,8 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   Widget _streamSimilarNames(HistoryData? data) {
     if (category.equals('anime') || category.equals('all')) {
       return StreamBuilder<String>(
-        stream: _searchTextListener.stream,
+        stream: _searchTextListener.stream
+            .throttle(const Duration(milliseconds: 500)),
         builder: (_, snap) {
           final text = snap.data;
           if (text != null && text.isNotBlank) {
@@ -1027,7 +1028,16 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
                   category: 'anime',
                 ));
           },
-          trailing: Icon(Icons.arrow_outward),
+          trailing: ToolTipButton(
+            message: S.current.Search,
+            usePadding: true,
+            onTap: () {
+              focusNode.unfocus();
+              _searchController.text = node.title;
+              startSearch(node.title);
+            },
+            child: Icon(Icons.arrow_outward),
+          ),
         );
       },
       itemCount: nodes.length,
@@ -1076,7 +1086,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
             child: Icon(Icons.close),
           ),
           title: title(
-            queryHistory[index] ?? '?',
+            queryHistory[index],
             align: TextAlign.left,
             opacity: .7,
           ),

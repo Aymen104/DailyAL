@@ -233,7 +233,7 @@ class AnimeAutoComplete {
       anilistId: json['anilistId'],
       kitsuId: json['kitsuId'],
       animePlanet: json['animePlanet'],
-      synonyms: json['synonyms'] ?? '',
+      synonyms: (json['synonyms'] ?? '').toString().toLowerCase(),
     );
   }
 
