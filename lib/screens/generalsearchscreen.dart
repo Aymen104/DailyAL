@@ -1011,9 +1011,11 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
               url: node.picture,
             ),
           ),
-          title: Text(node.title ?? '?',
-              style: Theme.of(context).textTheme.labelMedium),
+          title:
+              Text(node.title, style: Theme.of(context).textTheme.labelMedium),
           onTap: () {
+            HistoryData.setHistory(
+                dataType: HistoryDataType.query, value: node.title);
             gotoPage(
                 context: context,
                 newPage: ContentDetailedScreen(

@@ -523,7 +523,7 @@ class DalApi {
     if (autoCompleteList == null) {
       return [];
     }
-    final lowerCase = text.toLowerCase().toLowerCase();
+    final lowerCase = text.toLowerCase();
     return autoCompleteList
         .where((e) =>
             e.title.toLowerCase().contains(lowerCase) ||
@@ -538,7 +538,8 @@ class DalApi {
       final response = await http.get(Uri.parse('${apiURL}/anime'), headers: {
         ..._headers(),
       });
-      return AnimeAutoComplete.fromList(jsonDecode(response.body));
+      final decodedBody = utf8.decode(response.bodyBytes);
+      return AnimeAutoComplete.fromList(jsonDecode(decodedBody));
     } catch (e) {
       logDal(e);
       return null;

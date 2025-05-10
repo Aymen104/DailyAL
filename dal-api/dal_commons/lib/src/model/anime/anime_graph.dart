@@ -220,6 +220,7 @@ class AnimeAutoComplete {
   });
 
   static List<AnimeAutoComplete> fromList(List<dynamic> list) {
+    if (list.isEmpty) return [];
     return list.map((e) => AnimeAutoComplete.fromJson(e)).toList();
   }
 
