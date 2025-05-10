@@ -122,9 +122,9 @@ impl AnimeLinkService {
     fn compare_anime_links_by_mean_score(&self, a: &AnimeLink, b: &AnimeLink) -> Ordering {
         let a_mean = a.mean;
         let b_mean = b.mean;
-        if a_mean < b_mean {
+        if a_mean > b_mean {
             Ordering::Less
-        } else if a_mean > b_mean {
+        } else if a_mean < b_mean {
             Ordering::Greater
         } else {
             Ordering::Equal
