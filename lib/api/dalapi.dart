@@ -518,7 +518,10 @@ class DalApi {
     await CacheManager.instance.setValue(url, '');
   }
 
-  Future<List<AnimeAutoComplete>> autoCompleteAnime(String text) async {
+  Future<List<AnimeAutoComplete>> autoCompleteAnime(
+    String text, [
+    int limit = 10,
+  ]) async {
     final autoCompleteList = await _autoCompleteFuture;
     if (autoCompleteList == null) {
       return [];
@@ -528,17 +531,27 @@ class DalApi {
         .where((e) =>
             e.title.toLowerCase().contains(lowerCase) ||
             e.synonyms.contains(lowerCase))
-        .take(10)
+        .take(limit)
         .toList();
   }
 
   Future<List<AnimeAutoComplete>?> _getAutoCompleteFuture() async {
     try {
+      final cachedData = await CacheManager.instance
+          .getValueForServiceAutoExpire(
+              'autocomplete', 'anime', 60 * 60 * 24 * 7);
+      if (cachedData != null) {
+        logDal('Using cached data for autocomplete');
+        return AnimeAutoComplete.fromList(jsonDecode(cachedData));
+      }
       final apiURL = await _getAPIBaseUrl();
+      logDal('Sending request to $apiURL for autocomplete');
       final response = await http.get(Uri.parse('${apiURL}/anime'), headers: {
         ..._headers(),
       });
       final decodedBody = utf8.decode(response.bodyBytes);
+      CacheManager.instance
+          .setValueForServiceAutoExpireIn('autocomplete', 'anime', decodedBody);
       return AnimeAutoComplete.fromList(jsonDecode(decodedBody));
     } catch (e) {
       logDal(e);
