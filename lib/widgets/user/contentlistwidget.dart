@@ -62,6 +62,7 @@ class ContentListWidget extends StatelessWidget {
   final void Function(int index, dynamic node)? onClose;
   final double cardHeight;
   final double cardWidth;
+  final DisplaySubType? displaySubType;
 
   const ContentListWidget({
     Key? key,
@@ -88,6 +89,7 @@ class ContentListWidget extends StatelessWidget {
     this.shrinkWrap = false,
     this.physics,
     this.showSelfScoreInsteadOfStatus = false,
+    this.displaySubType,
   }) : super(key: key);
 
   @override
@@ -172,6 +174,7 @@ class ContentListWidget extends StatelessWidget {
         displayType: displayType ?? DisplayType.list_vert,
         cardHeight: cardHeight,
         cardWidth: cardWidth,
+        displaySubType: displaySubType,
         onClose: onClose != null ? () => onClose!(entry.key, dynContent) : null,
         showSelfScoreInsteadOfStatus: showSelfScoreInsteadOfStatus,
       );
@@ -236,6 +239,7 @@ Widget _baseBaseNode(
   bool showTime = false,
   bool? showIndex,
   bool? showStatus,
+  VoidCallback? onClose,
 }) {
   return ContentAllWidget(
     key: Key(MalAuth.codeChallenge(10)),
@@ -255,6 +259,7 @@ Widget _baseBaseNode(
     showTime: showTime,
     showIndex: showIndex ?? false,
     showStatus: showStatus ?? true,
+    onClose: onClose,
   );
 }
 
@@ -273,6 +278,7 @@ Widget buildBaseNodePageItem(
   bool? showIndex,
   bool? showStatus,
   String? id,
+  ValueChanged<int>? onClose,
 }) {
   Widget fromItem(int index, BaseNode node, [HomePageTileSize? tileSize]) {
     if (node.content == null) {
@@ -291,6 +297,7 @@ Widget buildBaseNodePageItem(
       showTime: showTime,
       showIndex: showIndex,
       showStatus: showStatus,
+      onClose: onClose != null ? () => onClose(index) : null,
     );
   }
 
@@ -343,12 +350,14 @@ Widget horizontalList({
   double? height,
   bool showTime = false,
   EdgeInsetsGeometry? padding,
+  ValueChanged<int>? onClose,
 }) {
   return ContentListWithDisplayType(
     category: category,
     items: items,
     showTime: showTime,
     padding: padding,
+    onClose: onClose,
     sortFilterDisplay: SortFilterDisplay(
       sort: SortOption(name: '_', value: '_'),
       displayOption: DisplayOption(
@@ -375,6 +384,7 @@ class ContentListWithDisplayType extends StatelessWidget {
   final bool? showEdit;
   final bool? updateCacheOnEdit;
   final bool? showStatus;
+  final ValueChanged<int>? onClose;
   const ContentListWithDisplayType({
     super.key,
     required this.category,
@@ -386,6 +396,7 @@ class ContentListWithDisplayType extends StatelessWidget {
     this.showIndex,
     this.showEdit,
     this.updateCacheOnEdit,
+    this.onClose,
     this.showStatus,
   });
 
@@ -426,6 +437,7 @@ class ContentListWithDisplayType extends StatelessWidget {
           showIndex: showIndex,
           showStatus: showStatus,
           id: sortFilterDisplay.displayOption.id,
+          onClose: onClose,
         ),
       );
     }
@@ -611,31 +623,40 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
             contentTypes.contains(widget.category))
         ? CFutureBuilder(
             future: DalApi.i.scheduleForMalIds,
-            loadingChild: SB.z,
-            done: (AsyncSnapshot<Map<int, ScheduleData>> data) => AnimeGridCard(
-              scheduleData: data.data?[id],
-              node: widget.dynContent?.content,
-              category: widget.category,
-              showEdit: widget.showEdit,
-              myListStatus: myListStatus,
-              showCardBar: true,
-              updateCache: false,
-              showGenres: true,
-              showTime: widget.showTime,
-              height: widget.cardHeight,
-              width: widget.cardWidth,
-              parentNsv: nsv,
-              onClose: widget.onClose,
-              onEdit: () => showEditSheet(context),
-              onTap: () => _onTileTap(),
-              showSelfScoreInsteadOfStatus: widget.showSelfScoreInsteadOfStatus,
-              addtionalWidget: _unseenWidget(),
-              homePageTileSize: widget.homePageTileSize,
-              displaySubType: widget.displaySubType,
-              gridHeight: widget.gridHeight,
-            ),
+            loadingChild: _buildAnimeGridCard(null, nsv, context),
+            done: (AsyncSnapshot<Map<int, ScheduleData>> data) =>
+                _buildAnimeGridCard(data.data, nsv, context),
           )
         : _buildListTile(nsv, nodeTitle);
+  }
+
+  AnimeGridCard _buildAnimeGridCard(
+    Map<int, ScheduleData>? data,
+    NodeStatusValue nsv,
+    BuildContext context,
+  ) {
+    return AnimeGridCard(
+      scheduleData: data?[id],
+      node: widget.dynContent?.content,
+      category: widget.category,
+      showEdit: widget.showEdit,
+      myListStatus: myListStatus,
+      showCardBar: true,
+      updateCache: false,
+      showGenres: true,
+      showTime: widget.showTime,
+      height: widget.cardHeight,
+      width: widget.cardWidth,
+      parentNsv: nsv,
+      onClose: widget.onClose,
+      onEdit: () => showEditSheet(context),
+      onTap: () => _onTileTap(),
+      showSelfScoreInsteadOfStatus: widget.showSelfScoreInsteadOfStatus,
+      addtionalWidget: _unseenWidget(),
+      homePageTileSize: widget.homePageTileSize,
+      displaySubType: widget.displaySubType,
+      gridHeight: widget.gridHeight,
+    );
   }
 
   void _onTileTap() {
@@ -1012,7 +1033,8 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
     final detailed = widget.dynContent?.content;
     if ((detailed is AnimeDetailed || detailed is MangaDetailed)) {
       final mediaText = mediaTypeText;
-      final [genreText, content] = getGenreText(detailed, category: widget.category);
+      final [genreText, content] =
+          getGenreText(detailed, category: widget.category);
       return Container(
         // width: width,
         child: Padding(
@@ -1437,7 +1459,8 @@ Widget countdownWidget({
 }) {
   if (category.equals('anime')) {
     return usingScheduler(id, (data) {
-      var child = CountDownWidget.expandedCountdownWidget(data, padding: padding, context: context);
+      var child = CountDownWidget.expandedCountdownWidget(data,
+          padding: padding, context: context);
       return wrapper != null ? wrapper(child) : child;
     });
   }

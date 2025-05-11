@@ -1,4 +1,5 @@
 import 'package:dailyanimelist/generated/l10n.dart';
+import 'package:dailyanimelist/pages/userpop.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/home/bookmarks_widget.dart';
@@ -124,7 +125,24 @@ class _AppBarHomeState extends State<AppBarHome> {
             child: AvatarWidget(
               url: userProf?.picture,
               onTap: () {
-                Scaffold.of(context).openEndDrawer();
+                if (user.status != AuthStatus.AUTHENTICATED) {
+                  Scaffold.of(context).openEndDrawer();
+                  return;
+                }
+                showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return UserPopSlideOpenPage(
+                        isSelf: true,
+                        username: userProf?.name,
+                        onUiChange: () {
+                          _refreshFuture();
+                          getUserProfile();
+                          widget.onUiChange?.call();
+                        },
+                      );
+                    });
               },
             ),
           )),
@@ -143,8 +161,7 @@ class _AppBarHomeState extends State<AppBarHome> {
       message: S.current.AnimeCalendar,
       padding: const EdgeInsets.symmetric(horizontal: 7.0),
       usePadding: true,
-      onTap: () =>
-          gotoPage(context: context, newPage: AnimeCalendarWidget()),
+      onTap: () => gotoPage(context: context, newPage: AnimeCalendarWidget()),
       child: Icon(Icons.calendar_today_outlined, size: iconSize),
     );
   }

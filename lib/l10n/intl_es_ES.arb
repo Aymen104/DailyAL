@@ -982,5 +982,9 @@
     "Default_tab_selected_for_anime": "Pesta\u00f1a predeterminada seleccionada para anime",
     "Default_tab_selected_for_anime_manga": "Pesta\u00f1a predeterminada seleccionada para anime/manga",
     "If_nothing_is_selected": "Si no se selecciona nada, se utilizar\u00e1 de forma predeterminada el \u00faltimo abierto.",
-    "Search_by_genre": "Buscar por el mismo g\u00e9nero"
+    "Search_by_genre": "Buscar por el mismo g\u00e9nero",
+    "Set_Profile_BG": "Establecer fondo",
+    "Remove_Profile_BG": "Eliminar fondo",
+    "Logout_desc": "INCARGE DE LA APLICACI\u00d3N",
+    "About_desc": "Verifique las actualizaciones, el cambio de cambios, la tasa y la revisi\u00f3n"
 }

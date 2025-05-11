@@ -979,5 +979,9 @@
     "Default_tab_selected_for_anime": "Anime i\u00e7in se\u00e7ilen varsay\u0131lan sekme",
     "Default_tab_selected_for_anime_manga": "Anime/manga i\u00e7in se\u00e7ilen varsay\u0131lan sekme",
     "If_nothing_is_selected": "Hi\u00e7bir \u015fey se\u00e7ilmezse, varsay\u0131lan olarak en son a\u00e7\u0131lana g\u00f6re ayarlanacakt\u0131r.",
-    "Search_by_genre": "Ayn\u0131 t\u00fcre g\u00f6re ara"
+    "Search_by_genre": "Ayn\u0131 t\u00fcre g\u00f6re ara",
+    "Set_Profile_BG": "Arka plan\u0131 ayarlamak",
+    "Remove_Profile_BG": "Arka plan\u0131 kald\u0131r",
+    "Logout_desc": "Uygulamadan oturum a\u00e7ma",
+    "About_desc": "G\u00fcncellemeleri kontrol edin, ChangeLog, Oran ve G\u00f6zden Ge\u00e7irme"
 }

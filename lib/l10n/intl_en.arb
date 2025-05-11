@@ -978,5 +978,9 @@
     "Default_tab_selected_for_anime_manga": "Default tab selected for anime/manga",
     "If_nothing_is_selected": "If nothing is selected, it will default to last opened one.",
     "Search_by_genre": "Search by same genre",
-    "AnimeCalendar": "Anime Calendar"
+    "AnimeCalendar": "Anime Calendar",
+    "Set_Profile_BG": "Set Background",
+    "Remove_Profile_BG": "Remove Background",
+    "Logout_desc": "Logout from the app",
+    "About_desc": "Check for Updates, Changelog, Rate & Review"
 }

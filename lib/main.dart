@@ -30,8 +30,7 @@ int androidSDKVersion = 0;
 final int homeIndex = 0;
 final int forumIndex = 1;
 final int userIndex = 2;
-final int profileIndex = 3;
-final int exploreIndex = 4;
+final int exploreIndex = 3;
 GlobalKey<ScaffoldMessengerState> messenger = GlobalKey();
 
 void main() async {
@@ -100,7 +99,6 @@ class _RestartAppState extends State<RestartApp> {
   @override
   void dispose() {
     super.dispose();
-    StreamUtils.i.close();
   }
 
   @override
@@ -128,8 +126,8 @@ class MyApp extends StatelessWidget {
           user = snap.data!;
           return DynamicColorBuilder(
               builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-            final colorScheme =
-                currentColorScheme(context, lightDynamic, darkDynamic, user.theme.themeMode);
+            final colorScheme = currentColorScheme(
+                context, lightDynamic, darkDynamic, user.theme.themeMode);
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               navigatorKey: navigatorKey,

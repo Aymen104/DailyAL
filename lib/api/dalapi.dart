@@ -6,13 +6,10 @@ import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/malconnect.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
-import 'package:dailyanimelist/cache/history_data.dart';
 import 'package:dailyanimelist/constant.dart';
+import 'package:dailyanimelist/util/streamutils.dart';
 import 'package:dal_api/handlers/handler_core.dart';
-import 'package:dal_api/services/helpers.dart';
 import 'package:dal_commons/commons.dart';
-import 'package:dal_commons/dal_commons.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/src/media_type.dart';
@@ -25,6 +22,8 @@ class DalApi {
   late Future<Servers?> _dalConfigFuture;
   late Future<String> _preferredServer;
   late Future<Map<int, ScheduleData>> _scheduleForMalIds;
+  late Future<List<AnimeAutoComplete>?> _autoCompleteFuture;
+  final StreamListener<bool> autoCompleteCacheLoaded = StreamListener(false);
   Map<int, ScheduleData> _scheduleForMalIdsSync = {};
   bool _debugMode = kDebugMode;
 
@@ -51,6 +50,11 @@ class DalApi {
     _dalConfigFuture = _getDalConfigFuture();
     _preferredServer = _getPreferredServer();
     _scheduleForMalIds = _getScheduleForMalIds();
+    _autoCompleteFuture = _getAutoCompleteFuture();
+    _autoCompleteFuture.then((_) {
+      logDal('autocomplete cache loaded');
+      autoCompleteCacheLoaded.update(true);
+    });
   }
 
   void resetScheduleForMalIds() {
@@ -423,20 +427,22 @@ class DalApi {
     );
   }
 
-  Future<dynamic> _apiGET(String endpoint) async {
+  Future<dynamic> _apiGET(String endpoint,
+      {Map<String, String>? customHeaders}) async {
     final apiURL = await _getAPIBaseUrl();
     return MalConnect.getContent(
       '$apiURL/$endpoint',
       retryOnFail: false,
       withNoHeaders: true,
       includeNsfw: false,
-      headers: _headers,
+      headers: _headers(customHeaders),
     );
   }
 
-  Map<String, String> get _headers {
+  Map<String, String> _headers([Map<String, String>? customHeaders]) {
     return {
       'Authorization': 'Bearer ${CredMal.apiSecret}',
+      if (customHeaders != null) ...customHeaders,
     };
   }
 
@@ -460,7 +466,7 @@ class DalApi {
       logDal('Sending reviews to $apiURL');
       final response = await http.post(
         Uri.parse(apiURL),
-        headers: _headers,
+        headers: _headers(),
         body: jsonEncode(reviews),
       );
       final body = response.body;
@@ -516,6 +522,47 @@ class DalApi {
       throw Exception('Failed to delete image');
     }
     await CacheManager.instance.setValue(url, '');
+  }
+
+  Future<List<AnimeAutoComplete>> autoCompleteAnime(
+    String text, [
+    int limit = 10,
+  ]) async {
+    final autoCompleteList = await _autoCompleteFuture;
+    if (autoCompleteList == null) {
+      return [];
+    }
+    final lowerCase = text.toLowerCase();
+    return autoCompleteList
+        .where((e) =>
+            e.title.toLowerCase().contains(lowerCase) ||
+            e.synonyms.contains(lowerCase))
+        .take(limit)
+        .toList();
+  }
+
+  Future<List<AnimeAutoComplete>?> _getAutoCompleteFuture() async {
+    try {
+      final cachedData = await CacheManager.instance
+          .getValueForServiceAutoExpire(
+              'autocomplete', 'anime', 60 * 60 * 24 * 7);
+      if (cachedData != null) {
+        logDal('Using cached data for autocomplete');
+        return AnimeAutoComplete.fromList(jsonDecode(cachedData));
+      }
+      final apiURL = await _getAPIBaseUrl();
+      logDal('Sending request to $apiURL for autocomplete');
+      final response = await http.get(Uri.parse('${apiURL}/anime'), headers: {
+        ..._headers(),
+      });
+      final decodedBody = utf8.decode(response.bodyBytes);
+      CacheManager.instance
+          .setValueForServiceAutoExpireIn('autocomplete', 'anime', decodedBody);
+      return AnimeAutoComplete.fromList(jsonDecode(decodedBody));
+    } catch (e) {
+      logDal(e);
+      return null;
+    }
   }
 }
 

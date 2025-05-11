@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("A new episode is out!"),
         "About": MessageLookupByLibrary.simpleMessage("About"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "Check for Updates, Changelog, Rate & Review"),
         "Account_fetch_details": MessageLookupByLibrary.simpleMessage(
             "Trying to fetch your account details"),
         "Action": MessageLookupByLibrary.simpleMessage("Action"),
@@ -621,6 +623,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("Log Out"),
         "Logout_Confirmation":
             MessageLookupByLibrary.simpleMessage("Logout Confirmation"),
+        "Logout_desc":
+            MessageLookupByLibrary.simpleMessage("Logout from the app"),
         "Love": MessageLookupByLibrary.simpleMessage("Love"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("Love_Polygon"),
         "Love_it": MessageLookupByLibrary.simpleMessage("Love it"),
@@ -897,6 +901,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove Image from Home Page"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "This will remove the image from the home page."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Remove Background"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "Do you wish to remove the background image?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1025,6 +1031,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("Series Discussion"),
         "Series_End": MessageLookupByLibrary.simpleMessage("Series End"),
+        "Set_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Set Background"),
         "Settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "Setup Timed out. Please try again."),

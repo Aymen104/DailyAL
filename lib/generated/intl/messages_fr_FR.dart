@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out": MessageLookupByLibrary.simpleMessage(
             "Un nouvel épisode est sorti!"),
         "About": MessageLookupByLibrary.simpleMessage("Sur"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "Vérifiez les mises à jour, les changelog, le taux et l\'examen"),
         "Account_fetch_details": MessageLookupByLibrary.simpleMessage(
             "Essayer d\'aller chercher vos détails de votre compte"),
         "Action": MessageLookupByLibrary.simpleMessage("action"),
@@ -650,6 +652,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("Se déconnecter"),
         "Logout_Confirmation":
             MessageLookupByLibrary.simpleMessage("Confirmation de déconnexion"),
+        "Logout_desc": MessageLookupByLibrary.simpleMessage(
+            "Déconnectez-vous à partir de l\'application"),
         "Love": MessageLookupByLibrary.simpleMessage("Amour"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("Love_Polygon"),
         "Love_it": MessageLookupByLibrary.simpleMessage("Aimer"),
@@ -946,6 +950,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Supprimer l\'image de la page d\'accueil"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "Cela supprimera l\'image de la page d\'accueil."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Supprimer le fond"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "Souhaitez-vous supprimer l\'image d\'arrière-plan ?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1079,6 +1085,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("Série Discussion"),
         "Series_End": MessageLookupByLibrary.simpleMessage("Fin de la série"),
+        "Set_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Définir l\'arrière-plan"),
         "Settings": MessageLookupByLibrary.simpleMessage("Paramètres"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "Configuration expirée.Veuillez réessayer."),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:dailyanimelist/api/dalapi.dart';
 import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/api/malapi.dart';
@@ -16,9 +15,9 @@ import 'package:dailyanimelist/pages/animedetailed/intereststackwidget.dart';
 import 'package:dailyanimelist/pages/search/allrankingwidget.dart';
 import 'package:dailyanimelist/pages/search/seasonalwidget.dart';
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
-import 'package:dailyanimelist/screens/plainscreen.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/util/streamutils.dart';
+import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/club/clublistwidget.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/customfuture.dart';
@@ -27,7 +26,6 @@ import 'package:dailyanimelist/widgets/listsortfilter.dart';
 import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/search/sliderwidget.dart';
-import 'package:dailyanimelist/widgets/selectbottom.dart';
 import 'package:dailyanimelist/widgets/slivers.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
 import 'package:dal_commons/commons.dart';
@@ -159,13 +157,26 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     return length != null && length > 10;
   }
 
-  Map<String, FilterOption> get _filterOutputs =>
-      _sortFilterDisplay.filterOutputs;
+  Map<String, FilterOption> get _filterOutputs {
+    try {
+      return _sortFilterDisplay.filterOutputs;
+    } catch (e) {
+      return {};
+    }
+  }
+
   set _filterOutputs(Map<String, FilterOption> value) {
     _sortFilterDisplay = _sortFilterDisplay.copyWith(filterOutputs: value);
   }
 
-  String get category => _sortFilterDisplay.category;
+  String get category {
+    try {
+      return _sortFilterDisplay.category;
+    } catch (e) {
+      return 'all';
+    }
+  }
+
   set category(String value) {
     _sortFilterDisplay = _sortFilterDisplay.copyWith(category: value);
   }
@@ -684,18 +695,27 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
 
   Widget _streamSimilarNames(HistoryData? data) {
     if (category.equals('anime') || category.equals('all')) {
-      return StreamBuilder<String>(
-        stream: _searchTextListener.stream,
-        builder: (_, snap) {
-          final text = snap.data;
-          if (text != null && text.isNotBlank) {
-            return CFutureBuilder(
-              future: _seasonResult,
-              done: (_snap) => _animeTypeSearch(text, _snap.data, data),
-              loadingChild: _buildHistory(data),
-            );
-          }
-          return _buildHistory(data);
+      return StreamBuilder<bool>(
+        stream: DalApi.i.autoCompleteCacheLoaded.stream,
+        initialData: DalApi.i.autoCompleteCacheLoaded.currentValue,
+        builder: (_, snapshot) {
+          final autoCompleteCacheLoaded = snapshot.data ?? false;
+          return StreamBuilder<String>(
+            stream: _searchTextListener.stream
+                .throttle(const Duration(milliseconds: 500)),
+            builder: (_, snap) {
+              final text = snap.data;
+              if (text != null && text.isNotBlank) {
+                return CFutureBuilder(
+                  future: _seasonResult,
+                  done: (_snap) => _animeTypeSearch(
+                      text, _snap.data, data, autoCompleteCacheLoaded),
+                  loadingChild: _buildHistory(data),
+                );
+              }
+              return _buildHistory(data);
+            },
+          );
         },
       );
     } else {
@@ -703,18 +723,17 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     }
   }
 
-  Widget _animeTypeSearch(
-      String text, SearchResult? result, HistoryData? data) {
+  Widget _animeTypeSearch(String text, SearchResult? result, HistoryData? data,
+      bool autoCompleteCacheLoaded) {
     text = text.trim().toLowerCase();
-    if (result != null) {
-      final base = result.data;
-      if (base != null && base.isNotEmpty) {
-        final filtered =
-            searchBaseNodes(base, text).take(5).map((e) => e.content!).toList();
-        return _buildHistory(data, filtered);
-      }
+    if (text.length < 3) {
+      return _buildHistory(data);
     }
-    return _buildHistory(data);
+    return CFutureBuilder<List<AnimeAutoComplete>>(
+      done: (animeLink) => _buildHistory(data, animeLink.data),
+      loadingChild: _buildHistory(data, [], autoCompleteCacheLoaded),
+      future: DalApi.i.autoCompleteAnime(text),
+    );
   }
 
   Future<bool> _onWillScope() async {
@@ -879,7 +898,9 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     return buildGridResults(results, category, scrollController, context);
   }
 
-  Widget _buildHistory(HistoryData? data, [List<Node>? searchNodes]) {
+  Widget _buildHistory(HistoryData? data,
+      [List<AnimeAutoComplete>? searchNodes,
+      bool showAutoCompleteProgress = false]) {
     final queryHistory = data?.queryHistory ?? [];
     final recentAnime = data?.recentAnime ?? [];
     final recentManga = data?.recentManga ?? [];
@@ -891,6 +912,12 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
         child: Padding(padding: padding),
       ),
       if (showFilter) SliverWrapper(_searchDivider()),
+      if (showAutoCompleteProgress)
+        SliverToBoxAdapter(
+            child: Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 560),
+          child: SB.z,
+        )),
       if (queryHistory.isEmpty &&
           recentManga.isEmpty &&
           recentAnime.isEmpty &&
@@ -918,7 +945,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
       else ...[
         if (_searchNodes.isNotEmpty) ...[
           SB.lh30,
-          _buildNodeSeach(_searchNodes),
+          _buildNodeSearch(_searchNodes),
         ],
         if (queryHistory.isNotEmpty) ...[
           SB.lh30,
@@ -994,22 +1021,44 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     ]);
   }
 
-  SliverList _buildNodeSeach(List<Node> nodes) {
+  SliverList _buildNodeSearch(List<AnimeAutoComplete> nodes) {
     return SliverList.builder(
       itemBuilder: (_, index) {
         final node = nodes[index];
         return ListTile(
-          title: Text(getNodeTitle(node),
-              style: Theme.of(context).textTheme.labelMedium),
+          leading: SizedBox(
+            height: 50.0,
+            width: 50.0,
+            child: AvatarWidget(
+              url: node.picture,
+            ),
+          ),
+          title:
+              Text(node.title, style: Theme.of(context).textTheme.labelMedium),
           onTap: () {
+            HistoryData.setHistory(
+                dataType: HistoryDataType.query, value: node.title);
             gotoPage(
                 context: context,
                 newPage: ContentDetailedScreen(
-                  node: node,
+                  node: Node(
+                    id: int.tryParse(node.malId ?? ''),
+                    mainPicture: Picture(large: node.picture),
+                    title: node.title,
+                  ),
                   category: 'anime',
                 ));
           },
-          trailing: Icon(Icons.arrow_outward),
+          trailing: ToolTipButton(
+            message: S.current.Search,
+            usePadding: true,
+            onTap: () {
+              focusNode.unfocus();
+              _searchController.text = node.title;
+              startSearch(node.title);
+            },
+            child: Icon(Icons.arrow_outward),
+          ),
         );
       },
       itemCount: nodes.length,
@@ -1020,22 +1069,17 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     return SliverToBoxAdapter(
       child: Container(
         height: 250,
-        child: ContentListWidget(
-          returnSlivers: false,
-          cardHeight: 170,
-          cardWidth: 160,
+        child: horizontalList(
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          contentList: nodes.map((e) => BaseNode(content: e)).toList(),
-          displayType: DisplayType.list_horiz,
+          items: nodes.map((e) => BaseNode(content: e)).toList(),
           category: category,
-          onClose: (i, _) => HistoryData.setHistory(
+          onClose: (i) => HistoryData.setHistory(
             remove: true,
             value: nodes.elementAt(i),
             dataType: category.equals("anime")
                 ? HistoryDataType.anime
                 : HistoryDataType.manga,
           ),
-          updateCacheOnEdit: true,
         ),
       ),
     );
@@ -1063,7 +1107,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
             child: Icon(Icons.close),
           ),
           title: title(
-            queryHistory[index] ?? '?',
+            queryHistory[index],
             align: TextAlign.left,
             opacity: .7,
           ),
@@ -1468,37 +1512,41 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   }
 
   Widget _filterSection() {
-    return ExpandedSection(
-      expand: showFilter,
-      child: Container(
-        width: double.infinity,
-        child: SortFilterPopup(
-          sortFilterDisplay: _sortFilterDisplay,
-          onSortFilterChange: _onFilterChange,
-          showText: category.equals("featured"),
-          additional: S.current.Tags_unApplied,
-          independent: false,
-          sortFilterOptions: SortFilterOptions(
-            sortOptions: [],
-            filterOptions: isSpecialQuery
-                ? []
-                : _removeExclusiveFilters(getFilterOptions()),
-            displayOptions: _getDisplayOptions(),
-            categories:
-                (widget.exclusiveScreen || isSpecialQuery) ? [] : searchTypes,
+    try {
+      return ExpandedSection(
+        expand: showFilter,
+        child: Container(
+          width: double.infinity,
+          child: SortFilterPopup(
+            sortFilterDisplay: _sortFilterDisplay,
+            onSortFilterChange: _onFilterChange,
+            showText: category.equals("featured"),
+            additional: S.current.Tags_unApplied,
+            independent: false,
+            sortFilterOptions: SortFilterOptions(
+              sortOptions: [],
+              filterOptions: isSpecialQuery
+                  ? []
+                  : _removeExclusiveFilters(getFilterOptions()),
+              displayOptions: _getDisplayOptions(),
+              categories:
+                  (widget.exclusiveScreen || isSpecialQuery) ? [] : searchTypes,
+            ),
+            onCategoryChange: (value) {
+              _onCategorySelect(value);
+            },
+            onClose: () {
+              if (mounted)
+                setState(() {
+                  showFilter = false;
+                });
+            },
           ),
-          onCategoryChange: (value) {
-            _onCategorySelect(value);
-          },
-          onClose: () {
-            if (mounted)
-              setState(() {
-                showFilter = false;
-              });
-          },
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      return SB.z;
+    }
   }
 
   List<SelectDisplayOption> _getDisplayOptions() {

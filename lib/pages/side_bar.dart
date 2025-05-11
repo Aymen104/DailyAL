@@ -4,19 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/dalapi.dart';
 import 'package:dailyanimelist/api/maluser.dart';
-import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/extensions.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/pages/settings/about.dart';
-import 'package:dailyanimelist/pages/settings/anime_manga_settings.dart';
-import 'package:dailyanimelist/pages/settings/backup_restore.dart';
-import 'package:dailyanimelist/pages/settings/cachesettings.dart';
-import 'package:dailyanimelist/pages/settings/customsettings.dart';
-import 'package:dailyanimelist/pages/settings/homepagesettings.dart';
-import 'package:dailyanimelist/pages/settings/langsettings.dart';
-import 'package:dailyanimelist/pages/settings/notifsettings.dart';
 import 'package:dailyanimelist/pages/settings/optiontile.dart';
-import 'package:dailyanimelist/pages/settings/themesettings.dart';
 import 'package:dailyanimelist/pages/settings/userprefsetting.dart';
 import 'package:dailyanimelist/pages/settings_page.dart';
 import 'package:dailyanimelist/screens/homescreen.dart';
@@ -35,7 +26,6 @@ import 'package:dailyanimelist/widgets/user/user_header.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:line_icons/line_icons.dart';
 
 import '../constant.dart';
 import '../main.dart';
@@ -164,7 +154,9 @@ class _AppSideBarState extends State<AppSideBar> with TickerProviderStateMixin {
           return SizedBox(
             height: MediaQuery.of(context).size.height / 1.35,
             child: CustomScrollView(slivers: [
-              if (userProf != null) ...header else ..._buildHeaderShimmer(),
+              if (user.status == AuthStatus.AUTHENTICATED)
+                if (userProf != null) ...header else ..._buildHeaderShimmer(),
+              if (user.status != AuthStatus.AUTHENTICATED) ...header,
               if (user.status == AuthStatus.AUTHENTICATED)
                 SliverWrapper(_userActionsWidget(userProf)),
               SliverListWrapper(_tiles),

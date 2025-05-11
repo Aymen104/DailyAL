@@ -130,9 +130,6 @@ class _UserPrefSettingsState extends State<UserPrefSettings> {
   Widget build(BuildContext context) {
     return SliverList(
       delegate: SliverChildListDelegate(
-        // shrinkWrap: true,
-        // physics: const NeverScrollableScrollPhysics(),
-        // padding: EdgeInsets.zero,
         [
           OptionTile(
             text: user.pref.bgPath != null

@@ -77,8 +77,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       homeIndex: OpacityAnima(child: HomePage(), animation: animation),
       forumIndex: OpacityAnima(child: ForumPage(), animation: animation),
       userIndex: OpacityAnima(child: UserPage(), animation: animation),
-      profileIndex: OpacityAnima(
-          child: UserProfilePage(isSelf: true), animation: animation),
       exploreIndex: OpacityAnima(child: ExplorePage(), animation: animation)
     };
 

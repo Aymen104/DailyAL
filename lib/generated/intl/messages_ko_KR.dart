@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("새로운 에피소드가 나왔습니다!"),
         "About": MessageLookupByLibrary.simpleMessage("에 대한"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "업데이트, ChangeLog, Rate & Review를 확인하십시오"),
         "Account_fetch_details":
             MessageLookupByLibrary.simpleMessage("계정 세부 정보를 가져 오려고합니다"),
         "Action": MessageLookupByLibrary.simpleMessage("동작"),
@@ -563,6 +565,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("더 많은 것을 보려면 로그인하십시오"),
         "Logout": MessageLookupByLibrary.simpleMessage("로그 아웃"),
         "Logout_Confirmation": MessageLookupByLibrary.simpleMessage("로그 아웃 확인"),
+        "Logout_desc": MessageLookupByLibrary.simpleMessage("앱에서 로그 아웃"),
         "Love": MessageLookupByLibrary.simpleMessage("사랑"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("사랑_다각형"),
         "Love_it": MessageLookupByLibrary.simpleMessage("사랑해"),
@@ -814,6 +817,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("홈 페이지에서 이미지를 제거하십시오"),
         "Remove_Image_desc":
             MessageLookupByLibrary.simpleMessage("홈 페이지에서 이미지를 제거합니다."),
+        "Remove_Profile_BG": MessageLookupByLibrary.simpleMessage("배경을 제거하십시오"),
         "Remove_the_Bg":
             MessageLookupByLibrary.simpleMessage("배경 이미지를 제거하시겠습니까?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -926,6 +930,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "Serialization": MessageLookupByLibrary.simpleMessage("직렬화"),
         "Series_Discussion": MessageLookupByLibrary.simpleMessage("시리즈 토론"),
         "Series_End": MessageLookupByLibrary.simpleMessage("시리즈 끝"),
+        "Set_Profile_BG": MessageLookupByLibrary.simpleMessage("배경 설정"),
         "Settings": MessageLookupByLibrary.simpleMessage("설정"),
         "Setup_timed_out":
             MessageLookupByLibrary.simpleMessage("설정 시간이 초과되었습니다.다시 시도하십시오."),
