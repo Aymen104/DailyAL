@@ -1,7 +1,5 @@
 # Ignore compiled output
 /target/
 
-# Ignore project-specific files
-Cargo.lock
 
 .env
