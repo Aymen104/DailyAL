@@ -2,15 +2,18 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dailyanimelist/api/auth/auth.dart';
+import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/pages/settings/userprefsetting.dart';
 import 'package:dailyanimelist/pages/settings_page.dart';
 import 'package:dailyanimelist/pages/side_bar.dart';
+import 'package:dailyanimelist/pages/userpage.dart';
 import 'package:dailyanimelist/screens/user_profile.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/util/streamutils.dart';
+import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/customfuture.dart';
 import 'package:dailyanimelist/widgets/fadingeffect.dart';
@@ -20,14 +23,14 @@ import 'package:dal_commons/commons.dart';
 import 'package:flutter/material.dart';
 
 class UserPopSlideOpenPage extends StatefulWidget {
-  final UserProf? userProf;
   final VoidCallback? onUiChange;
   final String? username;
+  final bool isSelf;
   const UserPopSlideOpenPage({
     super.key,
-    this.userProf,
     this.onUiChange,
     this.username,
+    required this.isSelf,
   });
 
   @override
@@ -37,22 +40,53 @@ class UserPopSlideOpenPage extends StatefulWidget {
 class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
   bool _isFullScreen = false;
   StreamListener<bool> _imageListener = StreamListener(false);
-  UserProf? userProf;
   late String _bgImageRefKey;
   late PageController _pageController;
   late StreamListener<int> _pageListner;
   String category = 'anime';
-  List<UserProfileType> get _profileHeaders => profileHeaders;
+  List<UserProfileType> get _profileHeaders => [
+        if (!isSelf) _userPageType(),
+        ...profileHeaders,
+      ];
   DraggableScrollableController _draggableScrollableController =
       DraggableScrollableController();
+  late bool isSelf;
+  late Future<UserProf?> _userProfFuture;
+
+  String get _username {
+    return widget.username ?? '';
+  }
+
+  UserProfileType _userPageType() {
+    return UserProfileType(
+      S.current.List,
+      Icons.list,
+      (username, s, c) => UserPage(
+        username: username,
+        initalPageIndex: 1,
+        isSelf: s,
+        category: category,
+        controller: c,
+      ),
+    );
+  }
 
   @override
   void initState() {
-    userProf = widget.userProf;
+    isSelf = widget.isSelf;
+    _userProfFuture = _getUserProfileFuture();
     _bgImageRefKey = MalAuth.codeChallenge(10);
     _pageController = PageController(initialPage: 0);
     _pageListner = StreamListener(0);
     super.initState();
+  }
+
+  Future<UserProf?> _getUserProfileFuture() async {
+    if (widget.isSelf) {
+      return UserProfService.i.userProf;
+    } else {
+      return MalUser.getUserInfo(username: _username, fromCache: true);
+    }
   }
 
   Future<String?> _getProfileImageUrlFuture(int? id) async {
@@ -83,9 +117,7 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
         shouldCloseOnMinExtent: true,
         controller: _draggableScrollableController,
         builder: (BuildContext context, ScrollController scrollController) {
-          final header =
-              [_buildHeader(userProf, context)].map((e) => SliverWrapper(e));
-          final body = _body(userProf?.name ?? '', scrollController);
+          final body = _body(scrollController);
           return Material(
             borderRadius: _isFullScreen
                 ? BorderRadius.zero
@@ -96,7 +128,7 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
             child: CustomScrollView(
               controller: scrollController,
               slivers: [
-                if (userProf != null) ...header else ..._buildHeaderShimmer(),
+                SliverWrapper(_buildHeader()),
                 SB.lh10,
                 SliverWrapper(_headerWidget()),
                 SliverFillRemaining(
@@ -119,22 +151,29 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
     );
   }
 
-  Widget _body(String username, ScrollController scrollController) {
+  Widget _body(ScrollController scrollController) {
     return PageView.builder(
       onPageChanged: (value) => _pageListner.update(value),
       controller: _pageController,
       itemCount: _profileHeaders.length,
       itemBuilder: (context, index) =>
-          _profileHeaders[index].widget(username, true, scrollController),
+          _profileHeaders[index].widget(_username, isSelf, scrollController),
     );
   }
 
-  Widget _buildHeader(UserProf? userProf, BuildContext context) {
-    return StateFullFutureWidget<String?>(
-      refKey: _bgImageRefKey,
-      future: () => _getProfileImageUrlFuture(userProf?.id),
-      loadingChild: _buildHeaderWithImage(userProf, null),
-      done: (snapshot) => _buildHeaderWithImage(userProf, snapshot.data),
+  Widget _buildHeader() {
+    return StateFullFutureWidget<UserProf?>(
+      done: (snapshot) {
+        final userProf = snapshot.data;
+        return StateFullFutureWidget<String?>(
+          refKey: _bgImageRefKey,
+          future: () => _getProfileImageUrlFuture(userProf?.id),
+          loadingChild: _buildHeaderWithImage(userProf, null),
+          done: (snapshot) => _buildHeaderWithImage(userProf, snapshot.data),
+        );
+      },
+      loadingChild: _buildHeaderShimmer(),
+      future: () => _userProfFuture,
     );
   }
 
@@ -194,7 +233,7 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
             );
           }),
         ),
-        _dragPill(imageData),
+        _dragPill(imageData, userProf),
       ],
     );
   }
@@ -217,29 +256,31 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
     );
   }
 
-  List<Widget> _buildHeaderShimmer() {
-    return [
-      SB.h120,
-      Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: ShimmerColor(Row(
-            children: [
-              Container(
-                height: 35,
-                width: 35,
-                decoration:
-                    BoxDecoration(shape: BoxShape.circle, color: Colors.white),
-              ),
-              SB.w20,
-              Text(S.current.Loading_Profile),
-            ],
-          ))),
-      SB.h10,
-      Divider(
-        thickness: 1.0,
-        color: Theme.of(context).cardColor,
-      ),
-    ].map((e) => SliverWrapper(e)).toList();
+  Widget _buildHeaderShimmer() {
+    return Column(
+      children: [
+        SB.h120,
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: ShimmerColor(Row(
+              children: [
+                Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle, color: Colors.white),
+                ),
+                SB.w20,
+                Text(S.current.Loading_Profile),
+              ],
+            ))),
+        SB.h10,
+        Divider(
+          thickness: 1.0,
+          color: Theme.of(context).cardColor,
+        ),
+      ],
+    );
   }
 
   Widget _profileBgEditWidget(String? data) {
@@ -279,7 +320,7 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
         });
   }
 
-  Widget _dragPill(String? data) {
+  Widget _dragPill(String? data, UserProf? prof) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -320,8 +361,11 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
                     ),
                   ),
                 )
-              else
-                _profileBgEditWidget(data),
+              else ...[
+                if (isSelf) _profileBgEditWidget(data),
+                if (!isSelf && prof != null && prof.id != null)
+                  _reportUserWidget(prof)
+              ],
               IconButton(
                 icon: Icon(
                   Icons.close,
@@ -410,5 +454,29 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
     }
 
     return false;
+  }
+
+  Widget _reportUserWidget(UserProf prof) {
+    return ShadowButton(
+      child: iconAndText(Icons.report, S.current.Report_User),
+      onPressed: () => _reportUser(prof),
+    );
+  }
+
+  void _reportUser(UserProf prof) {
+    reportWithConfirmation(
+      type: ReportType.profile,
+      context: context,
+      content: Row(children: [
+        AvatarWidget(
+          url: prof.picture,
+          height: 40,
+          width: 40,
+        ),
+        SB.w10,
+        title(prof.name)
+      ]),
+      queryParams: {'id': prof.id},
+    );
   }
 }

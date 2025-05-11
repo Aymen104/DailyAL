@@ -9,6 +9,7 @@ import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/pages/animedetailed/videoswidget.dart';
+import 'package:dailyanimelist/pages/userpop.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/screens/homescreen.dart';
 import 'package:dailyanimelist/screens/user_profile.dart';
@@ -1119,12 +1120,15 @@ gotoAuthPage() {
 }
 
 void showUserPage({required BuildContext context, required String username}) {
-  gotoPage(
+  showModalBottomSheet(
     context: context,
-    newPage: UserProfilePage(
-      username: username,
-      isSelf: false,
-    ),
+    isScrollControlled: true,
+    builder: (context) {
+      return UserPopSlideOpenPage(
+        username: username,
+        isSelf: false,
+      );
+    },
   );
 }
 

@@ -105,12 +105,10 @@ class UserProfileType {
 class UserProfilePage extends StatefulWidget {
   final bool isSelf;
   final String? username;
-  final bool isPartOfSettings;
   const UserProfilePage({
     super.key,
     required this.isSelf,
     this.username,
-    this.isPartOfSettings = false,
   });
 
   @override
@@ -184,9 +182,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 NestedScrollView(
                   controller: _controller,
                   headerSliverBuilder: (_, __) {
-                    if (widget.isPartOfSettings) {
-                      return [SliverWrapper(_headerWidget())];
-                    }
                     final list = [
                       if (widget.isSelf)
                         _buildAppBar()

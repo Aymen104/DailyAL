@@ -134,8 +134,8 @@ class _AppBarHomeState extends State<AppBarHome> {
                     isScrollControlled: true,
                     builder: (context) {
                       return UserPopSlideOpenPage(
-                        userProf: userProf,
-                        username: '@me',
+                        isSelf: true,
+                        username: userProf?.name,
                         onUiChange: () {
                           _refreshFuture();
                           getUserProfile();
