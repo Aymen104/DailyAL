@@ -215,26 +215,37 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
           height: 180.0,
           child: Builder(builder: (context) {
             return Center(
-              child: Container(
-                height: 100.0,
-                width: 100.0,
-                margin: const EdgeInsets.only(top: 60.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Theme.of(context).splashColor,
-                    width: 4.0,
-                  ),
-                ),
-                child: CircleAvatar(
-                  backgroundImage: NetworkImage(userProf?.picture ?? ""),
-                ),
-              ),
+              child: _userDisplayPicture(context, userProf),
             );
           }),
         ),
         _dragPill(imageData, userProf),
       ],
+    );
+  }
+
+  Widget _userDisplayPicture(BuildContext context, UserProf? userProf) {
+    final pic = userProf?.picture;
+    return Container(
+      height: 100.0,
+      width: 100.0,
+      margin: const EdgeInsets.only(top: 60.0),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Theme.of(context).splashColor,
+          width: 4.0,
+        ),
+      ),
+      child: pic == null
+          ? Icon(
+              Icons.person,
+              size: 50.0,
+              color: Theme.of(context).splashColor,
+            )
+          : CircleAvatar(
+              backgroundImage: NetworkImage(pic),
+            ),
     );
   }
 
