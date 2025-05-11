@@ -18,7 +18,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';  
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -30,8 +30,7 @@ int androidSDKVersion = 0;
 final int homeIndex = 0;
 final int forumIndex = 1;
 final int userIndex = 2;
-final int profileIndex = 3;
-final int exploreIndex = 4;
+final int exploreIndex = 3;
 GlobalKey<ScaffoldMessengerState> messenger = GlobalKey();
 
 void main() async {
@@ -128,8 +127,8 @@ class MyApp extends StatelessWidget {
           user = snap.data!;
           return DynamicColorBuilder(
               builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-            final colorScheme =
-                currentColorScheme(context, lightDynamic, darkDynamic, user.theme.themeMode);
+            final colorScheme = currentColorScheme(
+                context, lightDynamic, darkDynamic, user.theme.themeMode);
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               navigatorKey: navigatorKey,

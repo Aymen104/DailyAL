@@ -9839,6 +9839,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Set Background`
+  String get Set_Profile_BG {
+    return Intl.message(
+      'Set Background',
+      name: 'Set_Profile_BG',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove Background`
+  String get Remove_Profile_BG {
+    return Intl.message(
+      'Remove Background',
+      name: 'Remove_Profile_BG',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logout from the app`
+  String get Logout_desc {
+    return Intl.message(
+      'Logout from the app',
+      name: 'Logout_desc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check for Updates, Changelog, Rate & Review`
+  String get About_desc {
+    return Intl.message(
+      'Check for Updates, Changelog, Rate & Review',
+      name: 'About_desc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

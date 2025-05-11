@@ -16,9 +16,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Map<int, Icon> lineIconMap = {
     0: LineIcon.home(),
     1: LineIcon.comments(),
-    2: LineIcon.list(),
-    3: LineIcon.user(),
-    4: LineIcon.globe(),
+    2: LineIcon.user(),
+    3: LineIcon.globe(),
   };
 
   @override

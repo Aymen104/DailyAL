@@ -26,18 +26,24 @@ import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 
 final profileHeaders = [
-  UserProfileType(S.current.Profile, Icons.stacked_bar_chart,
-      (name, isSelf) => UserStatsScreen(username: name, isSelf: isSelf)),
-  UserProfileType(S.current.Friends, Icons.people_alt,
-      (name, _) => UserHeader().friendsWidget(name)),
-  UserProfileType(S.current.Clubs, Icons.castle,
-      (name, _) => UserHeader().clubsWidget(name)),
   UserProfileType(
-      S.current.About, Icons.info, (name, _) => UserHeader().aboutWidget(name)),
+      S.current.Profile,
+      Icons.stacked_bar_chart,
+      (name, isSelf, c) => UserStatsScreen(
+            username: name,
+            isSelf: isSelf,
+            scrollController: c,
+          )),
+  UserProfileType(S.current.Friends, Icons.people_alt,
+      (name, _, c) => UserHeader().friendsWidget(name, scrollController: c)),
+  UserProfileType(S.current.Clubs, Icons.castle,
+      (name, _, c) => UserHeader().clubsWidget(name, scrollController: c)),
+  UserProfileType(S.current.About, Icons.info,
+      (name, _, c) => UserHeader().aboutWidget(name, true, c)),
   UserProfileType(S.current.Favorites, Icons.favorite,
-      (name, _) => UserHeader().favoritesWidget(name)),
+      (name, _, c) => UserHeader().favoritesWidget(name, scrollController: c)),
   UserProfileType(S.current.History, Icons.history,
-      (name, _) => UserHistoryWidget(username: name)),
+      (name, _, c) => UserHistoryWidget(username: name, scrollController: c)),
 ];
 
 PreferredSize profileHeaderWidget({
@@ -81,7 +87,11 @@ PreferredSize profileHeaderWidget({
 
 class UserProfileType {
   final String title;
-  final Widget Function(String username, bool isSelf) widget;
+  final Widget Function(
+    String username,
+    bool isSelf,
+    ScrollController? controller,
+  ) widget;
   final IconData icon;
   final bool isSelf;
   UserProfileType(
@@ -95,7 +105,13 @@ class UserProfileType {
 class UserProfilePage extends StatefulWidget {
   final bool isSelf;
   final String? username;
-  const UserProfilePage({super.key, required this.isSelf, this.username});
+  final bool isPartOfSettings;
+  const UserProfilePage({
+    super.key,
+    required this.isSelf,
+    this.username,
+    this.isPartOfSettings = false,
+  });
 
   @override
   State<UserProfilePage> createState() => _UserProfilePageState();
@@ -147,6 +163,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             )),
       );
     }
+
     return WillPopScope(
       onWillPop: () async {
         if (_expandUserProfile.currentValue!) {
@@ -166,12 +183,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
               children: [
                 NestedScrollView(
                   controller: _controller,
-                  headerSliverBuilder: (_, __) => [
-                    if (widget.isSelf)
-                      _buildAppBar()
-                    else
-                      SliverWrapper(_headerWidget()),
-                  ],
+                  headerSliverBuilder: (_, __) {
+                    if (widget.isPartOfSettings) {
+                      return [SliverWrapper(_headerWidget())];
+                    }
+                    final list = [
+                      if (widget.isSelf)
+                        _buildAppBar()
+                      else
+                        SliverWrapper(_headerWidget()),
+                    ];
+
+                    return list;
+                  },
                   body: username == null ? loadingBelowText() : _body(username),
                 ),
                 if (userProf != null && !widget.isSelf)
@@ -349,7 +373,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return UserProfileType(
       S.current.List,
       Icons.list,
-      (username, isSelf) => UserPage(
+      (username, isSelf, c) => UserPage(
         username: username,
         initalPageIndex: 1,
         isSelf: isSelf,
@@ -450,7 +474,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       controller: _pageController,
       itemCount: _profileHeaders.length,
       itemBuilder: (context, index) =>
-          _profileHeaders[index].widget(username, widget.isSelf),
+          _profileHeaders[index].widget(username, widget.isSelf, null),
     );
   }
 }
