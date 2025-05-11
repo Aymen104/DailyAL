@@ -1,7 +1,9 @@
 import 'dart:ui';
 
+import 'package:dailyanimelist/api/dalapi.dart';
 import 'package:dailyanimelist/api/malapi.dart';
 import 'package:dailyanimelist/api/maluser.dart';
+import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/screens/homescreen.dart';
@@ -11,6 +13,7 @@ import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
+import 'package:dal_commons/commons.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +25,10 @@ import '../togglebutton.dart';
 
 enum EditMode { floating, full }
 
+enum EpisodeSelectMode { text, bar }
+
 class ContentEditWidget extends StatefulWidget {
+  final int? id;
   final dynamic contentDetailed;
   final String category;
   final bool isCacheRefreshed;
@@ -36,6 +42,7 @@ class ContentEditWidget extends StatefulWidget {
   final bool applyHero;
 
   ContentEditWidget({
+    this.id,
     this.contentDetailed,
     required this.category,
     this.onUpdate,
@@ -84,6 +91,8 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   bool isListStatusOpen = true;
   bool animationPending = false;
   DateTime? startDate, finishDate;
+  ScheduleData? _scheduleData;
+  EpisodeSelectMode _episodeSelectMode = EpisodeSelectMode.bar;
 
   Map<String, bool> accordions = {
     S.current.Your_List_Status: true,
@@ -93,6 +102,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
 
   final ItemScrollController itemScrollController = ItemScrollController();
   bool _loading = false;
+  final ItemScrollController _episodeScrollController = ItemScrollController();
 
   @override
   void initState() {
@@ -109,6 +119,34 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
 
     accordions[(widget.category.equals('anime') ? 'Rewatch' : 'Reread') +
         ' Status'] = true;
+
+    _setScheduleData();
+  }
+
+  void _setScheduleData() async {
+    final preferred = await CacheManager.instance
+        .getValueForService('edit', 'episodeSelectPref');
+    if (preferred != null) {
+      _episodeSelectMode =
+          preferred == 'text' ? EpisodeSelectMode.text : EpisodeSelectMode.bar;
+    }
+    if (widget.category.equals('anime') && _id != null) {
+      _scheduleData = DalApi.i.scheduleForMalIdsSync[_id];
+      if (_totalEpisodeCount == null) {
+        _episodeSelectMode = EpisodeSelectMode.text;
+      }
+    }
+  }
+
+  int? get _id {
+    if (widget.id != null) {
+      return widget.id;
+    }
+    if (contentDetailed is BaseNode) {
+      return contentDetailed?.content?.id;
+    } else {
+      return contentDetailed?.id;
+    }
   }
 
   reset() {
@@ -835,10 +873,6 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         ),
       );
 
-  Widget get _divider => Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: Divider(thickness: 1));
-
   Widget get othersWidget => Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -848,20 +882,22 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
               _modifyWidget(
                 modifyComments,
                 TextFormFilter(
-                    onFieldSubmitted: (value) {
-                      modifyComments = true;
-                      updateAdvancedStatus(
-                          comments: value,
-                          onDone: () {
-                            modifyComments = false;
-                          });
-                    },
-                    option: FilterOption(
-                        value: contentDetailed?.myListStatus?.comments,
-                        fieldName: "Comments")),
+                  onFieldSubmitted: (value) {
+                    modifyComments = true;
+                    updateAdvancedStatus(
+                        comments: value,
+                        onDone: () {
+                          modifyComments = false;
+                        });
+                  },
+                  option: FilterOption(
+                      value: contentDetailed?.myListStatus?.comments,
+                      fieldName: "Comments",
+                      openTextFormAsModal: true),
+                ),
               ),
               null,
-              null,
+              100.0,
               CrossAxisAlignment.start,
               EdgeInsets.only(left: 20, bottom: 8)),
           Padding(
@@ -1145,15 +1181,26 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if (_episodeSelectMode == EpisodeSelectMode.bar) SB.w20,
                 Expanded(
                     child: expandedChild(S.current.Status, statusWidget())),
                 SB.w20,
-                Expanded(
-                    child: expandedChild(
-                        S.current.Episodes_seen, episodesWidget())),
+                if (_episodeSelectMode == EpisodeSelectMode.text)
+                  Expanded(
+                      child: Column(
+                    children: [
+                      SB.h10,
+                      _episodeTextHeader(),
+                      SB.h10,
+                      SizedBox(
+                          width: double.infinity, child: _episodesWidget()),
+                    ],
+                  )),
               ],
             ),
-            _barWidget(),
+            if (_episodeSelectMode == EpisodeSelectMode.bar)
+              _episodeBarWidget(),
+            _scoreBarWidget(),
             SB.h20,
           ],
         ));
@@ -1170,7 +1217,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     );
   }
 
-  Widget _barWidget() {
+  Widget _scoreBarWidget() {
     final value = myStarMap[starValue];
     final keys = myStarMap.keys.toList();
     return Column(
@@ -1187,7 +1234,8 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   scrollDirection: Axis.horizontal,
                   physics: ClampingScrollPhysics(),
                   initialAlignment: 0.5,
-                  padding: EdgeInsets.symmetric(horizontal: 160.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 160.0, vertical: 2.0),
                   initialScrollIndex: keys.indexOf(starValue ?? 0),
                   itemCount: keys.length,
                   itemBuilder: (context, e) =>
@@ -1261,7 +1309,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                     ),
                   ],
                 ),
-                _barWidget(),
+                _scoreBarWidget(),
                 SB.h20,
               ],
             ),
@@ -1269,7 +1317,125 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         ));
   }
 
-  Widget episodesWidget() {
+  Widget _episodeBarWidget() {
+    final count = _totalEpisodeCount ?? 1;
+    return Column(
+      children: [
+        SB.h20,
+        _episodeTextHeader(),
+        SB.h15,
+        SizedBox(
+          height: 45.0,
+          child: modifyEpisodes
+              ? loadingCenter()
+              : ScrollablePositionedList.builder(
+                  itemScrollController: _episodeScrollController,
+                  scrollDirection: Axis.horizontal,
+                  physics: ClampingScrollPhysics(),
+                  initialAlignment: 0.5,
+                  initialScrollIndex: _episodeCount(),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 160.0, vertical: 2.0),
+                  itemCount: count,
+                  itemBuilder: (context, e) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: ShadowButton(
+                          onPressed: () async {
+                            _episodeScrollController.scrollTo(
+                              index: e,
+                              alignment: 0.5,
+                              duration: const Duration(milliseconds: 200),
+                            );
+                            updateEpisodeCount(episodes: e + 1);
+                          },
+                          child: Text((e + 1).toString()),
+                          padding: EdgeInsets.zero,
+                          shape: (e + 1) == _episodeCount()
+                              ? RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(32),
+                                  side: BorderSide(
+                                      color: Theme.of(context).dividerColor,
+                                      width: 1.0))
+                              : RoundedRectangleBorder(),
+                        ),
+                      )),
+        ),
+      ],
+    );
+  }
+
+  Row _episodeTextHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SB.w20,
+        Text(S.current.Episodes_seen),
+        SB.w5,
+        ToolTipButton(
+          onTap: () {
+            if (mounted)
+              setState(() {
+                if (_episodeSelectMode == EpisodeSelectMode.text) {
+                  _episodeSelectMode = EpisodeSelectMode.bar;
+                  const duration = const Duration(milliseconds: 200);
+                  Future.delayed(duration).then(
+                    (value) => _episodeScrollController.scrollTo(
+                      index: _episodeCount(),
+                      alignment: 0.6,
+                      duration: duration,
+                    ),
+                  );
+                } else {
+                  _episodeSelectMode = EpisodeSelectMode.text;
+                }
+                CacheManager.instance.setValueForService(
+                    'edit', 'episodeSelectPref', _episodeSelectMode.name);
+              });
+          },
+          child: Icon(Icons.change_circle, size: 18),
+          message: S.current.Update,
+        ),
+        SB.w20,
+      ],
+    );
+  }
+
+  int? get _totalEpisodeCount {
+    int totalEpisodes = 0;
+    if (contentDetailed is AnimeDetailed) {
+      totalEpisodes = contentDetailed?.numEpisodes ?? 0;
+    }
+    if (_scheduleData != null) {
+      totalEpisodes = _scheduleData?.episode ?? 0;
+    }
+    if (totalEpisodes == 0 && _episodeCount() > 0) {
+      totalEpisodes = _episodeCount() + 10;
+    }
+    if (totalEpisodes == 0) {
+      totalEpisodes = _calculateEpisodes();
+    }
+    if (totalEpisodes == 0) {
+      return null;
+    }
+    return totalEpisodes;
+  }
+
+  int _calculateEpisodes() {
+    int totalEpisodes = 0;
+    if (contentDetailed is AnimeDetailed) {
+      var animeDetailed = contentDetailed as AnimeDetailed;
+      totalEpisodes = animeDetailed.calculateTotalEpisodes();
+    }
+    return totalEpisodes;
+  }
+
+  int _episodeCount() {
+    return episodeController.text.isNotEmpty
+        ? int.tryParse(episodeController.text) ?? 0
+        : 0;
+  }
+
+  Widget _episodesWidget() {
     return Container(
       // width: 150,
       height: 50,

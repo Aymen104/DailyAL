@@ -1,8 +1,14 @@
 use std::sync::Arc;
 
 use crate::{
-    anime_service, auth, cache_service::CacheService, config::Config,
-    file_storage_service::FileStorageService, handlers, image_service, mal_api::MalAPI, AppState,
+    anime_link_service::{self},
+    anime_service, auth,
+    cache_service::CacheService,
+    config::Config,
+    file_storage_service::FileStorageService,
+    handlers, image_service,
+    mal_api::MalAPI,
+    AppState,
 };
 use axum::{
     http::{
@@ -13,12 +19,14 @@ use axum::{
     routing::{delete, get, post},
     Router,
 };
+use futures::lock::Mutex;
 use tower_http::cors::CorsLayer;
 
 pub async fn setup_app(config: Config) -> Router {
     let cache_service = CacheService {
         config: config.clone(),
     };
+    cache_service.check_aws_get_item().await;
     let mal_api = MalAPI {
         config: config.clone(),
     };
@@ -28,12 +36,18 @@ pub async fn setup_app(config: Config) -> Router {
         },
         cache_service: cache_service.clone(),
     };
+    let anime_link_service = anime_link_service::AnimeLinkService {
+        config: config.clone(),
+        link_map: Arc::new(Mutex::new(std::collections::HashMap::new())),
+    };
+    let _ = &anime_link_service.setup_links().await;
     let state = Arc::new(AppState {
         config: config.clone(),
         image_service,
         anime_service: anime_service::AnimeService {
             config: config.clone(),
             mal_api,
+            anime_link_service,
             cache_service,
             ai_service: crate::gemini_api::GeminiAPI {
                 config: config.clone(),
@@ -41,6 +55,7 @@ pub async fn setup_app(config: Config) -> Router {
         },
     });
     Router::new()
+        .route("/anime", get(handlers::get_anime))
         .route("/anime/:id/related", get(handlers::get_related_anime))
         .route(
             "/types/:image_type/images/:image_id",
@@ -54,10 +69,8 @@ pub async fn setup_app(config: Config) -> Router {
             "/types/:image_type/images/:image_id",
             delete(handlers::delete_image),
         )
-        .route(
-            "/reviews",
-            post(handlers::get_review_summary),
-        )
+        .route("/schedules", post(handlers::start_schedules))
+        .route("/reviews", post(handlers::get_review_summary))
         .route_layer(middleware::from_fn_with_state(state.clone(), auth::auth))
         .with_state(state)
         .layer(get_cors_layer())

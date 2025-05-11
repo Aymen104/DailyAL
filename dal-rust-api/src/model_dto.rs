@@ -5,7 +5,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::model::Anime;
+use crate::model::{Anime, AnimeLink};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContentGraphDTO {
@@ -49,11 +49,12 @@ impl From<Anime> for ContentNodeDTO {
             media_type: anime.media_type,
             status: anime.status,
             start_season: anime.start_season.map(|season| season.into()),
-            alternative_titles: anime.alternative_titles.map(|alternate_titles| alternate_titles.into()),
+            alternative_titles: anime
+                .alternative_titles
+                .map(|alternate_titles| alternate_titles.into()),
         }
     }
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AlternateTitlesDTO {
@@ -119,33 +120,73 @@ impl From<crate::model::Season> for SeasonDTO {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RelationTypeDTO {
-    sequel,
-    prequel,
-    alternative_setting,
-    alternative_version,
-    side_story,
-    parent_story,
-    summary,
-    full_story,
-    spin_off,
-    character,
-    other,
+    #[serde(rename(serialize = "sequel", deserialize = "sequel"))]
+    Sequel,
+    #[serde(rename(serialize = "prequel", deserialize = "prequel"))]
+    Prequel,
+    #[serde(rename(serialize = "alternative_setting", deserialize = "alternative_setting"))]
+    AlternativeSetting,
+    #[serde(rename(serialize = "alternative_version", deserialize = "alternative_version"))]
+    AlternativeVersion,
+    #[serde(rename(serialize = "side_story", deserialize = "side_story"))]
+    SideStory,
+    #[serde(rename(serialize = "parent_story", deserialize = "parent_story"))]
+    ParentStory,
+    #[serde(rename(serialize = "summary", deserialize = "summary"))]
+    Summary,
+    #[serde(rename(serialize = "full_story", deserialize = "full_story"))]
+    FullStory,
+    #[serde(rename(serialize = "spin_off", deserialize = "spin_off"))]
+    SpinOff,
+    #[serde(rename(serialize = "character", deserialize = "character"))]
+    Character,
+    #[serde(rename(serialize = "other", deserialize = "other"))]
+    Other,
 }
 
 impl From<crate::model::RelationType> for RelationTypeDTO {
     fn from(relation_type: crate::model::RelationType) -> Self {
         match relation_type {
-            crate::model::RelationType::sequel => RelationTypeDTO::sequel,
-            crate::model::RelationType::prequel => RelationTypeDTO::prequel,
-            crate::model::RelationType::alternative_setting => RelationTypeDTO::alternative_setting,
-            crate::model::RelationType::alternative_version => RelationTypeDTO::alternative_version,
-            crate::model::RelationType::side_story => RelationTypeDTO::side_story,
-            crate::model::RelationType::parent_story => RelationTypeDTO::parent_story,
-            crate::model::RelationType::summary => RelationTypeDTO::summary,
-            crate::model::RelationType::full_story => RelationTypeDTO::full_story,
-            crate::model::RelationType::spin_off => RelationTypeDTO::spin_off,
-            crate::model::RelationType::character => RelationTypeDTO::character,
-            crate::model::RelationType::other => RelationTypeDTO::other,
+            crate::model::RelationType::Sequel => RelationTypeDTO::Sequel,
+            crate::model::RelationType::Prequel => RelationTypeDTO::Prequel,
+            crate::model::RelationType::AlternativeSetting => RelationTypeDTO::AlternativeSetting,
+            crate::model::RelationType::AlternativeVersion => RelationTypeDTO::AlternativeVersion,
+            crate::model::RelationType::SideStory => RelationTypeDTO::SideStory,
+            crate::model::RelationType::ParentStory => RelationTypeDTO::ParentStory,
+            crate::model::RelationType::Summary => RelationTypeDTO::Summary,
+            crate::model::RelationType::FullStory => RelationTypeDTO::FullStory,
+            crate::model::RelationType::SpinOff => RelationTypeDTO::SpinOff,
+            crate::model::RelationType::Character => RelationTypeDTO::Character,
+            crate::model::RelationType::Other => RelationTypeDTO::Other,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AnimeLinkDTO {
+    pub title: Option<String>,
+    pub picture: Option<String>,
+    pub year: Option<String>,
+    #[serde(rename(serialize = "malId", deserialize = "malId"))]
+    pub mal_id: Option<String>,
+    #[serde(rename(serialize = "anilistId", deserialize = "anilistId"))]
+    pub anilist_id: Option<String>,
+    #[serde(rename(serialize = "kitsuId", deserialize = "kitsuId"))]
+    pub kitsu_id: Option<String>,
+    #[serde(rename(serialize = "animePlanet", deserialize = "animePlanet"))]
+    pub anime_planet: Option<String>,
+}
+
+impl From<AnimeLink> for AnimeLinkDTO {
+    fn from(anime: AnimeLink) -> Self {
+        AnimeLinkDTO {
+            title: anime.title,
+            anilist_id: anime.anilist_id,
+            mal_id: anime.mal_id,
+            kitsu_id: anime.kitsu_id,
+            anime_planet: anime.anime_planet,
+            picture: anime.picture,
+            year: anime.year,
         }
     }
 }

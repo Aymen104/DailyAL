@@ -34,8 +34,15 @@ class _BackUpAndRestorePageState extends State<BackUpAndRestorePage> {
       addtionalActions: [],
     );
     if (result) {
-      await FileStorage.writeFile(data, name);
-      showToast(S.current.BackUpFileSaved);
+      try {
+        await FileStorage.writeFile(data, name);
+        showToast(S.current.BackUpFileSaved);
+        return;
+      } catch (e) {}
+      // Provide feedback to user if backup fails
+      // However, not exactly sure how to go about the localization since
+      // I don't have an account and experience with Localizely.
+      showToast("Backup failed");
     }
   }
 

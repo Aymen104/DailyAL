@@ -46,11 +46,12 @@ int getStatusColor(int index) {
 class UserStatsScreen extends StatefulWidget {
   final String username;
   final bool isSelf;
-  const UserStatsScreen({
-    super.key,
-    required this.username,
-    this.isSelf = true,
-  });
+  final ScrollController? scrollController;
+  const UserStatsScreen(
+      {super.key,
+      required this.username,
+      this.isSelf = true,
+      this.scrollController});
 
   @override
   State<UserStatsScreen> createState() => _UserStatsScreenState();
@@ -192,6 +193,7 @@ class _UserStatsScreenState extends State<UserStatsScreen> {
   Widget _statsBuilder(UserProf? userProf) {
     if (userProf == null) return _loading();
     return CustomScrollView(
+      controller: widget.scrollController,
       slivers: [
         SB.lh10,
         _categorySelector(),
@@ -504,7 +506,7 @@ class _UserStatsScreenState extends State<UserStatsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       sliver: SliverWrapper(Accordion(
         isOpen: true,
-        title: S.current.Profile,
+        title: widget.username,
         titleStyle: Theme.of(context).textTheme.titleLarge,
         titlePadding: const EdgeInsets.symmetric(horizontal: 10.0),
         atStartExpanded: true,

@@ -981,5 +981,9 @@
     "Default_tab_selected_for_anime": "Onglet par d\u00e9faut s\u00e9lectionn\u00e9 pour l'anime",
     "Default_tab_selected_for_anime_manga": "Onglet par d\u00e9faut s\u00e9lectionn\u00e9 pour l'anime/manga",
     "If_nothing_is_selected": "Si rien n\u2019est s\u00e9lectionn\u00e9, il s\u2019agira par d\u00e9faut du dernier ouvert.",
-    "Search_by_genre": "Rechercher par m\u00eame genre"
+    "Search_by_genre": "Rechercher par m\u00eame genre",
+    "Set_Profile_BG": "D\u00e9finir l'arri\u00e8re-plan",
+    "Remove_Profile_BG": "Supprimer le fond",
+    "Logout_desc": "D\u00e9connectez-vous \u00e0 partir de l'application",
+    "About_desc": "V\u00e9rifiez les mises \u00e0 jour, les changelog, le taux et l'examen"
 }

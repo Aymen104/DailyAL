@@ -1,13 +1,19 @@
 use core::panic;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    file_storage_service::SignedURLResponse, model::{File, ReviewResponse}, model_dto::ContentGraphDTO, AppState,
+    file_storage_service::SignedURLResponse,
+    model::{AnimeQuery, File, ReviewResponse},
+    model_dto::ContentGraphDTO,
+    AppState,
 };
 
 use axum::{
-    extract::{Multipart, Path, State}, Json
+    extract::{Multipart, Path, State},
+    http::HeaderMap,
+    Json,
 };
+use serde_json::{json, Value};
 
 /// A function to handle GET requests at /anime/{id}/related
 pub async fn get_related_anime(
@@ -15,6 +21,15 @@ pub async fn get_related_anime(
     State(data): State<Arc<AppState>>,
 ) -> Json<ContentGraphDTO> {
     Json(data.anime_service.get_related_anime(mal_id).await.unwrap())
+}
+
+/// A function to handle GET requests at /anime
+pub async fn get_anime(
+    headers: HeaderMap,
+    State(data): State<Arc<AppState>>,
+) -> Json<Vec<HashMap<String, String>>> {
+    let anime_query = AnimeQuery::from_headers(headers);
+    Json(data.anime_service.get_anime(anime_query).await)
 }
 
 /// A function to GET downloadURL of images
@@ -49,9 +64,19 @@ pub async fn delete_image(
 
 pub async fn get_review_summary(
     State(data): State<Arc<AppState>>,
-    body: String
+    body: String,
 ) -> Json<ReviewResponse> {
-    Json(data.anime_service.summarize_review(body.as_str()).await.unwrap())
+    Json(
+        data.anime_service
+            .summarize_review(body.as_str())
+            .await
+            .unwrap(),
+    )
+}
+
+pub async fn start_schedules(State(data): State<Arc<AppState>>) -> Json<Value> {
+    data.anime_service.anime_link_service.setup_links().await;
+    Json(json!({"status": "ok"}))
 }
 
 async fn field_to_file(field: axum::extract::multipart::Field<'_>) -> File {

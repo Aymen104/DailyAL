@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("新しいエピソードが出ています！"),
         "About": MessageLookupByLibrary.simpleMessage("だいたい"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "アップデート、changelog、レート、レビューを確認してください"),
         "Account_fetch_details":
             MessageLookupByLibrary.simpleMessage("アカウントの詳細を取得しようとしています"),
         "Action": MessageLookupByLibrary.simpleMessage("アクション"),
@@ -562,6 +564,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("もっと見るにはログインしてください"),
         "Logout": MessageLookupByLibrary.simpleMessage("ログアウト"),
         "Logout_Confirmation": MessageLookupByLibrary.simpleMessage("ログアウト確認"),
+        "Logout_desc": MessageLookupByLibrary.simpleMessage("アプリからのログアウト"),
         "Love": MessageLookupByLibrary.simpleMessage("愛"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("Love_Polygon"),
         "Love_it": MessageLookupByLibrary.simpleMessage("大好きです"),
@@ -810,6 +813,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ホームページから画像を削除します"),
         "Remove_Image_desc":
             MessageLookupByLibrary.simpleMessage("これにより、ホームページから画像が削除されます。"),
+        "Remove_Profile_BG": MessageLookupByLibrary.simpleMessage("背景を削除します"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage("背景画像を削除しますか?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
             "ロングプレスしてリストをドラッグ/ドロップして並べ替える"),
@@ -923,6 +927,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("シリーズディスカッション"),
         "Series_End": MessageLookupByLibrary.simpleMessage("シリーズエンド"),
+        "Set_Profile_BG": MessageLookupByLibrary.simpleMessage("背景を設定します"),
         "Settings": MessageLookupByLibrary.simpleMessage("設定"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "セットアップがタイムアウトしました。もう一度やり直してください。"),

@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("Вышел новый эпизод!"),
         "About": MessageLookupByLibrary.simpleMessage("О"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "Проверьте на наличие обновлений, изменений, ставок и обзора"),
         "Account_fetch_details": MessageLookupByLibrary.simpleMessage(
             "Пытаюсь получить данные вашего аккаунта"),
         "Action": MessageLookupByLibrary.simpleMessage("Действие"),
@@ -638,6 +640,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("Выйти"),
         "Logout_Confirmation": MessageLookupByLibrary.simpleMessage(
             "Подтверждение выхода из системы"),
+        "Logout_desc":
+            MessageLookupByLibrary.simpleMessage("Выход из приложения"),
         "Love": MessageLookupByLibrary.simpleMessage("Любовь"),
         "Love_Polygon":
             MessageLookupByLibrary.simpleMessage("Любовь_Многоугольник"),
@@ -927,6 +931,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Удалить изображение с домашней страницы"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "Это удалит изображение с главной страницы."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Удалить фон"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "Вы хотите удалить фоновое изображение?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1056,6 +1062,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("Обсуждение серии"),
         "Series_End": MessageLookupByLibrary.simpleMessage("Конец серии"),
+        "Set_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Установить фон"),
         "Settings": MessageLookupByLibrary.simpleMessage("Настройки"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "Время установки истекло. Пожалуйста, попробуйте еще раз."),

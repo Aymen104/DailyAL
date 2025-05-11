@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("Yeni bir bölüm çıktı!"),
         "About": MessageLookupByLibrary.simpleMessage("Hakkında"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "Güncellemeleri kontrol edin, ChangeLog, Oran ve Gözden Geçirme"),
         "Account_fetch_details": MessageLookupByLibrary.simpleMessage(
             "Hesap ayrıntılarınız alınmaya çalışılıyor"),
         "Action": MessageLookupByLibrary.simpleMessage("Aksiyon"),
@@ -627,6 +629,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("Çıkış Yap"),
         "Logout_Confirmation":
             MessageLookupByLibrary.simpleMessage("Oturum Kapatma Onayı"),
+        "Logout_desc":
+            MessageLookupByLibrary.simpleMessage("Uygulamadan oturum açma"),
         "Love": MessageLookupByLibrary.simpleMessage("Aşk"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("Aşk_Poligon"),
         "Love_it": MessageLookupByLibrary.simpleMessage("Onu seviyorum"),
@@ -908,6 +912,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Resmi Ana Sayfadan Kaldır"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "Bu, resmi ana sayfadan kaldıracaktır."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Arka planı kaldır"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "Arka plan resmini kaldırmak istiyor musunuz?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1038,6 +1044,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("Dizi Tartışması"),
         "Series_End": MessageLookupByLibrary.simpleMessage("Seri Sonu"),
+        "Set_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Arka planı ayarlamak"),
         "Settings": MessageLookupByLibrary.simpleMessage("Ayarlar"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "Kurulum Zaman aşımına uğradı. Lütfen tekrar deneyin."),

@@ -1,5 +1,7 @@
+import 'package:dailyanimelist/api/dalapi.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
+import 'package:dailyanimelist/pages/settings/about.dart';
 import 'package:dailyanimelist/pages/settings/anime_manga_settings.dart';
 import 'package:dailyanimelist/pages/settings/backup_restore.dart';
 import 'package:dailyanimelist/pages/settings/cachesettings.dart';
@@ -11,6 +13,9 @@ import 'package:dailyanimelist/pages/settings/notifsettings.dart';
 import 'package:dailyanimelist/pages/settings/optiontile.dart';
 import 'package:dailyanimelist/pages/settings/themesettings.dart';
 import 'package:dailyanimelist/pages/settings/userprefsetting.dart';
+import 'package:dailyanimelist/widgets/custombutton.dart';
+import 'package:dailyanimelist/widgets/customfuture.dart';
+import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
@@ -39,6 +44,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
   List<Widget> settingOptions(BuildContext context) {
     return [
+      OptionTile(
+          text: S.current.Logout,
+          desc: S.current.Logout_desc,
+          authOnly: true,
+          iconData: Icons.logout,
+          onPressed: () {
+            launchLogOutConfirmation(context: context);
+          }),
       OptionTile(
           text: S.current.Theme_Settings,
           iconData: Icons.color_lens,
@@ -70,7 +83,8 @@ class _SettingsPageState extends State<SettingsPage> {
           text: S.current.List_preferences,
           iconData: Icons.list_alt,
           desc: S.current.List_preferences_desc,
-          onPressed: () => gotoPage(context: context, newPage: ListPreferenceSettings())),
+          onPressed: () =>
+              gotoPage(context: context, newPage: ListPreferenceSettings())),
       OptionTile(
           text: S.current.Home_Page_Setting,
           iconData: Icons.home_work,
@@ -98,13 +112,44 @@ class _SettingsPageState extends State<SettingsPage> {
           onPressed: () {
             gotoPage(context: context, newPage: BackUpAndRestorePage());
           }),
+      _aboutTile,
+      CFutureBuilder<Servers?>(
+        future: DalApi.i.dalConfigFuture,
+        done: (snapshot) {
+          if (snapshot.data?.bmacLink ?? false)
+            return OptionTile(
+              text: S.current.Buy_Me_A_Copy,
+              desc: S.current.Buy_Me_A_Copy_Desc,
+              iconData: Icons.coffee,
+              onPressed: () =>
+                  launchURL("https://www.buymeacoffee.com/dailyanimelist"),
+            );
+          else
+            return SB.z;
+        },
+        loadingChild: SB.z,
+      ),
       OptionTile(
           text: S.current.Language_settings,
           iconData: Icons.language,
           desc: S.current.Language_settings_desc_v2,
           onPressed: () => _openLanguageSettings(context)),
+      PlainButton(
+        onPressed: () =>
+            launchURLWithConfirmation('https://flutter.dev/', context: context),
+        child: title('${S.current.Made_With_Flutter} Flutter'),
+      ),
       SB.h120,
     ];
+  }
+
+  Widget get _aboutTile {
+    return OptionTile(
+      text: S.current.About,
+      desc: S.current.About_desc,
+      iconData: Icons.info,
+      onPressed: () => gotoPage(context: context, newPage: AboutPage()),
+    );
   }
 
   void _openLanguageSettings(BuildContext context) {

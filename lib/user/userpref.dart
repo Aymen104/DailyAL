@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/user/anime_manga_pref.dart';
@@ -212,7 +214,7 @@ class UserPreferences {
             firstTimePref: FirstTimePref.fromJson(json['firstTimePref']),
             preferredAnimeTitle: TitleLang.values
                 .elementAt(json['preferredAnimeTitle'] ?? TitleLang.ro.index),
-            startUpPage: json['startUpPage'] ?? 0,
+            startUpPage: min(json['startUpPage'] ?? 0, 3),
             preferredLinkType: LinkType.values.firstWhere(
               (e) => e.name == json['preferredLinkType'],
               orElse: () => LinkType.streaming,

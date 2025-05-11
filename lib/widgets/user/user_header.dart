@@ -25,17 +25,19 @@ class UserHeader {
   UserHeader._();
   static UserHeader _uh = UserHeader._();
   factory UserHeader() => _uh;
-  Widget aboutWidget(String username, [bool showEdit = true]) {
+  Widget aboutWidget(String username,
+      [bool showEdit = true, ScrollController? scrollController]) {
     final aboutW = (UserAbout? about) => (about == null || about.about.isBlank)
         ? showNoContent()
         : HtmlW(
             data: about.about,
             useImageRenderer: true,
           );
-    return CFutureBuilder<UserAbout?>(
-      future: DalApi.i.getUserAbout(username),
+    return StateFullFutureWidget<UserAbout?>(
+      future: () => DalApi.i.getUserAbout(username),
       loadingChild: _loadingBelow(S.current.About),
       done: (snap) => SingleChildScrollView(
+        controller: scrollController,
         child: Column(
           children: [
             aboutW(snap.data),
@@ -82,49 +84,47 @@ class UserHeader {
     );
   }
 
-  Widget friendsWidget(String username) {
-    return FutureBuilder<FriendV4List>(
-      future: DalApi.i.getUserFriends(username),
-      builder: (_, snapshot) {
-        if (snapshot.hasData) {
-          final data = snapshot.data;
-          final friends = data?.friends ?? [];
-          int count;
-          if (friends.length == 100) {
-            count = data?.count ?? friends.length;
-          } else {
-            count = friends.length;
-          }
-          if (friends.isNotEmpty) {
-            return ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child: title("($count ${S.current.friends})",
-                        fontStyle: FontStyle.italic)),
-                ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    padding: EdgeInsets.only(top: 10),
-                    itemCount: friends.length,
-                    itemBuilder: (_, i) => friendTile(friends.elementAt(i)))
-              ],
-            );
-          } else {
-            return Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.only(top: 20),
-              child: showNoContent(text: S.current.No_friends_found),
-            );
-          }
+  Widget friendsWidget(String username, {ScrollController? scrollController}) {
+    return StateFullFutureWidget<FriendV4List>(
+      done: (snapshot) {
+        final data = snapshot.data;
+        final friends = data?.friends ?? [];
+        int count;
+        if (friends.length == 100) {
+          count = data?.count ?? friends.length;
         } else {
-          return _loadingBelow(S.current.Friends);
+          count = friends.length;
+        }
+        if (friends.isNotEmpty) {
+          return ListView(
+            controller: scrollController,
+            padding: EdgeInsets.zero,
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+              Padding(
+                  padding: EdgeInsets.only(left: 20),
+                  child: title("($count ${S.current.friends})",
+                      fontStyle: FontStyle.italic)),
+              ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  padding: EdgeInsets.only(top: 10),
+                  itemCount: friends.length,
+                  itemBuilder: (_, i) => friendTile(friends.elementAt(i)))
+            ],
+          );
+        } else {
+          return Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.only(top: 20),
+            child: showNoContent(text: S.current.No_friends_found),
+          );
         }
       },
+      loadingChild: _loadingBelow(S.current.Friends),
+      future: () => DalApi.i.getUserFriends(username),
     );
   }
 
@@ -164,7 +164,7 @@ class UserHeader {
     );
   }
 
-  Widget clubsWidget(String username) {
+  Widget clubsWidget(String username, {ScrollController? scrollController}) {
     return FutureBuilder<SearchResult>(
       future: MalForum.getUserClubs(username: username),
       builder: (_, snapshot) {
@@ -178,6 +178,7 @@ class UserHeader {
             );
           }
           return ListView.builder(
+              controller: scrollController,
               padding: EdgeInsets.only(top: 10),
               itemCount: clubs.length,
               itemBuilder: (_, i) => clubTile(clubs.elementAt(i)));
@@ -218,13 +219,15 @@ class UserHeader {
     );
   }
 
-  Widget favoritesWidget(String username) {
-    return CFutureBuilder<UserFavV4>(
-      future: JikanHelper.getUserFavorites(username),
+  Widget favoritesWidget(String username,
+      {ScrollController? scrollController}) {
+    return StateFullFutureWidget<UserFavV4>(
+      future: () => JikanHelper.getUserFavorites(username),
       loadingChild: _loadingBelow(S.current.Favorites),
       done: (snapshot) => Padding(
         padding: EdgeInsets.only(left: 15),
         child: SingleChildScrollView(
+          controller: scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -338,7 +341,9 @@ Widget _loadingBelow(String text) {
 
 class UserHistoryWidget extends StatefulWidget {
   final String username;
-  const UserHistoryWidget({super.key, required this.username});
+  final ScrollController? scrollController;
+  const UserHistoryWidget(
+      {super.key, required this.username, this.scrollController});
 
   @override
   State<UserHistoryWidget> createState() => _UserHistoryWidgetState();
@@ -417,6 +422,7 @@ class _UserHistoryWidgetState extends State<UserHistoryWidget> {
           return _someDateText(datum) ?? S.current.Today;
         });
         return ListView.builder(
+            controller: widget.scrollController,
             padding: EdgeInsets.only(top: 10, bottom: 40),
             itemCount: groupedHistory.length,
             itemBuilder: (_, i) =>
