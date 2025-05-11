@@ -99,7 +99,6 @@ class _RestartAppState extends State<RestartApp> {
   @override
   void dispose() {
     super.dispose();
-    StreamUtils.i.close();
   }
 
   @override

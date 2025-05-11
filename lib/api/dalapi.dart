@@ -7,6 +7,7 @@ import 'package:dailyanimelist/api/malconnect.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/constant.dart';
+import 'package:dailyanimelist/util/streamutils.dart';
 import 'package:dal_api/handlers/handler_core.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:flutter/foundation.dart';
@@ -22,6 +23,7 @@ class DalApi {
   late Future<String> _preferredServer;
   late Future<Map<int, ScheduleData>> _scheduleForMalIds;
   late Future<List<AnimeAutoComplete>?> _autoCompleteFuture;
+  final StreamListener<bool> autoCompleteCacheLoaded = StreamListener(false);
   Map<int, ScheduleData> _scheduleForMalIdsSync = {};
   bool _debugMode = kDebugMode;
 
@@ -49,6 +51,10 @@ class DalApi {
     _preferredServer = _getPreferredServer();
     _scheduleForMalIds = _getScheduleForMalIds();
     _autoCompleteFuture = _getAutoCompleteFuture();
+    _autoCompleteFuture.then((_) {
+      logDal('autocomplete cache loaded');
+      autoCompleteCacheLoaded.update(true);
+    });
   }
 
   void resetScheduleForMalIds() {

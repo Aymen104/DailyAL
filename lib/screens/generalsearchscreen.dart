@@ -695,19 +695,27 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
 
   Widget _streamSimilarNames(HistoryData? data) {
     if (category.equals('anime') || category.equals('all')) {
-      return StreamBuilder<String>(
-        stream: _searchTextListener.stream
-            .throttle(const Duration(milliseconds: 500)),
-        builder: (_, snap) {
-          final text = snap.data;
-          if (text != null && text.isNotBlank) {
-            return CFutureBuilder(
-              future: _seasonResult,
-              done: (_snap) => _animeTypeSearch(text, _snap.data, data),
-              loadingChild: _buildHistory(data),
-            );
-          }
-          return _buildHistory(data);
+      return StreamBuilder<bool>(
+        stream: DalApi.i.autoCompleteCacheLoaded.stream,
+        initialData: DalApi.i.autoCompleteCacheLoaded.currentValue,
+        builder: (_, snapshot) {
+          final autoCompleteCacheLoaded = snapshot.data ?? false;
+          return StreamBuilder<String>(
+            stream: _searchTextListener.stream
+                .throttle(const Duration(milliseconds: 500)),
+            builder: (_, snap) {
+              final text = snap.data;
+              if (text != null && text.isNotBlank) {
+                return CFutureBuilder(
+                  future: _seasonResult,
+                  done: (_snap) => _animeTypeSearch(
+                      text, _snap.data, data, autoCompleteCacheLoaded),
+                  loadingChild: _buildHistory(data),
+                );
+              }
+              return _buildHistory(data);
+            },
+          );
         },
       );
     } else {
@@ -715,15 +723,15 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
     }
   }
 
-  Widget _animeTypeSearch(
-      String text, SearchResult? result, HistoryData? data) {
+  Widget _animeTypeSearch(String text, SearchResult? result, HistoryData? data,
+      bool autoCompleteCacheLoaded) {
     text = text.trim().toLowerCase();
     if (text.length < 3) {
       return _buildHistory(data);
     }
     return CFutureBuilder<List<AnimeAutoComplete>>(
       done: (animeLink) => _buildHistory(data, animeLink.data),
-      loadingChild: _buildHistory(data, [], true),
+      loadingChild: _buildHistory(data, [], autoCompleteCacheLoaded),
       future: DalApi.i.autoCompleteAnime(text),
     );
   }
