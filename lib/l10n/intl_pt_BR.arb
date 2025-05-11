@@ -982,5 +982,9 @@
     "Default_tab_selected_for_anime": "Guia padr\u00e3o selecionada para anime",
     "Default_tab_selected_for_anime_manga": "Guia padr\u00e3o selecionada para anime/mang\u00e1",
     "If_nothing_is_selected": "Se nada for selecionado, o padr\u00e3o ser\u00e1 o \u00faltimo aberto.",
-    "Search_by_genre": "Pesquise pelo mesmo g\u00eanero"
+    "Search_by_genre": "Pesquise pelo mesmo g\u00eanero",
+    "Set_Profile_BG": "Defina o fundo",
+    "Remove_Profile_BG": "Remova o fundo",
+    "Logout_desc": "Logout do aplicativo",
+    "About_desc": "Verifique se h\u00e1 atualiza\u00e7\u00f5es, Changelog, Taxa e revis\u00e3o"
 }

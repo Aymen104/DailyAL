@@ -982,5 +982,9 @@
     "Default_tab_selected_for_anime": "Standardregisterkarte f\u00fcr Anime ausgew\u00e4hlt",
     "Default_tab_selected_for_anime_manga": "Standardregisterkarte f\u00fcr Anime/Manga ausgew\u00e4hlt",
     "If_nothing_is_selected": "Wenn nichts ausgew\u00e4hlt ist, wird standardm\u00e4\u00dfig die zuletzt ge\u00f6ffnete Seite verwendet.",
-    "Search_by_genre": "Suche nach demselben Genre"
+    "Search_by_genre": "Suche nach demselben Genre",
+    "Set_Profile_BG": "Hintergrund setzen",
+    "Remove_Profile_BG": "Hintergrund entfernen",
+    "Logout_desc": "Melden Sie sich aus der App an",
+    "About_desc": "\u00dcberpr\u00fcfen Sie nach Updates, ChangeLog, Tarif & Review"
 }

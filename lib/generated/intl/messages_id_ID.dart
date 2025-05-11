@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("Episode baru keluar!"),
         "About": MessageLookupByLibrary.simpleMessage("Tentang"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "Periksa pembaruan, changelog, rate & review"),
         "Account_fetch_details": MessageLookupByLibrary.simpleMessage(
             "Mencoba mengambil detail akun Anda"),
         "Action": MessageLookupByLibrary.simpleMessage("Tindakan"),
@@ -633,6 +635,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("Keluar"),
         "Logout_Confirmation":
             MessageLookupByLibrary.simpleMessage("Konfirmasi Logout."),
+        "Logout_desc":
+            MessageLookupByLibrary.simpleMessage("Keluar dari aplikasi"),
         "Love": MessageLookupByLibrary.simpleMessage("Cinta"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("Cinta_Poligon"),
         "Love_it": MessageLookupByLibrary.simpleMessage("Suka sekali"),
@@ -919,6 +923,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hapus gambar dari beranda"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "Ini akan menghapus gambar dari beranda."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Hapus latar belakang"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "Apakah Anda ingin menghapus gambar latar belakang?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1046,6 +1052,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("Diskusi seri"),
         "Series_End": MessageLookupByLibrary.simpleMessage("Seri akhir."),
+        "Set_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Atur latar belakang"),
         "Settings": MessageLookupByLibrary.simpleMessage("Pengaturan"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "Pengaturan waktu habis.Silakan coba lagi."),

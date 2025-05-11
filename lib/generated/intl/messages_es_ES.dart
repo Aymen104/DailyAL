@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out": MessageLookupByLibrary.simpleMessage(
             "¡Un nuevo episodio está fuera!"),
         "About": MessageLookupByLibrary.simpleMessage("Sobre"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "Verifique las actualizaciones, el cambio de cambios, la tasa y la revisión"),
         "Account_fetch_details": MessageLookupByLibrary.simpleMessage(
             "Tratando de buscar los detalles de su cuenta"),
         "Action": MessageLookupByLibrary.simpleMessage("Acción"),
@@ -652,6 +654,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("Cerrar sesión"),
         "Logout_Confirmation": MessageLookupByLibrary.simpleMessage(
             "Confirmación de cierre de sesión"),
+        "Logout_desc":
+            MessageLookupByLibrary.simpleMessage("INCARGE DE LA APLICACIÓN"),
         "Love": MessageLookupByLibrary.simpleMessage("Amor"),
         "Love_Polygon":
             MessageLookupByLibrary.simpleMessage("polígono_de_amor"),
@@ -948,6 +952,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Eliminar la imagen de la página de inicio"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "Esto eliminará la imagen de la página de inicio."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Eliminar fondo"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "¿Desea eliminar la imagen de fondo?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1081,6 +1087,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("Discusión de la serie"),
         "Series_End": MessageLookupByLibrary.simpleMessage("Serie de la serie"),
+        "Set_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Establecer fondo"),
         "Settings": MessageLookupByLibrary.simpleMessage("Ajustes"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "Configuración programada.Inténtalo de nuevo."),

@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("Eine neue Episode ist raus!"),
         "About": MessageLookupByLibrary.simpleMessage("Über"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "Überprüfen Sie nach Updates, ChangeLog, Tarif & Review"),
         "Account_fetch_details": MessageLookupByLibrary.simpleMessage(
             "Versuchen, Ihre Kontodaten abzurufen"),
         "Action": MessageLookupByLibrary.simpleMessage("Handlung"),
@@ -639,6 +641,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("Ausloggen"),
         "Logout_Confirmation":
             MessageLookupByLibrary.simpleMessage("Logout-Bestätigung"),
+        "Logout_desc": MessageLookupByLibrary.simpleMessage(
+            "Melden Sie sich aus der App an"),
         "Love": MessageLookupByLibrary.simpleMessage("Liebe"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("Liebe_Polygon"),
         "Love_it": MessageLookupByLibrary.simpleMessage("Liebe es"),
@@ -930,6 +934,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bild von der Startseite entfernen"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "Dadurch wird das Bild von der Startseite entfernt."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Hintergrund entfernen"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "Möchten Sie das Hintergrundbild entfernen?"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1060,6 +1066,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("Seriendiskussion."),
         "Series_End": MessageLookupByLibrary.simpleMessage("Serie Ende"),
+        "Set_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("Hintergrund setzen"),
         "Settings": MessageLookupByLibrary.simpleMessage("Einstellungen"),
         "Setup_timed_out": MessageLookupByLibrary.simpleMessage(
             "Setup zeitlich herausgestellt.Bitte versuche es erneut."),

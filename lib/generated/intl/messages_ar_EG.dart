@@ -25,6 +25,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "A_new_episode_is_out":
             MessageLookupByLibrary.simpleMessage("حلقة جديدة خارج!"),
         "About": MessageLookupByLibrary.simpleMessage("عن"),
+        "About_desc": MessageLookupByLibrary.simpleMessage(
+            "تحقق للحصول على التحديثات ، changelog ، معدل ومراجعة"),
         "Account_fetch_details":
             MessageLookupByLibrary.simpleMessage("محاولة جلب تفاصيل حسابك"),
         "Action": MessageLookupByLibrary.simpleMessage("عمل"),
@@ -625,6 +627,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Logout": MessageLookupByLibrary.simpleMessage("تسجيل خروج"),
         "Logout_Confirmation":
             MessageLookupByLibrary.simpleMessage("تأكيد تسجيل الخروج"),
+        "Logout_desc":
+            MessageLookupByLibrary.simpleMessage("تسجيل الخروج من التطبيق"),
         "Love": MessageLookupByLibrary.simpleMessage("حب"),
         "Love_Polygon": MessageLookupByLibrary.simpleMessage("الحب_المضلع"),
         "Love_it": MessageLookupByLibrary.simpleMessage("أحبها"),
@@ -906,6 +910,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "إزالة الصورة من الصفحة الرئيسية"),
         "Remove_Image_desc": MessageLookupByLibrary.simpleMessage(
             "سيؤدي ذلك إلى إزالة الصورة من الصفحة الرئيسية."),
+        "Remove_Profile_BG":
+            MessageLookupByLibrary.simpleMessage("إزالة الخلفية"),
         "Remove_the_Bg": MessageLookupByLibrary.simpleMessage(
             "هل ترغب في إزالة صورة الخلفية؟"),
         "Reorder_home_page": MessageLookupByLibrary.simpleMessage(
@@ -1026,6 +1032,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "Series_Discussion":
             MessageLookupByLibrary.simpleMessage("مناقشة السلسلة"),
         "Series_End": MessageLookupByLibrary.simpleMessage("سلسلة النهاية"),
+        "Set_Profile_BG": MessageLookupByLibrary.simpleMessage("ضبط الخلفية"),
         "Settings": MessageLookupByLibrary.simpleMessage("إعدادات"),
         "Setup_timed_out":
             MessageLookupByLibrary.simpleMessage("ضبط مهلة.حاول مرة اخرى."),
