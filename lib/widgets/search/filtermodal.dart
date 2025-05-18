@@ -656,26 +656,24 @@ class CustomTextForm extends StatelessWidget {
     );
   }
 
-  Expanded buildTextFormField() {
-    return Expanded(
-      child: TextFormField(
-        controller: controller,
-        focusNode: focusNode,
-        autofocus: false,
-        maxLines: maxLines,
-        initialValue: controller == null ? (value ?? "") : null,
-        onFieldSubmitted: (value) {
-          if (onFieldSubmitted != null) {
-            onFieldSubmitted!(value);
-          }
-        },
-        style: TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: 'Type ${fieldName.toLowerCase()} here..',
-          hintStyle: TextStyle(fontSize: 14),
-          errorStyle: TextStyle(fontSize: 14),
-        ),
+  Widget buildTextFormField() {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      autofocus: false,
+      maxLines: maxLines,
+      initialValue: controller == null ? (value) : null,
+      onFieldSubmitted: (value) {
+        if (onFieldSubmitted != null) {
+          onFieldSubmitted!(value);
+        }
+      },
+      style: TextStyle(fontSize: 14),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        hintText: 'Type ${fieldName.toLowerCase()} here..',
+        hintStyle: TextStyle(fontSize: 14),
+        errorStyle: TextStyle(fontSize: 14),
       ),
     );
   }

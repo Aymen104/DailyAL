@@ -136,6 +136,9 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         _episodeSelectMode = EpisodeSelectMode.text;
       }
     }
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   int? get _id {
@@ -1405,11 +1408,11 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     if (contentDetailed is AnimeDetailed) {
       totalEpisodes = contentDetailed?.numEpisodes ?? 0;
     }
+    if (contentDetailed is BaseNode) {
+      totalEpisodes = contentDetailed?.content?.numEpisodes ?? 0;
+    }
     if (_scheduleData != null) {
       totalEpisodes = _scheduleData?.episode ?? 0;
-    }
-    if (totalEpisodes == 0 && _episodeCount() > 0) {
-      totalEpisodes = _episodeCount() + 10;
     }
     if (totalEpisodes == 0) {
       totalEpisodes = _calculateEpisodes();
