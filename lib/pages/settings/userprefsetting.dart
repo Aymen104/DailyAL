@@ -61,7 +61,6 @@ final _options = [
   S.current.Home_Page,
   S.current.Forums_Page,
   S.current.listPage,
-  S.current.Profile_Page,
   S.current.Explore,
 ];
 
