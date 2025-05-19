@@ -73,7 +73,6 @@ android {
         release {
             signingConfig signingConfigs.release
             shrinkResources true// to shrink your image resource read more at https://developer.android.com/studio/build/shrink-code
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
         }
     }
     dependencies {

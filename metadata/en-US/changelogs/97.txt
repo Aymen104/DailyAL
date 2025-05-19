@@ -1,0 +1,4 @@
+- Fix Comments section not rendering
+- Fix slowness due to impeller (disabled it for now)
+- Fix `totalEpisodes` calculation logic
+- Fix `profile` page showing up as a dropdown option

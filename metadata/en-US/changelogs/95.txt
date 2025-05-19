@@ -1,0 +1,7 @@
+- hotfix for display customization and user preference settings
+- Add User Customization for displaying list items
+- Add Review Summary for Manga
+- Add list preference for anime/manga
+- Add new display type in List/Search/Weekly anime pages
+- Fix updating status in user list
+- Fix alternative title not being applied when filter is on
