@@ -986,5 +986,16 @@
     "Set_Profile_BG": "Hintergrund setzen",
     "Remove_Profile_BG": "Hintergrund entfernen",
     "Logout_desc": "Melden Sie sich aus der App an",
-    "About_desc": "\u00dcberpr\u00fcfen Sie nach Updates, ChangeLog, Tarif & Review"
+    "About_desc": "\u00dcberpr\u00fcfen Sie nach Updates, ChangeLog, Tarif & Review",
+    "Font_Settings": "Schriftarteinstellungen",
+    "Font_Settings_desc": "\u00c4ndern Sie die App -Schriftart.",
+    "Font_Family": "Schriftfamilie",
+    "Font_Family_desc": "\u00c4ndern Sie die App -Schriftfamilie",
+    "Select_Font_Family": "W\u00e4hlen Sie Schriftfamilie",
+    "Font_Instructions": "W\u00e4hlen Sie Ihre bevorzugte Schriftfamilie f\u00fcr die App aus",
+    "Font_Preview": "Schriftart Vorschau",
+    "Font_Sample_Text": "Der schnelle braune Fuchs springt \u00fcber den faulen Hund.",
+    "Font_Heading_Sample": "\u00dcbergangstext",
+    "Font_Preview_Description": "So wird in der App Text angezeigt.",
+    "Font_Restart_Notice": "M\u00f6glicherweise m\u00fcssen Sie die App neu starten, um alle \u00c4nderungen anzuzeigen."
 }

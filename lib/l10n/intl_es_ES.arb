@@ -986,5 +986,16 @@
     "Set_Profile_BG": "Establecer fondo",
     "Remove_Profile_BG": "Eliminar fondo",
     "Logout_desc": "INCARGE DE LA APLICACI\u00d3N",
-    "About_desc": "Verifique las actualizaciones, el cambio de cambios, la tasa y la revisi\u00f3n"
+    "About_desc": "Verifique las actualizaciones, el cambio de cambios, la tasa y la revisi\u00f3n",
+    "Font_Settings": "Configuraci\u00f3n de fuentes",
+    "Font_Settings_desc": "Cambie la fuente de la aplicaci\u00f3n.",
+    "Font_Family": "Familia de fuentes",
+    "Font_Family_desc": "Cambiar la familia de fuentes de la aplicaci\u00f3n",
+    "Select_Font_Family": "Familia de fuentes seleccionadas",
+    "Font_Instructions": "Seleccione su familia de fuentes preferida para la aplicaci\u00f3n",
+    "Font_Preview": "Vista previa de fuentes",
+    "Font_Sample_Text": "El r\u00e1pido zorro marr\u00f3n salta sobre el perro perezoso.",
+    "Font_Heading_Sample": "Texto de encabezado",
+    "Font_Preview_Description": "As\u00ed es como aparecer\u00e1 el texto en toda la aplicaci\u00f3n.",
+    "Font_Restart_Notice": "Es posible que deba reiniciar la aplicaci\u00f3n para ver todos los cambios."
 }

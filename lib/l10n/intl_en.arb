@@ -984,5 +984,14 @@
     "Logout_desc": "Logout from the app",
     "About_desc": "Check for Updates, Changelog, Rate & Review",
     "Font_Settings": "Font Settings",
-    "Font_Settings_desc": "Change the app font."
+    "Font_Settings_desc": "Change the app font.",
+    "Font_Family": "Font Family",
+    "Font_Family_desc": "Change the app font family",
+    "Select_Font_Family": "Select Font Family",
+    "Font_Instructions": "Select your preferred font family for the app",
+    "Font_Preview": "Font Preview",
+    "Font_Sample_Text": "The quick brown fox jumps over the lazy dog.",
+    "Font_Heading_Sample": "Heading Text",
+    "Font_Preview_Description": "This is how text will appear throughout the app.",
+    "Font_Restart_Notice": "You may need to restart the app to see all changes."
 }

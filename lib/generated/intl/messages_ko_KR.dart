@@ -388,6 +388,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "First_Impression": MessageLookupByLibrary.simpleMessage("첫 인상"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("첫 번째 볼륨 판매"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("글꼴 가족"),
+        "Font_Family_desc":
+            MessageLookupByLibrary.simpleMessage("앱 글꼴 패밀리를 변경하십시오"),
+        "Font_Heading_Sample": MessageLookupByLibrary.simpleMessage("제목 텍스트"),
+        "Font_Instructions":
+            MessageLookupByLibrary.simpleMessage("앱의 선호하는 글꼴 제품군을 선택하십시오"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage("글꼴 미리보기"),
+        "Font_Preview_Description":
+            MessageLookupByLibrary.simpleMessage("이것이 앱 전체에 텍스트가 나타나는 방법입니다."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "모든 변경 사항을 확인하려면 앱을 다시 시작해야 할 수도 있습니다."),
+        "Font_Sample_Text":
+            MessageLookupByLibrary.simpleMessage("빠른 갈색 여우가 게으른 개 위로 뛰어 넘습니다."),
+        "Font_Settings": MessageLookupByLibrary.simpleMessage("글꼴 설정"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("앱 글꼴을 변경하십시오."),
         "Food": MessageLookupByLibrary.simpleMessage("음식"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("포럼 게임"),
         "Forums": MessageLookupByLibrary.simpleMessage("포럼"),
@@ -901,6 +917,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("필터링할 점수를 선택하세요."),
         "Select_All": MessageLookupByLibrary.simpleMessage("모두 선택"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("보드를 선택하십시오"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("글꼴 패밀리를 선택하십시오"),
         "Select_Image":
             MessageLookupByLibrary.simpleMessage("배경 이미지로 설정할 이미지를 선택하십시오"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(

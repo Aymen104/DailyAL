@@ -985,5 +985,16 @@
     "Set_Profile_BG": "D\u00e9finir l'arri\u00e8re-plan",
     "Remove_Profile_BG": "Supprimer le fond",
     "Logout_desc": "D\u00e9connectez-vous \u00e0 partir de l'application",
-    "About_desc": "V\u00e9rifiez les mises \u00e0 jour, les changelog, le taux et l'examen"
+    "About_desc": "V\u00e9rifiez les mises \u00e0 jour, les changelog, le taux et l'examen",
+    "Font_Settings": "Param\u00e8tres de police",
+    "Font_Settings_desc": "Modifiez la police de l'application.",
+    "Font_Family": "Famille de polices",
+    "Font_Family_desc": "Changer la famille des polices d'application",
+    "Select_Font_Family": "S\u00e9lectionner la famille des polices",
+    "Font_Instructions": "S\u00e9lectionnez votre famille de polices pr\u00e9f\u00e9r\u00e9e pour l'application",
+    "Font_Preview": "Aper\u00e7u de la police",
+    "Font_Sample_Text": "Le renard brun rapide saute par-dessus le chien paresseux.",
+    "Font_Heading_Sample": "Texte de t\u00eate",
+    "Font_Preview_Description": "C'est ainsi que le texte appara\u00eetra dans l'application.",
+    "Font_Restart_Notice": "Vous devrez peut-\u00eatre red\u00e9marrer l'application pour voir tous les modifications."
 }

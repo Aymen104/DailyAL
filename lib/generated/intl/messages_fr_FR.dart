@@ -444,6 +444,26 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Première impression"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("Premier volume ventes"),
+        "Font_Family":
+            MessageLookupByLibrary.simpleMessage("Famille de polices"),
+        "Font_Family_desc": MessageLookupByLibrary.simpleMessage(
+            "Changer la famille des polices d\'application"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Texte de tête"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Sélectionnez votre famille de polices préférée pour l\'application"),
+        "Font_Preview":
+            MessageLookupByLibrary.simpleMessage("Aperçu de la police"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "C\'est ainsi que le texte apparaîtra dans l\'application."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "Vous devrez peut-être redémarrer l\'application pour voir tous les modifications."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "Le renard brun rapide saute par-dessus le chien paresseux."),
+        "Font_Settings":
+            MessageLookupByLibrary.simpleMessage("Paramètres de police"),
+        "Font_Settings_desc": MessageLookupByLibrary.simpleMessage(
+            "Modifiez la police de l\'application."),
         "Food": MessageLookupByLibrary.simpleMessage("Nourriture"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Jeux de forum"),
         "Forums": MessageLookupByLibrary.simpleMessage("Forums"),
@@ -1050,6 +1070,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Select_All": MessageLookupByLibrary.simpleMessage("Tout sélectionner"),
         "Select_Board":
             MessageLookupByLibrary.simpleMessage("Boîte de sélection"),
+        "Select_Font_Family": MessageLookupByLibrary.simpleMessage(
+            "Sélectionner la famille des polices"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Sélectionnez une image à définir comme image d\'arrière-plan"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(

@@ -985,5 +985,16 @@
     "Set_Profile_BG": "Atur latar belakang",
     "Remove_Profile_BG": "Hapus latar belakang",
     "Logout_desc": "Keluar dari aplikasi",
-    "About_desc": "Periksa pembaruan, changelog, rate & review"
+    "About_desc": "Periksa pembaruan, changelog, rate & review",
+    "Font_Settings": "Pengaturan Font",
+    "Font_Settings_desc": "Ubah font aplikasi.",
+    "Font_Family": "Keluarga Font",
+    "Font_Family_desc": "Ubah Keluarga Font Aplikasi",
+    "Select_Font_Family": "Pilih keluarga font",
+    "Font_Instructions": "Pilih keluarga font pilihan Anda untuk aplikasi",
+    "Font_Preview": "Pratinjau Font",
+    "Font_Sample_Text": "Rubah cokelat cepat melompat di atas anjing malas.",
+    "Font_Heading_Sample": "Heading Text",
+    "Font_Preview_Description": "Beginilah teks akan muncul di seluruh aplikasi.",
+    "Font_Restart_Notice": "Anda mungkin perlu memulai kembali aplikasi untuk melihat semua perubahan."
 }

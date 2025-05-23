@@ -428,6 +428,20 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("First Impression"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("First Volume Sales"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("Font Family"),
+        "Font_Family_desc":
+            MessageLookupByLibrary.simpleMessage("Change the app font family"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Heading Text"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Select your preferred font family for the app"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage("Font Preview"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "This is how text will appear throughout the app."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "You may need to restart the app to see all changes."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "The quick brown fox jumps over the lazy dog."),
         "Font_Settings": MessageLookupByLibrary.simpleMessage("Font Settings"),
         "Font_Settings_desc":
             MessageLookupByLibrary.simpleMessage("Change the app font."),
@@ -1000,6 +1014,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select a score to filter by"),
         "Select_All": MessageLookupByLibrary.simpleMessage("Select all"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("Select Board"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("Select Font Family"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Select an image to set as the background image"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(

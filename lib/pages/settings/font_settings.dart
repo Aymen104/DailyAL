@@ -38,7 +38,7 @@ class _FontSettingsState extends State<FontSettings> {
           SB.h30,
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 25),
-            child: text('Select your preferred font family for the app',
+            child: text(S.current.Font_Instructions,
                 fontSize: 16),
           ),
           SB.h20,
@@ -46,7 +46,7 @@ class _FontSettingsState extends State<FontSettings> {
           SB.h30,
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 25),
-            child: text('Font Preview', fontSize: 20),
+            child: text(S.current.Font_Preview, fontSize: 20),
           ),
           SB.h20,
           _fontPreview(),
@@ -58,13 +58,13 @@ class _FontSettingsState extends State<FontSettings> {
 
   Widget _fontFamilySelector() {
     return OptionTile(
-      text: 'Font Family',
+      text: S.current.Font_Family,
       iconData: Icons.font_download_outlined,
       multiLine: false,
-      desc: 'Change the app font family',
+      desc: S.current.Font_Family_desc,
       onPressed: () {},
       trailing: SelectButton(
-        popupText: 'Select Font Family',
+        popupText: S.current.Select_Font_Family,
         selectedOption: fontFamilyDisplayMap[UserFont.values.firstWhere(
               (font) => font == currentFont,
               orElse: () => UserFont.Poppins,
@@ -102,7 +102,7 @@ class _FontSettingsState extends State<FontSettings> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'The quick brown fox jumps over the lazy dog.',
+                S.current.Font_Sample_Text,
                 style: TextStyle(
                   fontFamily: current,
                   fontSize: 16,
@@ -134,7 +134,7 @@ class _FontSettingsState extends State<FontSettings> {
               ),
               SB.h20,
               Text(
-                'Heading Text',
+                S.current.Font_Heading_Sample,
                 style: TextStyle(
                   fontFamily: current,
                   fontSize: 24,
@@ -143,7 +143,7 @@ class _FontSettingsState extends State<FontSettings> {
               ),
               SB.h10,
               Text(
-                'This is how text will appear throughout the app.',
+                S.current.Font_Preview_Description,
                 style: TextStyle(
                   fontFamily: current,
                   fontSize: 14,
@@ -151,7 +151,7 @@ class _FontSettingsState extends State<FontSettings> {
               ),
               SB.h10,
               Text(
-                'You may need to restart the app to see all changes.',
+                S.current.Font_Restart_Notice,
                 style: TextStyle(
                   fontFamily: current,
                   fontSize: 12,

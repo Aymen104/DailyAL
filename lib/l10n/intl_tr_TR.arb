@@ -983,5 +983,16 @@
     "Set_Profile_BG": "Arka plan\u0131 ayarlamak",
     "Remove_Profile_BG": "Arka plan\u0131 kald\u0131r",
     "Logout_desc": "Uygulamadan oturum a\u00e7ma",
-    "About_desc": "G\u00fcncellemeleri kontrol edin, ChangeLog, Oran ve G\u00f6zden Ge\u00e7irme"
+    "About_desc": "G\u00fcncellemeleri kontrol edin, ChangeLog, Oran ve G\u00f6zden Ge\u00e7irme",
+    "Font_Settings": "Yaz\u0131 tipi ayarlar\u0131",
+    "Font_Settings_desc": "Uygulama yaz\u0131 tipini de\u011fi\u015ftirin.",
+    "Font_Family": "Yaz\u0131 tipi ailesi",
+    "Font_Family_desc": "Uygulama font ailesini de\u011fi\u015ftir",
+    "Select_Font_Family": "Font ailesini se\u00e7in",
+    "Font_Instructions": "Uygulama i\u00e7in tercih etti\u011finiz yaz\u0131 tipi ailesini se\u00e7in",
+    "Font_Preview": "Yaz\u0131 tipi \u00f6nizlemesi",
+    "Font_Sample_Text": "H\u0131zl\u0131 kahverengi tilki tembel k\u00f6pe\u011fin \u00fczerine atlar.",
+    "Font_Heading_Sample": "Ba\u015fl\u0131k metni",
+    "Font_Preview_Description": "Uygulama boyunca metin b\u00f6yle g\u00f6r\u00fcnecektir.",
+    "Font_Restart_Notice": "T\u00fcm de\u011fi\u015fiklikleri g\u00f6rmek i\u00e7in uygulamay\u0131 yeniden ba\u015flatman\u0131z gerekebilir."
 }

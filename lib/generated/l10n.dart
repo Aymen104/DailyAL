@@ -9899,6 +9899,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Font Family`
+  String get Font_Family {
+    return Intl.message(
+      'Font Family',
+      name: 'Font_Family',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change the app font family`
+  String get Font_Family_desc {
+    return Intl.message(
+      'Change the app font family',
+      name: 'Font_Family_desc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Font Family`
+  String get Select_Font_Family {
+    return Intl.message(
+      'Select Font Family',
+      name: 'Select_Font_Family',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select your preferred font family for the app`
+  String get Font_Instructions {
+    return Intl.message(
+      'Select your preferred font family for the app',
+      name: 'Font_Instructions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Font Preview`
+  String get Font_Preview {
+    return Intl.message(
+      'Font Preview',
+      name: 'Font_Preview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The quick brown fox jumps over the lazy dog.`
+  String get Font_Sample_Text {
+    return Intl.message(
+      'The quick brown fox jumps over the lazy dog.',
+      name: 'Font_Sample_Text',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Heading Text`
+  String get Font_Heading_Sample {
+    return Intl.message(
+      'Heading Text',
+      name: 'Font_Heading_Sample',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is how text will appear throughout the app.`
+  String get Font_Preview_Description {
+    return Intl.message(
+      'This is how text will appear throughout the app.',
+      name: 'Font_Preview_Description',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You may need to restart the app to see all changes.`
+  String get Font_Restart_Notice {
+    return Intl.message(
+      'You may need to restart the app to see all changes.',
+      name: 'Font_Restart_Notice',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
