@@ -9879,6 +9879,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Font Settings`
+  String get Font_Settings {
+    return Intl.message(
+      'Font Settings',
+      name: 'Font_Settings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change the app font.`
+  String get Font_Settings_desc {
+    return Intl.message(
+      'Change the app font.',
+      name: 'Font_Settings_desc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

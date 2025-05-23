@@ -141,12 +141,12 @@ class MyApp extends StatelessWidget {
               darkTheme: ThemeData(
                 colorScheme: colorScheme,
                 useMaterial3: true,
-                fontFamily: 'Poppins',
+                fontFamily: user.pref.preferredFont,
               ),
               theme: ThemeData(
                 colorScheme: colorScheme,
                 useMaterial3: true,
-                fontFamily: 'Poppins',
+                fontFamily: user.pref.preferredFont,
               ),
               title: 'DailyAL',
               localizationsDelegates: [

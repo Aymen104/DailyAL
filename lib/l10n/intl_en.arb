@@ -982,5 +982,7 @@
     "Set_Profile_BG": "Set Background",
     "Remove_Profile_BG": "Remove Background",
     "Logout_desc": "Logout from the app",
-    "About_desc": "Check for Updates, Changelog, Rate & Review"
+    "About_desc": "Check for Updates, Changelog, Rate & Review",
+    "Font_Settings": "Font Settings",
+    "Font_Settings_desc": "Change the app font."
 }

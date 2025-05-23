@@ -428,6 +428,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("First Impression"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("First Volume Sales"),
+        "Font_Settings": MessageLookupByLibrary.simpleMessage("Font Settings"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("Change the app font."),
         "Food": MessageLookupByLibrary.simpleMessage("Food"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Forum Games"),
         "Forums": MessageLookupByLibrary.simpleMessage("Forums"),
