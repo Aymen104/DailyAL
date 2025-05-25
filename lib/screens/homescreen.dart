@@ -10,7 +10,6 @@ import 'package:dailyanimelist/pages/settings/about.dart';
 import 'package:dailyanimelist/pages/side_bar.dart';
 import 'package:dailyanimelist/pages/userpage.dart';
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
-import 'package:dailyanimelist/screens/user_profile.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/widgets/background.dart';
 import 'package:dailyanimelist/widgets/bottomnavbar.dart';

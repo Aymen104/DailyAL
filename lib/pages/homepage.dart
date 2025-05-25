@@ -217,34 +217,37 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.only(bottom: 10, top: 7.0),
         child: Container(
           height: 35,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            children: topHeaders.keys
-                .map((key) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                      child: ShadowButton(
-                        elevation: 0.0,
-                        child: Text(
-                          key,
-                          style: Theme.of(context).textTheme.bodySmall,
+          child: Center(
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              children: topHeaders.keys
+                  .map((key) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: ShadowButton(
+                          elevation: 0.0,
+                          child: Text(
+                            key,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          onPressed: () {
+                            var value = topHeaders[key]!;
+                            if (value is Widget) {
+                              gotoPage(context: context, newPage: value);
+                            } else if (value is Function) {
+                              value();
+                            }
+                          },
+                          backgroundColor: Color(c.scrollOffset > 0
+                                  ? Theme.of(context).cardColor.value
+                                  : Theme.of(context).cardColor.value)
+                              .withOpacity(c.scrollOffset > 0 ? 0.1 : 0.4),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
                         ),
-                        onPressed: () {
-                          var value = topHeaders[key]!;
-                          if (value is Widget) {
-                            gotoPage(context: context, newPage: value);
-                          } else if (value is Function) {
-                            value();
-                          }
-                        },
-                        backgroundColor: Color(c.scrollOffset > 0
-                                ? Theme.of(context).cardColor.value
-                                : Theme.of(context).cardColor.value)
-                            .withOpacity(c.scrollOffset > 0 ? 0.1 : 0.4),
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                      ),
-                    ))
-                .toList(),
+                      ))
+                  .toList(),
+            ),
           ),
         ),
       ),
