@@ -13,6 +13,7 @@ import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
@@ -595,7 +596,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     );
 
     if (widget.applyPopScope)
-      return WillPopScope(
+      return WillPopWidget(
           child: _build,
           onWillPop: () async {
             if (showAdvancedEdit) {

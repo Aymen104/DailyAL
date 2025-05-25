@@ -10,6 +10,7 @@ import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
 import 'package:dailyanimelist/widgets/togglebutton.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -85,7 +86,7 @@ class _ThemeSettingsState extends State<ThemeSettings> {
           colorScheme: colorScheme,
         ),
         child: Builder(builder: (context) {
-          return WillPopScope(
+          return WillPopWidget(
             child: Scaffold(
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.miniCenterFloat,

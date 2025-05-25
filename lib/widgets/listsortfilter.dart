@@ -13,6 +13,7 @@ import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
 import 'package:dailyanimelist/widgets/user/contentbuilder.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:dal_commons/src/model/anime/schedule_data.dart';
 import 'package:flutter/material.dart';
@@ -646,7 +647,7 @@ class _SortFilterPopupState extends State<SortFilterPopup> {
       child: Builder(builder: (tabContext) {
         return conditional(
           on: widget.independent,
-          parent: (child) => WillPopScope(
+          parent: (child) => WillPopWidget(
             onWillPop: () async {
               _prepareClose(tabContext);
               return false;
