@@ -1,4 +1,6 @@
 import 'package:dailyanimelist/generated/l10n.dart';
+import 'package:dailyanimelist/pages/settings/font_settings.dart';
+import 'package:dailyanimelist/pages/settings/optiontile.dart';
 import 'package:dailyanimelist/theme/theme.dart';
 import 'package:dailyanimelist/theme/themedata.dart';
 import 'package:dailyanimelist/pages/settings/settingheader.dart';
@@ -153,6 +155,13 @@ class _ThemeSettingsState extends State<ThemeSettings> {
               expand: bgEnabled,
               child: _bgSelector(),
             ),
+                  OptionTile(
+          text: S.current.Font_Settings,
+          iconData: Icons.font_download,
+          desc: S.current.Font_Settings_desc,
+          onPressed: () {
+            gotoPage(context: context, newPage: FontSettings(isIntroPage: widget.isIntroPage),);
+          }),
           ],
         ),
       ),

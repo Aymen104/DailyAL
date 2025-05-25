@@ -8,7 +8,8 @@ import 'package:dailyanimelist/widgets/selectbottom.dart';
 import 'package:flutter/material.dart';
 
 class FontSettings extends StatefulWidget {
-  const FontSettings({super.key});
+  final bool isIntroPage;
+  const FontSettings({super.key, this.isIntroPage = false});
 
   @override
   State<FontSettings> createState() => _FontSettingsState();
@@ -28,6 +29,10 @@ class _FontSettingsState extends State<FontSettings> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           _save();
+          if (widget.isIntroPage) {
+            Navigator.pop(context);
+            return;
+          }
           restartApp(context);
         },
         label: Text(S.current.Save),

@@ -53,3 +53,5 @@ git update-index --assume-unchanged android/app/build.gradle
 git update-index --assume-unchanged android/settings.gradle
 
 echo "Files marked as unchanged in git."
+echo "Press any key to continue..."
+read -n 1 -s

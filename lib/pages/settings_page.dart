@@ -6,7 +6,6 @@ import 'package:dailyanimelist/pages/settings/anime_manga_settings.dart';
 import 'package:dailyanimelist/pages/settings/backup_restore.dart';
 import 'package:dailyanimelist/pages/settings/cachesettings.dart';
 import 'package:dailyanimelist/pages/settings/customsettings.dart';
-import 'package:dailyanimelist/pages/settings/font_settings.dart';
 import 'package:dailyanimelist/pages/settings/homepagesettings.dart';
 import 'package:dailyanimelist/pages/settings/langsettings.dart';
 import 'package:dailyanimelist/pages/settings/list_pref_settings.dart';
@@ -59,13 +58,6 @@ class _SettingsPageState extends State<SettingsPage> {
           desc: S.current.Theme_setting_desc_v2,
           onPressed: () {
             gotoPage(context: context, newPage: ThemeSettings());
-          }),
-      OptionTile(
-          text: S.current.Font_Settings,
-          iconData: Icons.font_download,
-          desc: S.current.Font_Settings_desc,
-          onPressed: () {
-            gotoPage(context: context, newPage: FontSettings());
           }),
       if (kDebugMode)
         OptionTile(
