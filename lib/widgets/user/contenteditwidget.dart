@@ -897,7 +897,9 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                       });
                 },
                 option: FilterOption(
-                    value: unescape.convert(contentDetailed?.myListStatus?.comments ?? ''),
+                    value: unescape
+                      .convert(contentDetailed?.myListStatus?.comments ?? '')
+                      .replaceAll("<br />", ""),
                     fieldName: "Comments",
                     openTextFormAsModal: true),
               ),

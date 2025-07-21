@@ -516,7 +516,9 @@ class _TextFormFilterState extends State<TextFormFilter> {
   Future<void> onTap() async {
     final unescape = HtmlUnescape();
     TextEditingController _controller = TextEditingController(
-      text: unescape.convert(controller.text)
+      text: unescape
+          .convert(controller.text)
+          .replaceAll("<br />", ""),
     );
     final value = await showModalBottomSheet(
         context: context,
