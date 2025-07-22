@@ -293,6 +293,14 @@ class _AllCharsWidgetState extends State<AllCharsWidget> {
     if (dd?.data == null) return showNoContent();
     final chars = dd?.data?.characters ?? [];
     final staffs = dd?.data?.staffs ?? [];
+
+    // Sort by favorites
+    chars.sort((a, b) {
+      final favA = a.charInfo?.favorites ?? 0;
+      final favB = b.charInfo?.favorites ?? 0;
+      return favB.compareTo(favA);
+    });
+
     return CustomScrollView(
       slivers: [
         if (staffs.isNotEmpty)
