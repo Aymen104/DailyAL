@@ -383,6 +383,7 @@ class AnimeGridCard extends StatelessWidget {
           if (time != null) _timeCard(time),
           if (numRecommendations != null) _recomWidget(context, borderRadius),
           if (addtionalWidget != null && !_coverOnly) addtionalWidget!,
+          _favoriteCountWidget(),
         ],
       ),
     );
@@ -512,6 +513,40 @@ class AnimeGridCard extends StatelessWidget {
           )),
     );
   }
+
+  Widget _favoriteCountWidget() {
+    if (node is AnimeDetailed || node is MangaDetailed) return SB.z;
+    final dynamic detailed = node;
+    final int? favorites = detailed.favorites;
+    if (favorites == null ) return SB.z;
+
+    return Positioned(
+      bottom: 5,
+      left: 5,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.favorite,
+              color: Colors.redAccent,
+              size: 12,
+            ),
+            SizedBox(width: 4),
+            Text(
+              userCountFormat.format(favorites),
+              style: TextStyle(color: Colors.white, fontSize: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   bool get isEditable =>
       showCardBar && (category.equals('anime') || category.equals('manga'));
