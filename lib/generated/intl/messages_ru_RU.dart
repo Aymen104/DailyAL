@@ -906,6 +906,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Оценить и просмотреть"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "Это поможет нам сделать приложение лучше."),
+        "Rate_limit_reached": MessageLookupByLibrary.simpleMessage(
+            "Достигнут предел скорости API"),
         "Rating": MessageLookupByLibrary.simpleMessage("Рейтинг"),
         "Read": MessageLookupByLibrary.simpleMessage("Читать"),
         "Reading": MessageLookupByLibrary.simpleMessage("Чтение"),
@@ -1117,6 +1119,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Сортировать и фильтровать"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("Отсортируйте список по"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("Сортировка завершена"),
         "Sound": MessageLookupByLibrary.simpleMessage("Звук"),
         "Source": MessageLookupByLibrary.simpleMessage("Источник"),
         "Space": MessageLookupByLibrary.simpleMessage("Космос"),
