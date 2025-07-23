@@ -17,6 +17,7 @@ import 'package:dailyanimelist/widgets/shimmecolor.dart';
 import 'package:dailyanimelist/widgets/translator.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
+import 'package:dailyanimelist/data/top_character_ids.dart';
 
 import '../main.dart';
 
@@ -436,9 +437,8 @@ class _CharacterScreenState extends State<CharacterScreen> {
     );
   }
 
-  Future<void> _fetchMissingFavorites() async {
-    bool wasRateLimitReached = false;
-    for (var voice in _originalVoices) {
+  Future<bool> _fetchFavorites(List<VoicesFull> voices) async {
+    for (var voice in voices) {
       final id = voice.character?.malId;
       if (id != null && !_favoritesCache.containsKey(id)) {
         try {
@@ -446,14 +446,32 @@ class _CharacterScreenState extends State<CharacterScreen> {
           if (data is CharacterV4Data) {
             _favoritesCache[id] = data.favorites ?? 0;
           } else {
-            wasRateLimitReached = true;
             showToast(S.current.Rate_limit_reached);
-            break;
+            return false;
           }
         } catch (_) {}
       }
+    }
+    return true;
+  }
+
+  Future<void> _fetchMissingFavorites() async {
+    // Build topVoices in the same order as topCharacterIds (descending by favorites)
+    final Map<int, VoicesFull> voiceMap = {
+      for (final voice in _originalVoices)
+        if (voice.character?.malId != null) voice.character!.malId!: voice
     };
-    if (!wasRateLimitReached) showToast(S.current.Sorting_finished);
+    final topVoices = <VoicesFull>[];
+    for (final id in topCharacterIds) {
+      final voice = voiceMap[id];
+      if (voice != null) {
+        topVoices.add(voice);
+      }
+    }
+
+    if (await _fetchFavorites(topVoices) && await _fetchFavorites(_originalVoices)) {
+      showToast(S.current.Sorting_finished);
+    }
   }
 
   void _sortVoices() {
