@@ -46,6 +46,7 @@ class _CharacterScreenState extends State<CharacterScreen> {
   VoiceSortType _voiceSort = VoiceSortType.mostRecent;
   bool _isSortingFavorites = false;
   List<VoicesFull> _originalVoices = [], _sortedVoices = [];
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -60,6 +61,12 @@ class _CharacterScreenState extends State<CharacterScreen> {
       getSeiyuuDetails();
       getSeiyuuPics();
     }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   getSeiyuuDetails() async {
@@ -382,14 +389,16 @@ class _CharacterScreenState extends State<CharacterScreen> {
                         icon: Icon(Icons.sort, size: 20),
                         onSelected: (sort) async {
                           if (sort == VoiceSortType.favorites) {
-                            setState(() => _isSortingFavorites = true);
+                            if (mounted) setState(() => _isSortingFavorites = true);
                             await _fetchMissingFavorites();
-                            setState(() => _isSortingFavorites = false);
+                            if (mounted) setState(() => _isSortingFavorites = false);
                           }
-                          setState(() {
-                            _voiceSort = sort;
-                          });
-                          _sortVoices();
+                          if (mounted) {
+                            setState(() {
+                              _voiceSort = sort;
+                            });
+                            _sortVoices();
+                          }
                         },
                         itemBuilder: (_) => [
                           PopupMenuItem(
@@ -439,6 +448,8 @@ class _CharacterScreenState extends State<CharacterScreen> {
 
   Future<bool> _fetchFavorites(List<VoicesFull> voices) async {
     for (var voice in voices) {
+      if (_disposed) return false;
+
       final id = voice.character?.malId;
       if (id != null && !_favoritesCache.containsKey(id)) {
         try {
