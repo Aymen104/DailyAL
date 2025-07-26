@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:intl/intl.dart';
 import 'package:dal_commons/dal_commons.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 import '../../constant.dart';
 import '../custombutton.dart';
@@ -513,8 +514,12 @@ class _TextFormFilterState extends State<TextFormFilter> {
   }
 
   Future<void> onTap() async {
-    TextEditingController _controller =
-        TextEditingController(text: controller.text);
+    final unescape = HtmlUnescape();
+    TextEditingController _controller = TextEditingController(
+      text: unescape
+          .convert(controller.text)
+          .replaceAll("<br />", ""),
+    );
     final value = await showModalBottomSheet(
         context: context,
         builder: (context) {
