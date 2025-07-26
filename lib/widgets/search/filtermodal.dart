@@ -522,28 +522,34 @@ class _TextFormFilterState extends State<TextFormFilter> {
     );
     final value = await showModalBottomSheet(
         context: context,
+        isScrollControlled: true,
         builder: (context) {
-          return SizedBox(
-            height: 400.0,
-            child: Column(
-              children: [
-                SB.h10,
-                Text(S.current.Comments,
-                    style: Theme.of(context).textTheme.titleMedium),
-                SB.h10,
-                Expanded(
-                  child: CustomTextForm(
-                    value: _controller.text,
-                    controller: _controller,
-                    useRow: false,
-                    fieldName: widget.option.modalField ?? "",
-                    maxLines: 20,
-                    onFieldSubmitted: (value) {
-                      Navigator.pop(context, value);
-                    },
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SizedBox(
+              height: 400.0,
+              child: Column(
+                children: [
+                  SB.h10,
+                  Text(S.current.Comments,
+                      style: Theme.of(context).textTheme.titleMedium),
+                  SB.h10,
+                  Expanded(
+                    child: CustomTextForm(
+                      value: _controller.text,
+                      controller: _controller,
+                      useRow: false,
+                      fieldName: widget.option.modalField ?? "",
+                      maxLines: 20,
+                      onFieldSubmitted: (value) {
+                        Navigator.pop(context, value);
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         });
