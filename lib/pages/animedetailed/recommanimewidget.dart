@@ -249,42 +249,49 @@ class _SelectorNodesWidgetState extends State<SelectorNodesWidget> {
   Widget _buildSelectorNode(Node node, int index) {
     return SizedBox(
       width: tabWidth,
-      child: Card(
-        child: InkWell(
+      child: RepaintBoundary(
+        child: GestureDetector(
           onTap: () {
-            if (mounted)
+            if (mounted) {
               setState(() {
                 widget.controller.index = index;
               });
+            }
           },
-          borderRadius: borderRadius,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                AvatarWidget(
-                  url:
-                      node.mainPicture?.large ?? node.mainPicture?.medium ?? '',
-                  height: 50,
-                  width: 50,
-                  onTap: () => gotoPage(
-                      context: context,
-                      newPage: ContentDetailedScreen(
-                        category: widget.category,
-                        id: node.id,
-                        node: node,
-                      )),
-                ),
-                SB.w10,
-                Expanded(
-                  child: title(
-                    node.title ?? '',
-                    textOverflow: TextOverflow.fade,
+          child: Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: borderRadius,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  RepaintBoundary(
+                    child: AvatarWidget(
+                      url: node.mainPicture?.large ?? node.mainPicture?.medium ?? '',
+                      height: 50,
+                      width: 50,
+                      onTap: () => gotoPage(
+                        context: context,
+                        newPage: ContentDetailedScreen(
+                          category: widget.category,
+                          id: node.id,
+                          node: node,
+                        )
+                      ),
+                    ),
                   ),
-                )
-              ],
+                  SB.w10,
+                  Expanded(
+                    child: title(
+                      node.title ?? '',
+                      textOverflow: TextOverflow.fade,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
