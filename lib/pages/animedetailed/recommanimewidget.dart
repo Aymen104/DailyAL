@@ -24,6 +24,7 @@ class RecommendedAnimeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return horizontalList(
+      showRecommendations: true,
       category: category,
       padding: EdgeInsets.symmetric(horizontal: horizPadding + 5.0),
       items: recommAnime
