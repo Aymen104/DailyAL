@@ -774,7 +774,7 @@ class _ReviewGeneratedSummaryState extends State<ReviewGeneratedSummary> {
       return _buildIcon();
     }
     return StateFullFutureWidget(
-      done: (sp) => _buildSummary(sp.data),
+      done: (sp) => _reviewAnimation(),
       loadingChild: _reviewAnimation(),
       future: () => reviewSummaryFuture,
     );
@@ -813,6 +813,7 @@ class _ReviewGeneratedSummaryState extends State<ReviewGeneratedSummary> {
           return AlertDialog(
             title: Text(S.current.Review_Summary),
             contentPadding: EdgeInsets.zero,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             content: SingleChildScrollView(
               child: ReviewGeneratedSummary(
                 reviews: widget.reviews,

@@ -5,6 +5,7 @@ import 'package:dailyanimelist/pages/settings/homepagesettings.dart';
 import 'package:dailyanimelist/pages/settings/userprefsetting.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/home/accordion.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:flutter/material.dart';
 
 bool get hasNewFeatures {
@@ -85,7 +86,7 @@ class _FeatureShowCaseState extends State<FeatureShowCase> {
           ),
         )
         .toList();
-    return WillPopScope(
+    return WillPopWidget(
         onWillPop: () async {
           await _setFirstTimePrefsOff();
           return true;

@@ -435,6 +435,24 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kesan pertama"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("Penjualan volume pertama"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("Keluarga Font"),
+        "Font_Family_desc":
+            MessageLookupByLibrary.simpleMessage("Ubah Keluarga Font Aplikasi"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Heading Text"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Pilih keluarga font pilihan Anda untuk aplikasi"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage("Pratinjau Font"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "Beginilah teks akan muncul di seluruh aplikasi."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "Anda mungkin perlu memulai kembali aplikasi untuk melihat semua perubahan."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "Rubah cokelat cepat melompat di atas anjing malas."),
+        "Font_Settings":
+            MessageLookupByLibrary.simpleMessage("Pengaturan Font"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("Ubah font aplikasi."),
         "Food": MessageLookupByLibrary.simpleMessage("Makanan"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Game forum."),
         "Forums": MessageLookupByLibrary.simpleMessage("Forum."),
@@ -897,6 +915,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Rate_Review": MessageLookupByLibrary.simpleMessage("Nilai & Ulasan"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "Ini akan membantu kami membuat aplikasi lebih baik."),
+        "Rate_limit_reached": MessageLookupByLibrary.simpleMessage(
+            "Batas kecepatan API tercapai"),
         "Rating": MessageLookupByLibrary.simpleMessage("Peringkat"),
         "Read": MessageLookupByLibrary.simpleMessage("Membaca"),
         "Reading": MessageLookupByLibrary.simpleMessage("Membaca"),
@@ -1021,6 +1041,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pilih skor untuk difilter"),
         "Select_All": MessageLookupByLibrary.simpleMessage("Pilih Semua"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("Pilih Papan"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("Pilih keluarga font"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Pilih gambar untuk ditetapkan sebagai gambar latar belakang"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -1108,6 +1130,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sortir & Filter"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("Urutkan daftar berdasarkan"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("Penyortiran selesai"),
         "Sound": MessageLookupByLibrary.simpleMessage("Suara"),
         "Source": MessageLookupByLibrary.simpleMessage("Sumber"),
         "Space": MessageLookupByLibrary.simpleMessage("Ruang angkasa"),

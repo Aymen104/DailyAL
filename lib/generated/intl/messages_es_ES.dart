@@ -449,6 +449,26 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Primera impresión"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("Venta de primer volumen"),
+        "Font_Family":
+            MessageLookupByLibrary.simpleMessage("Familia de fuentes"),
+        "Font_Family_desc": MessageLookupByLibrary.simpleMessage(
+            "Cambiar la familia de fuentes de la aplicación"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Texto de encabezado"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Seleccione su familia de fuentes preferida para la aplicación"),
+        "Font_Preview":
+            MessageLookupByLibrary.simpleMessage("Vista previa de fuentes"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "Así es como aparecerá el texto en toda la aplicación."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "Es posible que deba reiniciar la aplicación para ver todos los cambios."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "El rápido zorro marrón salta sobre el perro perezoso."),
+        "Font_Settings":
+            MessageLookupByLibrary.simpleMessage("Configuración de fuentes"),
+        "Font_Settings_desc": MessageLookupByLibrary.simpleMessage(
+            "Cambie la fuente de la aplicación."),
         "Food": MessageLookupByLibrary.simpleMessage("Comida"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Juegos de foro"),
         "Forums": MessageLookupByLibrary.simpleMessage("Foros"),
@@ -924,6 +944,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Revisión de tasas"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "Esto nos ayudará a mejorar la aplicación."),
+        "Rate_limit_reached": MessageLookupByLibrary.simpleMessage(
+            "Se alcanzó el límite de velocidad de la API"),
         "Rating": MessageLookupByLibrary.simpleMessage("Clasificación"),
         "Read": MessageLookupByLibrary.simpleMessage("Leer"),
         "Reading": MessageLookupByLibrary.simpleMessage("Leer"),
@@ -1052,6 +1074,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Select_All": MessageLookupByLibrary.simpleMessage("Seleccionar todo"),
         "Select_Board":
             MessageLookupByLibrary.simpleMessage("Seleccione la placa"),
+        "Select_Font_Family": MessageLookupByLibrary.simpleMessage(
+            "Familia de fuentes seleccionadas"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Seleccione una imagen para configurar como la imagen de fondo."),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -1145,6 +1169,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Filtro de clasificación"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("Ordenar la lista basada en"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("Clasificación terminada"),
         "Sound": MessageLookupByLibrary.simpleMessage("Sonido"),
         "Source": MessageLookupByLibrary.simpleMessage("Fuente"),
         "Space": MessageLookupByLibrary.simpleMessage("Espacio"),

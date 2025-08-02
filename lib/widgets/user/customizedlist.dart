@@ -19,6 +19,7 @@ import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/headerwidget.dart';
 import 'package:dailyanimelist/widgets/home/animecard.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
@@ -250,7 +251,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
     if (!widget.editMode) {
       return _populateFields();
     }
-    return WillPopScope(
+    return WillPopWidget(
       onWillPop: _discardChangedPopUp,
       child: SingleChildScrollView(
         child: Column(

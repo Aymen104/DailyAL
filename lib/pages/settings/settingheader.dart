@@ -1,4 +1,5 @@
 import 'package:dailyanimelist/constant.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:flutter/material.dart';
 
 class SettingsSliverHeader extends StatelessWidget {
@@ -19,7 +20,7 @@ class SettingsSliverHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = currentBrightness(context);
-    return WillPopScope(
+    return WillPopWidget(
       onWillPop: () async {
         if (onPressed != null) {
           onPressed!();

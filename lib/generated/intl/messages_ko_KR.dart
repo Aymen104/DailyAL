@@ -388,6 +388,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "First_Impression": MessageLookupByLibrary.simpleMessage("첫 인상"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("첫 번째 볼륨 판매"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("글꼴 가족"),
+        "Font_Family_desc":
+            MessageLookupByLibrary.simpleMessage("앱 글꼴 패밀리를 변경하십시오"),
+        "Font_Heading_Sample": MessageLookupByLibrary.simpleMessage("제목 텍스트"),
+        "Font_Instructions":
+            MessageLookupByLibrary.simpleMessage("앱의 선호하는 글꼴 제품군을 선택하십시오"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage("글꼴 미리보기"),
+        "Font_Preview_Description":
+            MessageLookupByLibrary.simpleMessage("이것이 앱 전체에 텍스트가 나타나는 방법입니다."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "모든 변경 사항을 확인하려면 앱을 다시 시작해야 할 수도 있습니다."),
+        "Font_Sample_Text":
+            MessageLookupByLibrary.simpleMessage("빠른 갈색 여우가 게으른 개 위로 뛰어 넘습니다."),
+        "Font_Settings": MessageLookupByLibrary.simpleMessage("글꼴 설정"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("앱 글꼴을 변경하십시오."),
         "Food": MessageLookupByLibrary.simpleMessage("음식"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("포럼 게임"),
         "Forums": MessageLookupByLibrary.simpleMessage("포럼"),
@@ -794,6 +810,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Rate_Review": MessageLookupByLibrary.simpleMessage("요금 및 검토"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "이것은 우리가 앱을 더 잘 만들 수 있도록 도와줍니다."),
+        "Rate_limit_reached":
+            MessageLookupByLibrary.simpleMessage("API 속도 제한에 도달했습니다"),
         "Rating": MessageLookupByLibrary.simpleMessage("평가"),
         "Read": MessageLookupByLibrary.simpleMessage("읽다"),
         "Reading": MessageLookupByLibrary.simpleMessage("독서"),
@@ -901,6 +919,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("필터링할 점수를 선택하세요."),
         "Select_All": MessageLookupByLibrary.simpleMessage("모두 선택"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("보드를 선택하십시오"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("글꼴 패밀리를 선택하십시오"),
         "Select_Image":
             MessageLookupByLibrary.simpleMessage("배경 이미지로 설정할 이미지를 선택하십시오"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -979,6 +999,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "Sort_and_Filter": MessageLookupByLibrary.simpleMessage("정렬 및 필터"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("목록을 기반으로 목록을 정렬합니다"),
+        "Sorting_finished": MessageLookupByLibrary.simpleMessage("정렬 완료"),
         "Sound": MessageLookupByLibrary.simpleMessage("소리"),
         "Source": MessageLookupByLibrary.simpleMessage("원천"),
         "Space": MessageLookupByLibrary.simpleMessage("우주"),

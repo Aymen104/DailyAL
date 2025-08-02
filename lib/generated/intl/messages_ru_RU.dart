@@ -436,6 +436,25 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Первое впечатление"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("Первые объемы продаж"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("Семья шрифтов"),
+        "Font_Family_desc": MessageLookupByLibrary.simpleMessage(
+            "Измените семью шрифтов приложения"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Заголовок текст"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Выберите предпочтительную семью шрифтов для приложения"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage(
+            "Предварительный просмотр шрифта"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "Вот как появится текст на протяжении всего приложения."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "Вам может потребоваться перезагрузить приложение, чтобы увидеть все изменения."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "Быстрая коричневая лиса прыгает через ленивую собаку."),
+        "Font_Settings":
+            MessageLookupByLibrary.simpleMessage("Настройки шрифта"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("Измените шрифт приложения."),
         "Food": MessageLookupByLibrary.simpleMessage("Еда"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Форумные игры"),
         "Forums": MessageLookupByLibrary.simpleMessage("Форумы"),
@@ -906,6 +925,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Оценить и просмотреть"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "Это поможет нам сделать приложение лучше."),
+        "Rate_limit_reached": MessageLookupByLibrary.simpleMessage(
+            "Достигнут предел скорости API"),
         "Rating": MessageLookupByLibrary.simpleMessage("Рейтинг"),
         "Read": MessageLookupByLibrary.simpleMessage("Читать"),
         "Reading": MessageLookupByLibrary.simpleMessage("Чтение"),
@@ -1029,6 +1050,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Выберите оценку для фильтрации"),
         "Select_All": MessageLookupByLibrary.simpleMessage("Выбрать все"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("Выберите доску"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("Выберите семью шрифтов"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Выберите изображение, которое хотите установить в качестве фонового изображения."),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -1117,6 +1140,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Сортировать и фильтровать"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("Отсортируйте список по"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("Сортировка завершена"),
         "Sound": MessageLookupByLibrary.simpleMessage("Звук"),
         "Source": MessageLookupByLibrary.simpleMessage("Источник"),
         "Space": MessageLookupByLibrary.simpleMessage("Космос"),

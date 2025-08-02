@@ -2300,10 +2300,10 @@ class S {
     );
   }
 
-  /// `Search for your favourite anime, manga and more..`
+  /// `Search for your favorite anime, manga and more..`
   String get Search_Page_Intro {
     return Intl.message(
-      'Search for your favourite anime, manga and more..',
+      'Search for your favorite anime, manga and more..',
       name: 'Search_Page_Intro',
       desc: '',
       args: [],
@@ -9420,6 +9420,26 @@ class S {
     );
   }
 
+  /// `Rate limit reached`
+  String get Rate_limit_reached {
+    return Intl.message(
+      'Rate limit reached',
+      name: 'Rate_limit_reached',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorting finished`
+  String get Sorting_finished {
+    return Intl.message(
+      'Sorting finished',
+      name: 'Sorting_finished',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Published End Date`
   String get publishedEndDate {
     return Intl.message(
@@ -9875,6 +9895,116 @@ class S {
     return Intl.message(
       'Check for Updates, Changelog, Rate & Review',
       name: 'About_desc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Font Settings`
+  String get Font_Settings {
+    return Intl.message(
+      'Font Settings',
+      name: 'Font_Settings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change the app font.`
+  String get Font_Settings_desc {
+    return Intl.message(
+      'Change the app font.',
+      name: 'Font_Settings_desc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Font Family`
+  String get Font_Family {
+    return Intl.message(
+      'Font Family',
+      name: 'Font_Family',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change the app font family`
+  String get Font_Family_desc {
+    return Intl.message(
+      'Change the app font family',
+      name: 'Font_Family_desc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Font Family`
+  String get Select_Font_Family {
+    return Intl.message(
+      'Select Font Family',
+      name: 'Select_Font_Family',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select your preferred font family for the app`
+  String get Font_Instructions {
+    return Intl.message(
+      'Select your preferred font family for the app',
+      name: 'Font_Instructions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Font Preview`
+  String get Font_Preview {
+    return Intl.message(
+      'Font Preview',
+      name: 'Font_Preview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The quick brown fox jumps over the lazy dog.`
+  String get Font_Sample_Text {
+    return Intl.message(
+      'The quick brown fox jumps over the lazy dog.',
+      name: 'Font_Sample_Text',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Heading Text`
+  String get Font_Heading_Sample {
+    return Intl.message(
+      'Heading Text',
+      name: 'Font_Heading_Sample',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is how text will appear throughout the app.`
+  String get Font_Preview_Description {
+    return Intl.message(
+      'This is how text will appear throughout the app.',
+      name: 'Font_Preview_Description',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You may need to restart the app to see all changes.`
+  String get Font_Restart_Notice {
+    return Intl.message(
+      'You may need to restart the app to see all changes.',
+      name: 'Font_Restart_Notice',
       desc: '',
       args: [],
     );

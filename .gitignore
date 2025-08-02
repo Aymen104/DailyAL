@@ -49,3 +49,5 @@ app.*.map.json
 .vscode/settings.json
 .vscode/PythonImportHelper-v2-Completion.json
 .dockerrun
+
+android/app/proguard-rules.prop

@@ -440,6 +440,25 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Erster Eindruck"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("Erster Umsatz"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("Schriftfamilie"),
+        "Font_Family_desc": MessageLookupByLibrary.simpleMessage(
+            "Ändern Sie die App -Schriftfamilie"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Übergangstext"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Wählen Sie Ihre bevorzugte Schriftfamilie für die App aus"),
+        "Font_Preview":
+            MessageLookupByLibrary.simpleMessage("Schriftart Vorschau"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "So wird in der App Text angezeigt."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "Möglicherweise müssen Sie die App neu starten, um alle Änderungen anzuzeigen."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "Der schnelle braune Fuchs springt über den faulen Hund."),
+        "Font_Settings":
+            MessageLookupByLibrary.simpleMessage("Schriftarteinstellungen"),
+        "Font_Settings_desc": MessageLookupByLibrary.simpleMessage(
+            "Ändern Sie die App -Schriftart."),
         "Food": MessageLookupByLibrary.simpleMessage("Essen"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Forum-Spiele"),
         "Forums": MessageLookupByLibrary.simpleMessage("Foren"),
@@ -908,6 +927,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Rate & Bewertung."),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "Dies wird uns helfen, die App besser zu machen."),
+        "Rate_limit_reached":
+            MessageLookupByLibrary.simpleMessage("API-Ratenlimit erreicht"),
         "Rating": MessageLookupByLibrary.simpleMessage("Nennen"),
         "Read": MessageLookupByLibrary.simpleMessage("Lesen"),
         "Reading": MessageLookupByLibrary.simpleMessage("Lektüre"),
@@ -1032,6 +1053,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wählen Sie eine Punktzahl aus, nach der gefiltert werden soll"),
         "Select_All": MessageLookupByLibrary.simpleMessage("Wählen Sie Alle"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("Board auswählen"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("Wählen Sie Schriftfamilie"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Wählen Sie ein Bild aus, das als Hintergrundbild eingestellt ist"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -1123,6 +1146,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sortieren und filtern"),
         "Sort_the_list_based_on": MessageLookupByLibrary.simpleMessage(
             "Sortieren Sie die Liste basierend auf"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("Sortierung abgeschlossen"),
         "Sound": MessageLookupByLibrary.simpleMessage("Klang"),
         "Source": MessageLookupByLibrary.simpleMessage("Quelle"),
         "Space": MessageLookupByLibrary.simpleMessage("Platz"),

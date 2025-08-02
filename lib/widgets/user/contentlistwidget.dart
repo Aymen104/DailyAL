@@ -237,6 +237,7 @@ Widget _baseBaseNode(
   double? gridHeight,
   bool updateCacheOnEdit = false,
   bool showTime = false,
+  bool showRecommendations = false,
   bool? showIndex,
   bool? showStatus,
   VoidCallback? onClose,
@@ -257,6 +258,7 @@ Widget _baseBaseNode(
     gridHeight: gridHeight,
     updateCacheOnEdit: updateCacheOnEdit,
     showTime: showTime,
+    showRecommendations: showRecommendations,
     showIndex: showIndex ?? false,
     showStatus: showStatus ?? true,
     onClose: onClose,
@@ -275,6 +277,7 @@ Widget buildBaseNodePageItem(
   required double gridHeight,
   bool updateCacheOnEdit = false,
   bool showTime = false,
+  bool showRecommendations = false,
   bool? showIndex,
   bool? showStatus,
   String? id,
@@ -295,6 +298,7 @@ Widget buildBaseNodePageItem(
       gridHeight: gridHeight,
       updateCacheOnEdit: updateCacheOnEdit,
       showTime: showTime,
+      showRecommendations: showRecommendations,
       showIndex: showIndex,
       showStatus: showStatus,
       onClose: onClose != null ? () => onClose(index) : null,
@@ -349,6 +353,7 @@ Widget horizontalList({
   required List<BaseNode> items,
   double? height,
   bool showTime = false,
+  bool showRecommendations = false,
   EdgeInsetsGeometry? padding,
   ValueChanged<int>? onClose,
 }) {
@@ -356,6 +361,7 @@ Widget horizontalList({
     category: category,
     items: items,
     showTime: showTime,
+    showRecommendations: showRecommendations,
     padding: padding,
     onClose: onClose,
     sortFilterDisplay: SortFilterDisplay(
@@ -378,6 +384,7 @@ class ContentListWithDisplayType extends StatelessWidget {
   final List<BaseNode> items;
   final SortFilterDisplay sortFilterDisplay;
   final bool showTime;
+  final bool showRecommendations;
   final HomePageTileSize? tileSize;
   final EdgeInsetsGeometry? padding;
   final bool? showIndex;
@@ -391,6 +398,7 @@ class ContentListWithDisplayType extends StatelessWidget {
     required this.items,
     required this.sortFilterDisplay,
     this.showTime = false,
+    this.showRecommendations = false,
     this.tileSize,
     this.padding,
     this.showIndex,
@@ -433,6 +441,7 @@ class ContentListWithDisplayType extends StatelessWidget {
           homePageTileSize: tileSize ?? _axisTileSizeMap[gridAxisCount],
           updateCacheOnEdit: updateCacheOnEdit ?? true,
           showTime: showTime,
+          showRecommendations: showRecommendations,
           showEdit: showEdit ?? true,
           showIndex: showIndex,
           showStatus: showStatus,
@@ -485,6 +494,7 @@ class ContentAllWidget extends StatefulWidget {
   final bool showSelfScoreInsteadOfStatus;
   final DisplaySubType? displaySubType;
   final bool showTime;
+  final bool showRecommendations;
 
   const ContentAllWidget({
     Key? key,
@@ -512,6 +522,7 @@ class ContentAllWidget extends StatefulWidget {
     this.displaySubType,
     this.gridHeight,
     this.showTime = false,
+    this.showRecommendations = false,
   }) : super(key: key);
 
   @override
@@ -642,6 +653,7 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
       showEdit: widget.showEdit,
       myListStatus: myListStatus,
       showCardBar: true,
+      showRecommendations: widget.showRecommendations,
       updateCache: false,
       showGenres: true,
       showTime: widget.showTime,

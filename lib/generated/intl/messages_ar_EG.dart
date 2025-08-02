@@ -426,6 +426,22 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("الانطباع الأول"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("مبيعات المجلد الأول"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("عائلة الخط"),
+        "Font_Family_desc":
+            MessageLookupByLibrary.simpleMessage("قم بتغيير عائلة خط التطبيق"),
+        "Font_Heading_Sample": MessageLookupByLibrary.simpleMessage("النص"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "حدد عائلة الخط المفضل لديك للتطبيق"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage("معاينة الخط"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "هذه هي الطريقة التي سيظهر بها النص في جميع أنحاء التطبيق."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "قد تحتاج إلى إعادة تشغيل التطبيق لرؤية جميع التغييرات."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "الثعلب البني السريع يقفز فوق الكلب كسول."),
+        "Font_Settings": MessageLookupByLibrary.simpleMessage("إعدادات الخط"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("قم بتغيير خط التطبيق."),
         "Food": MessageLookupByLibrary.simpleMessage("طعام"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("ألعاب المنتدى"),
         "Forums": MessageLookupByLibrary.simpleMessage("المنتديات"),
@@ -884,6 +900,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Rate_Review": MessageLookupByLibrary.simpleMessage("مراجعة معدل"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "هذا سوف يساعدنا في جعل التطبيق أفضل."),
+        "Rate_limit_reached":
+            MessageLookupByLibrary.simpleMessage("تم الوصول إلى حد معدل API"),
         "Rating": MessageLookupByLibrary.simpleMessage("تقييم"),
         "Read": MessageLookupByLibrary.simpleMessage("يقرأ"),
         "Reading": MessageLookupByLibrary.simpleMessage("قراءة"),
@@ -1003,6 +1021,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("حدد النتيجة للتصفية حسب"),
         "Select_All": MessageLookupByLibrary.simpleMessage("اختر الكل"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("حدد متنها"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("حدد عائلة الخط"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "حدد صورة لتعيين صورة الخلفية"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -1086,6 +1106,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Sort_and_Filter": MessageLookupByLibrary.simpleMessage("فرز وتصفية"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("فرز القائمة بناء على"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("تم الانتهاء من الفرز"),
         "Sound": MessageLookupByLibrary.simpleMessage("يبدو"),
         "Source": MessageLookupByLibrary.simpleMessage("مصدر"),
         "Space": MessageLookupByLibrary.simpleMessage("فضاء"),

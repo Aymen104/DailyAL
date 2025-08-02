@@ -10,11 +10,11 @@ import 'package:dailyanimelist/pages/settings/about.dart';
 import 'package:dailyanimelist/pages/side_bar.dart';
 import 'package:dailyanimelist/pages/userpage.dart';
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
-import 'package:dailyanimelist/screens/user_profile.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/widgets/background.dart';
 import 'package:dailyanimelist/widgets/bottomnavbar.dart';
 import 'package:dailyanimelist/widgets/home/feature_first.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             });
         },
       ),
-      body: WillPopScope(
+      body: WillPopWidget(
         onWillPop: () async {
           return true;
         },

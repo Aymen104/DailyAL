@@ -431,6 +431,25 @@ class MessageLookup extends MessageLookupByLibrary {
         "First_Impression": MessageLookupByLibrary.simpleMessage("İlk izlenim"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("İlk Cilt Satışları"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("Yazı tipi ailesi"),
+        "Font_Family_desc": MessageLookupByLibrary.simpleMessage(
+            "Uygulama font ailesini değiştir"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Başlık metni"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Uygulama için tercih ettiğiniz yazı tipi ailesini seçin"),
+        "Font_Preview":
+            MessageLookupByLibrary.simpleMessage("Yazı tipi önizlemesi"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "Uygulama boyunca metin böyle görünecektir."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "Tüm değişiklikleri görmek için uygulamayı yeniden başlatmanız gerekebilir."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "Hızlı kahverengi tilki tembel köpeğin üzerine atlar."),
+        "Font_Settings":
+            MessageLookupByLibrary.simpleMessage("Yazı tipi ayarları"),
+        "Font_Settings_desc": MessageLookupByLibrary.simpleMessage(
+            "Uygulama yazı tipini değiştirin."),
         "Food": MessageLookupByLibrary.simpleMessage("Yiyecek"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Forum Oyunları"),
         "Forums": MessageLookupByLibrary.simpleMessage("Forumlar"),
@@ -885,6 +904,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Rate_Review": MessageLookupByLibrary.simpleMessage("Oran incelemesi"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "Bu, uygulamayı daha iyi hale getirmemize yardımcı olacaktır."),
+        "Rate_limit_reached":
+            MessageLookupByLibrary.simpleMessage("API oranı sınırına ulaşıldı"),
         "Rating": MessageLookupByLibrary.simpleMessage("Değerlendirme"),
         "Read": MessageLookupByLibrary.simpleMessage("Okumak"),
         "Reading": MessageLookupByLibrary.simpleMessage("Okuma"),
@@ -1011,6 +1032,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Filtrelemek için bir puan seçin"),
         "Select_All": MessageLookupByLibrary.simpleMessage("Hepsini seç"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("Pano Seçin"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("Font ailesini seçin"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Arka plan resmi olarak ayarlanacak bir resim seçin"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -1102,6 +1125,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sırala ve Filtrele"),
         "Sort_the_list_based_on": MessageLookupByLibrary.simpleMessage(
             "Listeyi şuna göre sıralayın:"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("Sıralama tamamlandı"),
         "Sound": MessageLookupByLibrary.simpleMessage("Ses"),
         "Source": MessageLookupByLibrary.simpleMessage("Kaynak"),
         "Space": MessageLookupByLibrary.simpleMessage("Uzay"),

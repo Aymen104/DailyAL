@@ -28,6 +28,7 @@ import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/search/sliderwidget.dart';
 import 'package:dailyanimelist/widgets/slivers.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -629,7 +630,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
         ),
       );
     }
-    return WillPopScope(
+    return WillPopWidget(
       child: Scaffold(
         body: Stack(
           children: [

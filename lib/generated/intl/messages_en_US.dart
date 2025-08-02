@@ -428,6 +428,23 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("First Impression"),
         "First_Volume_Sales":
             MessageLookupByLibrary.simpleMessage("First Volume Sales"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("Font Family"),
+        "Font_Family_desc":
+            MessageLookupByLibrary.simpleMessage("Change the app font family"),
+        "Font_Heading_Sample":
+            MessageLookupByLibrary.simpleMessage("Heading Text"),
+        "Font_Instructions": MessageLookupByLibrary.simpleMessage(
+            "Select your preferred font family for the app"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage("Font Preview"),
+        "Font_Preview_Description": MessageLookupByLibrary.simpleMessage(
+            "This is how text will appear throughout the app."),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "You may need to restart the app to see all changes."),
+        "Font_Sample_Text": MessageLookupByLibrary.simpleMessage(
+            "The quick brown fox jumps over the lazy dog."),
+        "Font_Settings": MessageLookupByLibrary.simpleMessage("Font Settings"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("Change the app font."),
         "Food": MessageLookupByLibrary.simpleMessage("Food"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("Forum Games"),
         "Forums": MessageLookupByLibrary.simpleMessage("Forums"),
@@ -873,6 +890,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Rate_Review": MessageLookupByLibrary.simpleMessage("Rate & Review"),
         "Rate_Review_desc": MessageLookupByLibrary.simpleMessage(
             "This will help us make the app better."),
+        "Rate_limit_reached":
+            MessageLookupByLibrary.simpleMessage("Rate limit reached"),
         "Rating": MessageLookupByLibrary.simpleMessage("Rating"),
         "Read": MessageLookupByLibrary.simpleMessage("Read"),
         "Reading": MessageLookupByLibrary.simpleMessage("Reading"),
@@ -976,7 +995,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "Search_By_Season":
             MessageLookupByLibrary.simpleMessage("Search By Season"),
         "Search_Page_Intro": MessageLookupByLibrary.simpleMessage(
-            "Search for your favourite anime, manga and more.."),
+            "Search for your favorite anime, manga and more.."),
         "Search_Results":
             MessageLookupByLibrary.simpleMessage("Search Results"),
         "Search_by_genre":
@@ -997,6 +1016,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select a score to filter by"),
         "Select_All": MessageLookupByLibrary.simpleMessage("Select all"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("Select Board"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("Select Font Family"),
         "Select_Image": MessageLookupByLibrary.simpleMessage(
             "Select an image to set as the background image"),
         "Select_Image_desc": MessageLookupByLibrary.simpleMessage(
@@ -1084,6 +1105,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sort & Filter"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("Sort the list based on"),
+        "Sorting_finished":
+            MessageLookupByLibrary.simpleMessage("Sorting finished"),
         "Sound": MessageLookupByLibrary.simpleMessage("Sound"),
         "Source": MessageLookupByLibrary.simpleMessage("Source"),
         "Space": MessageLookupByLibrary.simpleMessage("Space"),

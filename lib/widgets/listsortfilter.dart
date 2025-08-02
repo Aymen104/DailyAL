@@ -13,6 +13,7 @@ import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
 import 'package:dailyanimelist/widgets/user/contentbuilder.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:dal_commons/src/model/anime/schedule_data.dart';
 import 'package:flutter/material.dart';
@@ -263,16 +264,19 @@ List<BaseNode> _sortListCustom(
             n1Value = (n1.myListStatus as dynamic)?.score;
             n2Value = (n2.myListStatus as dynamic)?.score;
           } catch (e) {}
+          break;
         case 'anime_start_date':
           try {
             n1Value = (n1.myListStatus as dynamic)?.startDate;
             n2Value = (n2.myListStatus as dynamic)?.startDate;
           } catch (e) {}
+          break;
         case 'list_updated_at':
           try {
             n1Value = (n1.myListStatus as dynamic)?.updatedAt;
             n2Value = (n2.myListStatus as dynamic)?.updatedAt;
           } catch (e) {}
+          break;
         case 'num_episodes':
           if (n1Value == null || n1Value == 0) {
             n1Value = _getEpisodes(scheduleForMalIds[n1.id]) ?? n1Value;
@@ -304,6 +308,7 @@ List<BaseNode> _sortListCustom(
           final temp = n1Value;
           n1Value = n2Value;
           n2Value = temp;
+          break;
         default:
       }
       if (n1Value == null && n2Value == null) {
@@ -646,7 +651,7 @@ class _SortFilterPopupState extends State<SortFilterPopup> {
       child: Builder(builder: (tabContext) {
         return conditional(
           on: widget.independent,
-          parent: (child) => WillPopScope(
+          parent: (child) => WillPopWidget(
             onWillPop: () async {
               _prepareClose(tabContext);
               return false;

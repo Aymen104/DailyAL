@@ -22,6 +22,7 @@ import 'package:dailyanimelist/widgets/slivers.dart';
 import 'package:dailyanimelist/widgets/user/signinpage.dart';
 import 'package:dailyanimelist/widgets/user/stats_screen.dart';
 import 'package:dailyanimelist/widgets/user/user_header.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 
@@ -162,7 +163,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       );
     }
 
-    return WillPopScope(
+    return WillPopWidget(
       onWillPop: () async {
         if (_expandUserProfile.currentValue!) {
           _expandUserProfile.update(false);

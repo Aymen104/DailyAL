@@ -13,11 +13,13 @@ import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 import '../../constant.dart';
 import '../../main.dart';
@@ -595,7 +597,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     );
 
     if (widget.applyPopScope)
-      return WillPopScope(
+      return WillPopWidget(
           child: _build,
           onWillPop: () async {
             if (showAdvancedEdit) {
@@ -876,63 +878,68 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         ),
       );
 
-  Widget get othersWidget => Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          field(
-              S.current.Comments,
-              _modifyWidget(
-                modifyComments,
-                TextFormFilter(
-                  onFieldSubmitted: (value) {
-                    modifyComments = true;
-                    updateAdvancedStatus(
-                        comments: value,
-                        onDone: () {
-                          modifyComments = false;
-                        });
-                  },
-                  option: FilterOption(
-                      value: contentDetailed?.myListStatus?.comments,
-                      fieldName: "Comments",
-                      openTextFormAsModal: true),
-                ),
+  Widget get othersWidget {
+    final unescape = HtmlUnescape();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        field(
+            S.current.Comments,
+            _modifyWidget(
+              modifyComments,
+              TextFormFilter(
+                onFieldSubmitted: (value) {
+                  modifyComments = true;
+                  updateAdvancedStatus(
+                      comments: value,
+                      onDone: () {
+                        modifyComments = false;
+                      });
+                },
+                option: FilterOption(
+                    value: unescape
+                      .convert(contentDetailed?.myListStatus?.comments ?? '')
+                      .replaceAll("<br />", ""),
+                    fieldName: "Comments",
+                    openTextFormAsModal: true),
               ),
-              null,
-              100.0,
-              CrossAxisAlignment.start,
-              EdgeInsets.only(left: 20, bottom: 8)),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: field(
-                  S.current.Tags,
-                  _modifyWidget(
-                    modifyTags,
-                    TextFormFilter(
-                        onFieldSubmitted: (value) {
-                          modifyTags = true;
-                          updateAdvancedStatus(
-                              tags: value,
-                              onDone: () {
-                                modifyTags = false;
-                              });
-                        },
-                        option: FilterOption(
-                            value:
-                                (contentDetailed?.myListStatus?.tags != null &&
-                                        contentDetailed
-                                            .myListStatus.tags.isNotEmpty)
-                                    ? contentDetailed?.myListStatus?.tags[0]
-                                    : '',
-                            fieldName: "Tags")),
-                  ),
-                  null,
-                  null,
-                  CrossAxisAlignment.start,
-                  EdgeInsets.only(left: 20, bottom: 8))),
-        ],
-      );
+            ),
+            null,
+            100.0,
+            CrossAxisAlignment.start,
+            EdgeInsets.only(left: 20, bottom: 8)),
+        Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: field(
+                S.current.Tags,
+                _modifyWidget(
+                  modifyTags,
+                  TextFormFilter(
+                      onFieldSubmitted: (value) {
+                        modifyTags = true;
+                        updateAdvancedStatus(
+                            tags: value,
+                            onDone: () {
+                              modifyTags = false;
+                            });
+                      },
+                      option: FilterOption(
+                          value: unescape.convert(
+                              (contentDetailed?.myListStatus?.tags != null &&
+                                      contentDetailed.myListStatus.tags.isNotEmpty)
+                                  ? contentDetailed?.myListStatus?.tags[0]
+                                  : '',
+                          ),
+                          fieldName: "Tags")),
+                ),
+                null,
+                null,
+                CrossAxisAlignment.start,
+                EdgeInsets.only(left: 20, bottom: 8))),
+      ],
+    );
+  }
 
   Widget get _deleteButton {
     return Row(

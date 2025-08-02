@@ -11,6 +11,7 @@ import 'package:dailyanimelist/widgets/home/bookmarks_widget.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
 import 'package:dailyanimelist/widgets/shimmecolor.dart';
 import 'package:dailyanimelist/widgets/web/c_webview.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -124,7 +125,7 @@ class _ForumPostsScreenState extends State<ForumPostsScreen> {
           ],
         ),
       ),
-      body: WillPopScope(
+      body: WillPopWidget(
         child: futurePostCustomScrollViewBuilder(),
         onWillPop: () async {
           if (enableShare) {

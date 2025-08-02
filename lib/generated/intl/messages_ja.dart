@@ -387,6 +387,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "Finish_Date": MessageLookupByLibrary.simpleMessage("終了日"),
         "First_Impression": MessageLookupByLibrary.simpleMessage("第一印象"),
         "First_Volume_Sales": MessageLookupByLibrary.simpleMessage("第一巻売上高"),
+        "Font_Family": MessageLookupByLibrary.simpleMessage("フォントファミリー"),
+        "Font_Family_desc":
+            MessageLookupByLibrary.simpleMessage("アプリフォントファミリを変更します"),
+        "Font_Heading_Sample": MessageLookupByLibrary.simpleMessage("見出しテキスト"),
+        "Font_Instructions":
+            MessageLookupByLibrary.simpleMessage("アプリに希望するフォントファミリを選択します"),
+        "Font_Preview": MessageLookupByLibrary.simpleMessage("フォントプレビュー"),
+        "Font_Preview_Description":
+            MessageLookupByLibrary.simpleMessage("これは、アプリ全体にテキストが表示される方法です。"),
+        "Font_Restart_Notice": MessageLookupByLibrary.simpleMessage(
+            "すべての変更を確認するには、アプリを再起動する必要がある場合があります。"),
+        "Font_Sample_Text":
+            MessageLookupByLibrary.simpleMessage("素早い茶色のキツネが怠zyな犬を飛び越えます。"),
+        "Font_Settings": MessageLookupByLibrary.simpleMessage("フォント設定"),
+        "Font_Settings_desc":
+            MessageLookupByLibrary.simpleMessage("アプリフォントを変更します。"),
         "Food": MessageLookupByLibrary.simpleMessage("食べ物"),
         "Forum_Games": MessageLookupByLibrary.simpleMessage("フォーラムゲーム"),
         "Forums": MessageLookupByLibrary.simpleMessage("フォーラム"),
@@ -790,6 +806,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Rate_Review": MessageLookupByLibrary.simpleMessage("料金＆口コミ"),
         "Rate_Review_desc":
             MessageLookupByLibrary.simpleMessage("これは私達がアプリをより良くするのを助けるでしょう。"),
+        "Rate_limit_reached":
+            MessageLookupByLibrary.simpleMessage("API レート制限に達しました"),
         "Rating": MessageLookupByLibrary.simpleMessage("評価"),
         "Read": MessageLookupByLibrary.simpleMessage("読んだ"),
         "Reading": MessageLookupByLibrary.simpleMessage("読む"),
@@ -898,6 +916,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("フィルタリングするスコアを選択してください"),
         "Select_All": MessageLookupByLibrary.simpleMessage("すべて選択"),
         "Select_Board": MessageLookupByLibrary.simpleMessage("ボードを選択してください"),
+        "Select_Font_Family":
+            MessageLookupByLibrary.simpleMessage("フォントファミリを選択します"),
         "Select_Image":
             MessageLookupByLibrary.simpleMessage("背景画像として設定する画像を選択してください"),
         "Select_Image_desc":
@@ -975,6 +995,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "Sort_and_Filter": MessageLookupByLibrary.simpleMessage("並べ替えとフィルター"),
         "Sort_the_list_based_on":
             MessageLookupByLibrary.simpleMessage("に基づいてリストを並べ替えます"),
+        "Sorting_finished": MessageLookupByLibrary.simpleMessage("仕分け完了"),
         "Sound": MessageLookupByLibrary.simpleMessage("音"),
         "Source": MessageLookupByLibrary.simpleMessage("ソース"),
         "Space": MessageLookupByLibrary.simpleMessage("スペース"),

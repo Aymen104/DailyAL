@@ -1419,3 +1419,10 @@ Future<void> openFutureAndNavigate<T>({
     showToast(customError ?? S.current.Couldnt_connect_network);
   }
 }
+
+enum DeviceType { phone, tablet }
+
+DeviceType getDeviceType() {
+    final display = PlatformDispatcher.instance.views.first.display;
+    return display.size.shortestSide < 600 ? DeviceType.phone :DeviceType.tablet;
+}

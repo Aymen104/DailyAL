@@ -44,6 +44,7 @@ import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/shimmecolor.dart';
 import 'package:dailyanimelist/widgets/slivers.dart';
 import 'package:dailyanimelist/widgets/user/contenteditwidget.dart';
+import 'package:dailyanimelist/widgets/will_pop_widget.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -860,7 +861,7 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return WillPopWidget(
       onWillPop: () async {
         if (showContentEdit && mounted) {
           setState(() {
