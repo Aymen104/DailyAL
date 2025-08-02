@@ -77,6 +77,7 @@ Explore the extensive MyAnimeList database to discover your favorite anime and m
 - To run this project, you need to have [Flutter](https://flutter.dev/docs/get-started/install) installed on your machine.
 - Clone this repo to your machine: `git clone`
 - Use `dal-code.code-workspace` to open the project in VSCode
+- Run the script `update_gradle.sh` to make the gradle files ready for development
 - Run `flutter pub get` to install dependencies
 - Launch the app using `flutter run` or `F5` in VSCode
 
