@@ -50,31 +50,8 @@ class _WillPopWidgetState extends State<WillPopWidget> {
 
     // If onWillPop is provided, we initially set canPop to false.
     // The decision to pop is then handled asynchronously in onPopInvoked.
-    return PopScope(
-      canPop: false, // Prevent immediate pop to consult onWillPop.
-      onPopInvokedWithResult: (bool didPop, dynamic result) async {
-        // This callback is invoked after a pop attempt.
-        //
-        // If didPop is true, it means the pop attempt was successful.
-        // This might happen if canPop was true initially (e.g. onWillPopCallback was null)
-        // or if Navigator.pop() was called elsewhere (potentially with a result).
-        // In such cases, we don't need to do anything further.
-        if (didPop) {
-          return;
-        }
-
-        // If didPop is false, it means the pop attempt was blocked by canPop: false.
-        // Now, we invoke the user-provided onWillPop callback to determine
-        // if the pop should proceed.
-        final bool shouldPop = await onWillPopCallback();
-
-        // If onWillPopCallback resolves to true, and the widget is still mounted,
-        // we manually trigger the pop.
-        if (shouldPop && mounted) {
-          Navigator.of(context).pop();
-        }
-        // If shouldPop is false, we do nothing, and the pop remains prevented.
-      },
+    return WillPopScope(
+      onWillPop: onWillPopCallback,
       child: widget.child,
     );
   }
