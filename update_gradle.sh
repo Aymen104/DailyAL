@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 # 1. Insert after line 75 in android/app/build.gradle
-sed -i '75a\            proguardFiles getDefaultProguardFile('\''proguard-android.txt'\'')' android/app/build.gradle
+sed -i '75a\            proguardFiles getDefaultProguardFile('\''proguard-android.txt'\''), '\''proguard-rules.prop'\''' android/app/build.gradle
 
 # 2. Replace line 26 in android/settings.gradle
 sed -i '26s/.*/    id "com.android.application" version '\''8.4.2'\'' apply false/' android/settings.gradle
