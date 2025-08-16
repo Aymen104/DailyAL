@@ -32,9 +32,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "Action": MessageLookupByLibrary.simpleMessage("Tindakan"),
         "Adaptations": MessageLookupByLibrary.simpleMessage("Adaptasi"),
         "Adapts_Manga": MessageLookupByLibrary.simpleMessage("Adapt Manga."),
+        "Add": MessageLookupByLibrary.simpleMessage("Menambahkan"),
         "Add_Edit_Msg": MessageLookupByLibrary.simpleMessage(
             "Tambahkan atau Edit bagian tentang Anda."),
         "Add_Friend": MessageLookupByLibrary.simpleMessage("Menambah teman"),
+        "Add_Recurring_Event":
+            MessageLookupByLibrary.simpleMessage("Berulang mingguan"),
+        "Add_Recurring_Event_Desc": MessageLookupByLibrary.simpleMessage(
+            "Tambahkan episode masa depan sebagai acara mingguan"),
+        "Add_To_Calendar_Prompt":
+            MessageLookupByLibrary.simpleMessage("Tambahkan ke Kalender"),
         "Add_an_Item": MessageLookupByLibrary.simpleMessage("Tambahkan item"),
         "Add_display_profile":
             MessageLookupByLibrary.simpleMessage("Tambahkan Profil Tampilan"),
@@ -334,6 +341,24 @@ class MessageLookup extends MessageLookupByLibrary {
         "Dragon_Ball": MessageLookupByLibrary.simpleMessage("bola naga"),
         "Drama": MessageLookupByLibrary.simpleMessage("Drama"),
         "Dropped": MessageLookupByLibrary.simpleMessage("Menjatuhkan"),
+        "Dub_Icon_Style": MessageLookupByLibrary.simpleMessage("Gaya ikon"),
+        "Dub_Icon_Style_Desc": MessageLookupByLibrary.simpleMessage(
+            "Pilih gaya ikon untuk anime yang di-dubbing dan sebagian di-dubbing"),
+        "Dub_Language":
+            MessageLookupByLibrary.simpleMessage("Bahasa sulih suara"),
+        "Dub_Language_Desc":
+            MessageLookupByLibrary.simpleMessage("Pilih bahasa untuk dub"),
+        "Dub_Report": MessageLookupByLibrary.simpleMessage(
+            "Laporkan dub yang tidak akurat"),
+        "Dub_Settings": MessageLookupByLibrary.simpleMessage("Pengaturan Dub"),
+        "Dub_Settings_Desc": MessageLookupByLibrary.simpleMessage(
+            "Sesuaikan pengaturan dub Anda"),
+        "Dub_Show_Icon":
+            MessageLookupByLibrary.simpleMessage("Tampilkan ikon dub"),
+        "Dub_Show_Icon_Desc": MessageLookupByLibrary.simpleMessage(
+            "Aktifkan ikon dub di samping anime yang di-dubbing"),
+        "Dub_Support":
+            MessageLookupByLibrary.simpleMessage("Dukung proyek MyDubList"),
         "Duration": MessageLookupByLibrary.simpleMessage("Durasi"),
         "Ecchi": MessageLookupByLibrary.simpleMessage("Ecchi."),
         "Edit": MessageLookupByLibrary.simpleMessage("Sunting"),
@@ -365,10 +390,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "Episodes_seen":
             MessageLookupByLibrary.simpleMessage("Episode terlihat"),
         "Erotica": MessageLookupByLibrary.simpleMessage("Erotika"),
+        "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
+            "Kesalahan Menambahkan Acara ke Kalender"),
         "Error_removing_image": MessageLookupByLibrary.simpleMessage(
             "Terjadi kesalahan saat menghapus gambar"),
         "Error_uploading_image": MessageLookupByLibrary.simpleMessage(
             "Terjadi kesalahan saat mengunggah gambar"),
+        "Event_Added_To_Calendar": MessageLookupByLibrary.simpleMessage(
+            "Acara ditambahkan ke kalender"),
         "Events": MessageLookupByLibrary.simpleMessage("Acara."),
         "Exclude_the_genre_here":
             MessageLookupByLibrary.simpleMessage("Kecualikan genre di sini"),

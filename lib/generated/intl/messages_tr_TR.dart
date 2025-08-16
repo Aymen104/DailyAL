@@ -33,9 +33,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "Adaptations": MessageLookupByLibrary.simpleMessage("Uyarlamalar"),
         "Adapts_Manga":
             MessageLookupByLibrary.simpleMessage("Manga\'yı uyarlar"),
+        "Add": MessageLookupByLibrary.simpleMessage("Eklemek"),
         "Add_Edit_Msg": MessageLookupByLibrary.simpleMessage(
             "Hakkında bölümünüzü ekleyin veya düzenleyin."),
         "Add_Friend": MessageLookupByLibrary.simpleMessage("Arkadaş Ekle"),
+        "Add_Recurring_Event":
+            MessageLookupByLibrary.simpleMessage("Tekrarlayan haftalık"),
+        "Add_Recurring_Event_Desc": MessageLookupByLibrary.simpleMessage(
+            "Haftalık etkinlikler olarak gelecekteki bölümleri ekleyin"),
+        "Add_To_Calendar_Prompt":
+            MessageLookupByLibrary.simpleMessage("Takvime ekle"),
         "Add_an_Item": MessageLookupByLibrary.simpleMessage("Bir Öğe Ekle"),
         "Add_display_profile":
             MessageLookupByLibrary.simpleMessage("Görüntü Profili Ekle"),
@@ -334,6 +341,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "Dragon_Ball": MessageLookupByLibrary.simpleMessage("Ejder topu"),
         "Drama": MessageLookupByLibrary.simpleMessage("Dram"),
         "Dropped": MessageLookupByLibrary.simpleMessage("Düştü"),
+        "Dub_Icon_Style": MessageLookupByLibrary.simpleMessage("Simge stili"),
+        "Dub_Icon_Style_Desc": MessageLookupByLibrary.simpleMessage(
+            "Dublajlı ve kısmen dublajlı anime için simge stilini seçin"),
+        "Dub_Language": MessageLookupByLibrary.simpleMessage("Dublaj dili"),
+        "Dub_Language_Desc":
+            MessageLookupByLibrary.simpleMessage("Dublaj için dili seçin"),
+        "Dub_Report":
+            MessageLookupByLibrary.simpleMessage("Hatalı dublajları bildirin"),
+        "Dub_Settings": MessageLookupByLibrary.simpleMessage("Dublaj Ayarları"),
+        "Dub_Settings_Desc": MessageLookupByLibrary.simpleMessage(
+            "Dublaj ayarlarınızı özelleştirin"),
+        "Dub_Show_Icon":
+            MessageLookupByLibrary.simpleMessage("Dub simgesini göster"),
+        "Dub_Show_Icon_Desc": MessageLookupByLibrary.simpleMessage(
+            "Dublajlı animenin yanındaki dublaj simgesini etkinleştirin"),
+        "Dub_Support": MessageLookupByLibrary.simpleMessage(
+            "MyDubList projesini destekleyin"),
         "Duration": MessageLookupByLibrary.simpleMessage("Süre"),
         "Ecchi": MessageLookupByLibrary.simpleMessage("Ecchi"),
         "Edit": MessageLookupByLibrary.simpleMessage("Düzenlemek"),
@@ -363,10 +387,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "Episodes_seen":
             MessageLookupByLibrary.simpleMessage("Görülen Bölümler"),
         "Erotica": MessageLookupByLibrary.simpleMessage("Erotik"),
+        "Error_Adding_Event_To_Calendar":
+            MessageLookupByLibrary.simpleMessage("Takvime olay ekleme hatası"),
         "Error_removing_image": MessageLookupByLibrary.simpleMessage(
             "Resim kaldırılırken hata oluştu"),
         "Error_uploading_image":
             MessageLookupByLibrary.simpleMessage("Resmi yüklerken hata"),
+        "Event_Added_To_Calendar":
+            MessageLookupByLibrary.simpleMessage("Takvime eklenen etkinlik"),
         "Events": MessageLookupByLibrary.simpleMessage("Olaylar"),
         "Exclude_the_genre_here":
             MessageLookupByLibrary.simpleMessage("Türü burada hariç tutun"),

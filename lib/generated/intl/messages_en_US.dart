@@ -32,9 +32,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "Action": MessageLookupByLibrary.simpleMessage("Action"),
         "Adaptations": MessageLookupByLibrary.simpleMessage("Adaptations"),
         "Adapts_Manga": MessageLookupByLibrary.simpleMessage("Adapts Manga"),
+        "Add": MessageLookupByLibrary.simpleMessage("Add"),
         "Add_Edit_Msg": MessageLookupByLibrary.simpleMessage(
             "Add or Edit your about section."),
         "Add_Friend": MessageLookupByLibrary.simpleMessage("Add Friend"),
+        "Add_Recurring_Event":
+            MessageLookupByLibrary.simpleMessage("Recurring weekly"),
+        "Add_Recurring_Event_Desc": MessageLookupByLibrary.simpleMessage(
+            "Add future episodes as weekly events"),
+        "Add_To_Calendar_Prompt":
+            MessageLookupByLibrary.simpleMessage("Add to Calendar"),
         "Add_an_Item": MessageLookupByLibrary.simpleMessage("Add an Item"),
         "Add_display_profile":
             MessageLookupByLibrary.simpleMessage("Add Display Profile"),
@@ -330,6 +337,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "Dragon_Ball": MessageLookupByLibrary.simpleMessage("Dragon Ball"),
         "Drama": MessageLookupByLibrary.simpleMessage("Drama"),
         "Dropped": MessageLookupByLibrary.simpleMessage("Dropped"),
+        "Dub_Icon_Style": MessageLookupByLibrary.simpleMessage("Icon style"),
+        "Dub_Icon_Style_Desc": MessageLookupByLibrary.simpleMessage(
+            "Select the icon style for dubbed and partially dubbed anime"),
+        "Dub_Language": MessageLookupByLibrary.simpleMessage("Dub language"),
+        "Dub_Language_Desc": MessageLookupByLibrary.simpleMessage(
+            "Select the language for dubs"),
+        "Dub_Report":
+            MessageLookupByLibrary.simpleMessage("Report inaccurate dubs"),
+        "Dub_Settings": MessageLookupByLibrary.simpleMessage("Dub Settings"),
+        "Dub_Settings_Desc":
+            MessageLookupByLibrary.simpleMessage("Customize your dub settings"),
+        "Dub_Show_Icon": MessageLookupByLibrary.simpleMessage("Show dub icon"),
+        "Dub_Show_Icon_Desc": MessageLookupByLibrary.simpleMessage(
+            "Enable the dub icon next to dubbed anime"),
+        "Dub_Support": MessageLookupByLibrary.simpleMessage(
+            "Support the MyDubList project"),
         "Duration": MessageLookupByLibrary.simpleMessage("Duration"),
         "Ecchi": MessageLookupByLibrary.simpleMessage("Ecchi"),
         "Edit": MessageLookupByLibrary.simpleMessage("Edit"),
@@ -358,10 +381,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "Episodes": MessageLookupByLibrary.simpleMessage("Episodes"),
         "Episodes_seen": MessageLookupByLibrary.simpleMessage("Episodes Seen"),
         "Erotica": MessageLookupByLibrary.simpleMessage("Erotica"),
+        "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
+            "Error adding event to calendar"),
         "Error_removing_image":
             MessageLookupByLibrary.simpleMessage("Error removing image"),
         "Error_uploading_image":
             MessageLookupByLibrary.simpleMessage("Error uploading image"),
+        "Event_Added_To_Calendar":
+            MessageLookupByLibrary.simpleMessage("Event added to calendar"),
         "Events": MessageLookupByLibrary.simpleMessage("Events"),
         "Exclude_the_genre_here":
             MessageLookupByLibrary.simpleMessage("Exclude the genre here"),
@@ -1078,6 +1105,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "Show_Menu": MessageLookupByLibrary.simpleMessage("Show Menu"),
         "Show_Original": MessageLookupByLibrary.simpleMessage("Show Original"),
         "Show_Spoiler": MessageLookupByLibrary.simpleMessage("Show Spoiler"),
+        "Show_dub_status_AnimeList_Desc": MessageLookupByLibrary.simpleMessage(
+            "Show dub (English) status of an anime in list"),
         "Show_priority_in_anime_manga_list":
             MessageLookupByLibrary.simpleMessage(
                 "Show priority in anime/manga list"),

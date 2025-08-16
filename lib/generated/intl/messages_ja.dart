@@ -32,9 +32,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "Action": MessageLookupByLibrary.simpleMessage("アクション"),
         "Adaptations": MessageLookupByLibrary.simpleMessage("適応"),
         "Adapts_Manga": MessageLookupByLibrary.simpleMessage("マンガを適応させる"),
+        "Add": MessageLookupByLibrary.simpleMessage("追加"),
         "Add_Edit_Msg":
             MessageLookupByLibrary.simpleMessage("概要セクションを追加または編集します。"),
         "Add_Friend": MessageLookupByLibrary.simpleMessage("友人を追加する"),
+        "Add_Recurring_Event": MessageLookupByLibrary.simpleMessage("毎週繰り返し"),
+        "Add_Recurring_Event_Desc": MessageLookupByLibrary.simpleMessage(
+            "Add future episodes as weekly events"),
+        "Add_To_Calendar_Prompt":
+            MessageLookupByLibrary.simpleMessage("カレンダーに追加します"),
         "Add_an_Item": MessageLookupByLibrary.simpleMessage("アイテムを追加してください"),
         "Add_display_profile":
             MessageLookupByLibrary.simpleMessage("ディスプレイプロファイルの追加"),
@@ -294,6 +300,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "Dragon_Ball": MessageLookupByLibrary.simpleMessage("ドラゴンボール"),
         "Drama": MessageLookupByLibrary.simpleMessage("ドラマ"),
         "Dropped": MessageLookupByLibrary.simpleMessage("drop"),
+        "Dub_Icon_Style": MessageLookupByLibrary.simpleMessage("アイコンスタイル"),
+        "Dub_Icon_Style_Desc": MessageLookupByLibrary.simpleMessage(
+            "吹き替え版および部分吹き替え版アニメのアイコンスタイルを選択します"),
+        "Dub_Language": MessageLookupByLibrary.simpleMessage("吹き替え言語"),
+        "Dub_Language_Desc":
+            MessageLookupByLibrary.simpleMessage("吹き替えの言語を選択してください"),
+        "Dub_Report": MessageLookupByLibrary.simpleMessage("不正確な吹き替えを報告する"),
+        "Dub_Settings": MessageLookupByLibrary.simpleMessage("ダブ設定"),
+        "Dub_Settings_Desc":
+            MessageLookupByLibrary.simpleMessage("吹き替え設定をカスタマイズする"),
+        "Dub_Show_Icon": MessageLookupByLibrary.simpleMessage("吹き替えアイコンを表示"),
+        "Dub_Show_Icon_Desc":
+            MessageLookupByLibrary.simpleMessage("吹き替えアニメの横にある吹き替えアイコンを有効にする"),
+        "Dub_Support":
+            MessageLookupByLibrary.simpleMessage("MyDubListプロジェクトをサポートする"),
         "Duration": MessageLookupByLibrary.simpleMessage("間隔"),
         "Ecchi": MessageLookupByLibrary.simpleMessage("柏"),
         "Edit": MessageLookupByLibrary.simpleMessage("編集"),
@@ -321,10 +342,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "Episodes": MessageLookupByLibrary.simpleMessage("エピソード"),
         "Episodes_seen": MessageLookupByLibrary.simpleMessage("エピソードが見ました"),
         "Erotica": MessageLookupByLibrary.simpleMessage("エロティカ"),
+        "Error_Adding_Event_To_Calendar":
+            MessageLookupByLibrary.simpleMessage("カレンダーにイベントを追加するエラー"),
         "Error_removing_image":
             MessageLookupByLibrary.simpleMessage("画像の削除中にエラーが発生しました"),
         "Error_uploading_image":
             MessageLookupByLibrary.simpleMessage("画像のアップロード中にエラーが発生しました"),
+        "Event_Added_To_Calendar":
+            MessageLookupByLibrary.simpleMessage("カレンダーに追加されたイベント"),
         "Events": MessageLookupByLibrary.simpleMessage("イベント"),
         "Exclude_the_genre_here":
             MessageLookupByLibrary.simpleMessage("ここにジャンルを除外してください"),

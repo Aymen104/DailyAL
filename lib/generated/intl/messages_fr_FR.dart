@@ -32,9 +32,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "Action": MessageLookupByLibrary.simpleMessage("action"),
         "Adaptations": MessageLookupByLibrary.simpleMessage("Adaptations"),
         "Adapts_Manga": MessageLookupByLibrary.simpleMessage("Adapte manga"),
+        "Add": MessageLookupByLibrary.simpleMessage("Ajouter"),
         "Add_Edit_Msg": MessageLookupByLibrary.simpleMessage(
             "Ajoutez ou modifiez votre section À propos."),
         "Add_Friend": MessageLookupByLibrary.simpleMessage("Ajouter un ami"),
+        "Add_Recurring_Event":
+            MessageLookupByLibrary.simpleMessage("Hebdomadaire récurrent"),
+        "Add_Recurring_Event_Desc": MessageLookupByLibrary.simpleMessage(
+            "Ajouter les futurs épisodes comme événements hebdomadaires"),
+        "Add_To_Calendar_Prompt":
+            MessageLookupByLibrary.simpleMessage("Ajouter au calendrier"),
         "Add_an_Item":
             MessageLookupByLibrary.simpleMessage("Ajouter un article"),
         "Add_display_profile": MessageLookupByLibrary.simpleMessage(
@@ -345,6 +352,25 @@ class MessageLookup extends MessageLookupByLibrary {
         "Dragon_Ball": MessageLookupByLibrary.simpleMessage("Dragon Ball"),
         "Drama": MessageLookupByLibrary.simpleMessage("Drame"),
         "Dropped": MessageLookupByLibrary.simpleMessage("Chuté"),
+        "Dub_Icon_Style":
+            MessageLookupByLibrary.simpleMessage("Style d\'icône"),
+        "Dub_Icon_Style_Desc": MessageLookupByLibrary.simpleMessage(
+            "Sélectionnez le style d\'icône pour les animes doublés et partiellement doublés"),
+        "Dub_Language": MessageLookupByLibrary.simpleMessage("Langue dub"),
+        "Dub_Language_Desc": MessageLookupByLibrary.simpleMessage(
+            "Sélectionnez la langue pour les doublages"),
+        "Dub_Report": MessageLookupByLibrary.simpleMessage(
+            "Signaler les doublages inexacts"),
+        "Dub_Settings": MessageLookupByLibrary.simpleMessage(
+            "Signaler les doublages inexacts"),
+        "Dub_Settings_Desc": MessageLookupByLibrary.simpleMessage(
+            "Personnalisez vos paramètres de doublage"),
+        "Dub_Show_Icon": MessageLookupByLibrary.simpleMessage(
+            "Afficher l\'icône de doublage"),
+        "Dub_Show_Icon_Desc": MessageLookupByLibrary.simpleMessage(
+            "Activer l\'icône de doublage à côté de l\'anime doublé"),
+        "Dub_Support": MessageLookupByLibrary.simpleMessage(
+            "Soutenez le projet MyDubList"),
         "Duration": MessageLookupByLibrary.simpleMessage("Durée"),
         "Ecchi": MessageLookupByLibrary.simpleMessage("Ecchi"),
         "Edit": MessageLookupByLibrary.simpleMessage("Éditer"),
@@ -374,10 +400,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "Episodes": MessageLookupByLibrary.simpleMessage("Épisodes"),
         "Episodes_seen": MessageLookupByLibrary.simpleMessage("Épisodes vus"),
         "Erotica": MessageLookupByLibrary.simpleMessage("Érotique"),
+        "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
+            "Erreur d\'ajout d\'événement au calendrier"),
         "Error_removing_image": MessageLookupByLibrary.simpleMessage(
             "Erreur lors de la suppression de l\'image"),
         "Error_uploading_image": MessageLookupByLibrary.simpleMessage(
             "Erreur lors de l\'envoi de l\'image"),
+        "Event_Added_To_Calendar": MessageLookupByLibrary.simpleMessage(
+            "Événement ajouté au calendrier"),
         "Events": MessageLookupByLibrary.simpleMessage("Événements"),
         "Exclude_the_genre_here":
             MessageLookupByLibrary.simpleMessage("Exclure le genre ici"),

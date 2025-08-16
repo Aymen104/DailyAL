@@ -7,18 +7,8 @@ part of 'anime_manga_pref.dart';
 // **************************************************************************
 
 AnimeMangaPagePreferences _$AnimeMangaPagePreferencesFromJson(
-        Map<String, dynamic> json) {
-  List<ContentCardProps>? list;
-  try {
-    list = (json['contentCardProps'] as List<dynamic>?)
-        ?.map((e) => ContentCardProps.fromJson(e as Map<String, dynamic>?))
-        .toList();
-  } catch (e) {
-    if (e is Error) {
-     ErrorReporting.reportError(e);
-    }
-  }
-  return AnimeMangaPagePreferences(
+        Map<String, dynamic> json) =>
+    AnimeMangaPagePreferences(
       animeTabs: (json['animeTabs'] as List<dynamic>)
           .map((e) =>
               AnimeMangaTabPreference.fromJson(e as Map<String, dynamic>))
@@ -33,9 +23,12 @@ AnimeMangaPagePreferences _$AnimeMangaPagePreferencesFromJson(
       defaultTab: json['defaultTab'] as String?,
       defaultAnimeTab: json['defaultAnimeTab'] as String?,
       defaultMangaTab: json['defaultMangaTab'] as String?,
-      contentCardProps: list,
-    );
-}
+      contentCardProps: (json['contentCardProps'] as List<dynamic>?)
+          ?.map((e) => ContentCardProps.fromJson(e as Map<String, dynamic>?))
+          .toList(),
+    )
+      ..defaultAnimeAddToList = json['defaultAnimeAddToList'] as String?
+      ..defaultMangaAddToList = json['defaultMangaAddToList'] as String?;
 
 Map<String, dynamic> _$AnimeMangaPagePreferencesToJson(
         AnimeMangaPagePreferences instance) =>
@@ -46,6 +39,8 @@ Map<String, dynamic> _$AnimeMangaPagePreferencesToJson(
       'defaultTab': instance.defaultTab,
       'defaultAnimeTab': instance.defaultAnimeTab,
       'defaultMangaTab': instance.defaultMangaTab,
+      'defaultAnimeAddToList': instance.defaultAnimeAddToList,
+      'defaultMangaAddToList': instance.defaultMangaAddToList,
       'contentCardProps': instance.contentCardProps,
     };
 
