@@ -27,7 +27,8 @@ bool canBeFetchedFromAPI(
 
   return _sortFilterDisplay.filterOutputs.isEmpty &&
       orderMap.containsKey(_sortFilterDisplay.sort.value) &&
-      orderMap[_sortFilterDisplay.sort.value] == _sortFilterDisplay.sort.order &&
+      orderMap[_sortFilterDisplay.sort.value] ==
+          _sortFilterDisplay.sort.order &&
       canTitleSortingBeDoneUsingApi(_sortFilterDisplay);
 }
 
@@ -141,12 +142,24 @@ List<BaseNode> _filterCustomList(
             if (modalValue is Map) {
               String? status = modalValue[option.apiFieldName];
               final convertValue = _convertValue(selectedValue!, option);
+
+              // Handle "in_list" - show items with ANY status
+              if ('in_list'.equals(convertValue)) {
+                if (status != null) {
+                  continue forLoop;
+                }
+                return false;
+              }
+
+              // Handle "not_in_list" - show items with no status
               if (status == null) {
                 if ('not_in_list'.equals(convertValue)) {
                   continue forLoop;
                 }
                 return false;
               }
+
+              // Handle specific status selection
               if ('not_in_list'.equals(status) || status.equals(convertValue)) {
                 continue forLoop;
               } else {
@@ -1009,7 +1022,7 @@ class _SortFilterPopupState extends State<SortFilterPopup> {
   Widget _gridAxisSizeSliderWidget() {
     final axisCount = _sortFilterDisplay.displayOption.gridCrossAxisCount;
     final min = 2;
-    final max = 4;
+    final max = 8;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1036,7 +1049,7 @@ class _SortFilterPopupState extends State<SortFilterPopup> {
                     value: axisCount.toDouble(),
                     min: min.toDouble(),
                     max: max.toDouble(),
-                    divisions: 2,
+                    divisions: max - min,
                     label: _sortFilterDisplay.displayOption.gridCrossAxisCount
                         .toString(),
                     onChanged: (value) {

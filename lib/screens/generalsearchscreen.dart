@@ -12,7 +12,9 @@ import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/pages/animedetailed/intereststackwidget.dart';
+import 'package:dailyanimelist/screens/featurescreen.dart';
 import 'package:dailyanimelist/pages/search/allrankingwidget.dart';
+import 'package:dailyanimelist/pages/home/newswidget.dart';
 import 'package:dailyanimelist/pages/search/seasonalwidget.dart';
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/user/user.dart';
@@ -33,6 +35,7 @@ import 'package:dal_commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:dailyanimelist/util/responsive_helper.dart';
 
 List<BaseNode> searchBaseNodes(List<BaseNode> base, String text) {
   final filtered = base.where((f) {
@@ -74,6 +77,7 @@ class GeneralSearchScreen extends StatefulWidget {
   final String? category;
   final Map<String, FilterOption>? filterOutputs;
   final bool exclusiveScreen;
+  final VoidCallback? onClose;
 
   const GeneralSearchScreen({
     this.searchQuery,
@@ -82,6 +86,7 @@ class GeneralSearchScreen extends StatefulWidget {
     this.filterOutputs,
     this.exclusiveScreen = false,
     this.autoFocus = true,
+    this.onClose,
   });
 
   @override
@@ -125,11 +130,21 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   late Future<SearchResult> _seasonResult;
   late SortFilterDisplay _sortFilterDisplay;
 
+  bool _initDone = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initDone) {
+      _initDone = true;
+      _setDefaultSortFilterDisplay();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _searchTextListener = StreamListener('');
-    _setDefaultSortFilterDisplay();
 
     autoFocus = widget.autoFocus ?? false;
     if (autoFocus) {
@@ -181,7 +196,23 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   }
 
   set category(String value) {
-    _sortFilterDisplay = _sortFilterDisplay.copyWith(category: value);
+    var displayOption = _sortFilterDisplay.displayOption;
+    if (ResponsiveHelper.isTabletOrLarger(context)) {
+      if (['anime', 'manga'].contains(value)) {
+        displayOption = displayOption.copyWith(
+          displayType: DisplayType.grid,
+          displaySubType: DisplaySubType.compact,
+          gridCrossAxisCount: ResponsiveHelper.getCrossAxisCount(context),
+        );
+      } else {
+        displayOption = displayOption.copyWith(
+          displayType: user.pref.defaultDisplayType,
+          displaySubType: DisplaySubType.comfortable,
+        );
+      }
+    }
+    _sortFilterDisplay =
+        _sortFilterDisplay.copyWith(category: value, display: displayOption);
   }
 
   _setDefaultSortFilterDisplay() async {
@@ -216,13 +247,20 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   }
 
   SortFilterDisplay _defaultSortFilterDisplay() {
+    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+    final _cat = widget.category ?? "all";
+    final isGridTarget = isTablet && ['anime', 'manga'].contains(_cat);
+
     return SortFilterDisplay(
       sort: SortOption(name: 'name', value: 'value'),
       displayOption: DisplayOption(
-        displayType: user.pref.defaultDisplayType,
-        displaySubType: DisplaySubType.comfortable,
+        displayType:
+            isGridTarget ? DisplayType.grid : user.pref.defaultDisplayType,
+        displaySubType:
+            isGridTarget ? DisplaySubType.compact : DisplaySubType.comfortable,
+        gridCrossAxisCount: ResponsiveHelper.getCrossAxisCount(context),
       ),
-      category: widget.category ?? "all",
+      category: _cat,
       filterOutputs: widget.filterOutputs ?? {},
     );
   }
@@ -752,6 +790,10 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
         });
       return false;
     }
+    if (widget.onClose != null) {
+      widget.onClose!();
+      return false;
+    }
     return true;
   }
 
@@ -895,9 +937,80 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
         return ClubList(
             clubs:
                 results.map<ClubHtml>((e) => e.content as ClubHtml).toList());
+      case "news":
+        return _buildNewsList();
       default:
         return _buildListResults(results, category);
     }
+  }
+
+  Widget _buildNewsList() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+        final crossAxisCount = isTablet ? 2 : 1;
+
+        if (isTablet) {
+          return GridView.builder(
+            itemCount: results.length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              mainAxisExtent: 220,
+            ),
+            itemBuilder: (context, index) =>
+                _buildNewsItem(context, results[index], isTablet),
+          );
+        } else {
+          return ListView.builder(
+            itemCount: results.length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) =>
+                _buildNewsItem(context, results[index], isTablet),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildNewsItem(BuildContext context, BaseNode node, bool isTablet) {
+    final item = node.content;
+    if (item is Featured) {
+      return Container(
+        height: isTablet ? 220 : 260,
+        child: Card(
+          child: InkWell(
+            onTap: () {
+              var id = item.id;
+              if (id != null)
+                gotoPage(
+                    context: context,
+                    newPage: FeaturedScreen(
+                      category: 'news',
+                      featureTitle: item.title,
+                      id: id,
+                      imgUrl: item.mainPicture?.large,
+                    ));
+            },
+            child: NewsTile(
+              node: item,
+              compact: true,
+              enableTagClicks: true,
+            ),
+          ),
+        ),
+      );
+    }
+    return SB.z;
+  }
+
+  Widget _unused() {
+    return SB.z;
   }
 
   Widget showGridLayout() {
@@ -1237,7 +1350,7 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   Widget _buildListResults(List<BaseNode>? _results, String _category) {
     if (_results == null || _results.isEmpty) return SB.z;
     Widget build;
-    if (contentTypes.contains(category)) {
+    if (contentTypes.contains(_category)) {
       build = _contentTypesList(_category, _results);
     } else {
       build = _contentList(_category, _results);
@@ -1266,10 +1379,19 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
   }
 
   Widget _contentTypesList(String _category, List<BaseNode> _results) {
+    var displayOption = _sortFilterDisplay;
+    if (category.equals('all') && ResponsiveHelper.isTabletOrLarger(context)) {
+      displayOption = displayOption.copyWith(
+          display: displayOption.displayOption.copyWith(
+        displayType: DisplayType.grid,
+        displaySubType: DisplaySubType.compact,
+        gridCrossAxisCount: ResponsiveHelper.getCrossAxisCount(context),
+      ));
+    }
     return ContentListWithDisplayType(
       category: _category,
       items: _results,
-      sortFilterDisplay: _sortFilterDisplay,
+      sortFilterDisplay: displayOption,
       showIndex: true,
       showEdit: true,
       updateCacheOnEdit: true,
@@ -1411,6 +1533,10 @@ class _GeneralSearchScreenState extends State<GeneralSearchScreen>
                 });
               }
             } else {
+              if (widget.onClose != null) {
+                widget.onClose!();
+                return;
+              }
               Navigator.pop(context);
             }
           },

@@ -17,6 +17,7 @@ import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/screens/plainscreen.dart';
 import 'package:dailyanimelist/user/user.dart';
+import 'package:dailyanimelist/util/responsive_helper.dart';
 import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/customfuture.dart';
@@ -65,32 +66,44 @@ class _ExplorePageState extends State<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+    final contentPadding = ResponsiveHelper.getContentPadding(context);
     return CustomScrollView(
       slivers: [
         SB.lh35,
-        _wrapSliver(AppBarHome(
-          onUiChange: () {
-            if (mounted) setState(() {});
-          },
-        )),
+        if (!isTablet)
+          _wrapSliver(AppBarHome(
+            onUiChange: () {
+              if (mounted) setState(() {});
+            },
+          )),
         _buildAnimeMangaPicker,
         SB.lh20,
         _wrapSliver(_randomPickerWidget),
         SB.lh30,
-        _wrapSliver(
-          _leadingWidget(
-            VisibleSection(
-                S.current.Categories, AllRankingWidget(category: category)),
+        SliverPadding(
+          padding: contentPadding,
+          sliver: _wrapSliver(
+            _leadingWidget(
+              VisibleSection(
+                  S.current.Categories, AllRankingWidget(category: category)),
+            ),
           ),
         ),
-        _wrapSliver(
-          AllGenreWidget(category: category),
+        SliverPadding(
+          padding: contentPadding,
+          sliver: _wrapSliver(
+            AllGenreWidget(category: category),
+          ),
         ),
-        SliverList(
-            delegate: SliverChildBuilderDelegate(
-          (context, index) => slivers.elementAt(index),
-          childCount: slivers.length,
-        )),
+        SliverPadding(
+          padding: contentPadding,
+          sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+            (context, index) => slivers.elementAt(index),
+            childCount: slivers.length,
+          )),
+        ),
         SB.lh80,
       ],
     );
@@ -225,9 +238,7 @@ class _ExplorePageState extends State<ExplorePage> {
     return StateFullFutureWidget<PeopleListData>(
       future: () => DalApi.i.getPeople(),
       done: (data) => _characterPeopleListWidget(
-          data?.data?.data
-              ?.map((e) => CharPeopleCommon.fromPerson(e))
-              ?.toList(),
+          data?.data?.data?.map((e) => CharPeopleCommon.fromPerson(e)).toList(),
           'person'),
       loadingChild: _characterPeopleListWidget(null),
     );
@@ -395,45 +406,48 @@ class _ExplorePageState extends State<ExplorePage> {
   }
 
   Widget get _randomPickerWidget {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: horizPadding, vertical: 3.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _randomButton(
-            S.current.Random,
-            Colors.green,
-            Color.fromARGB(255, 43, 49, 43),
-            Icons.shuffle,
-            () => openFutureAndNavigate<int?>(
-              text: isAnime
-                  ? S.current.Loading_Random_Anime
-                  : S.current.Loading_Random_Manga,
-              future: DalApi.i.getRandom(category),
-              onData: _onGetId,
-              context: context,
+    return Center(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding:
+            const EdgeInsets.symmetric(horizontal: horizPadding, vertical: 3.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _randomButton(
+              S.current.Random,
+              Colors.green,
+              Color.fromARGB(255, 43, 49, 43),
+              Icons.shuffle,
+              () => openFutureAndNavigate<int?>(
+                text: isAnime
+                    ? S.current.Loading_Random_Anime
+                    : S.current.Loading_Random_Manga,
+                future: DalApi.i.getRandom(category),
+                onData: _onGetId,
+                context: context,
+              ),
             ),
-          ),
-          SB.w10,
-          _randomButton(
-            isAnime ? S.current.Watching : S.current.Reading,
-            Colors.amber,
-            Color.fromARGB(255, 126, 94, 0),
-            isAnime ? Icons.tv : Icons.book,
-            () => _openRandomWithStatus(
-                isAnime ? MyStatus.watching : MyStatus.reading),
-          ),
-          SB.w10,
-          _randomButton(
-            isAnime ? S.current.Plan_To_Watch : S.current.Plan_To_Read,
-            Colors.orange,
-            Color.fromARGB(255, 98, 59, 0),
-            Icons.history,
-            () => _openRandomWithStatus(
-                isAnime ? MyStatus.planToWatch : MyStatus.planToRead),
-          ),
-        ],
+            SB.w10,
+            _randomButton(
+              isAnime ? S.current.Watching : S.current.Reading,
+              Colors.amber,
+              Color.fromARGB(255, 126, 94, 0),
+              isAnime ? Icons.tv : Icons.book,
+              () => _openRandomWithStatus(
+                  isAnime ? MyStatus.watching : MyStatus.reading),
+            ),
+            SB.w10,
+            _randomButton(
+              isAnime ? S.current.Plan_To_Watch : S.current.Plan_To_Read,
+              Colors.orange,
+              Color.fromARGB(255, 98, 59, 0),
+              Icons.history,
+              () => _openRandomWithStatus(
+                  isAnime ? MyStatus.planToWatch : MyStatus.planToRead),
+            ),
+          ],
+        ),
       ),
     );
   }

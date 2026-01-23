@@ -3,11 +3,11 @@ import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/screens/plainscreen.dart';
 import 'package:dailyanimelist/util/pathutils.dart';
+import 'package:dailyanimelist/util/responsive_helper.dart';
 import 'package:dailyanimelist/widgets/anime_graph.dart';
 import 'package:dailyanimelist/widgets/common/share_builder.dart';
 import 'package:dailyanimelist/widgets/customappbar.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
-import 'package:dailyanimelist/widgets/customfuture.dart';
 import 'package:dailyanimelist/widgets/listsortfilter.dart';
 import 'package:dailyanimelist/widgets/slivers.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
@@ -16,7 +16,7 @@ import 'package:dal_commons/src/model/anime/anime_graph.dart';
 import 'package:flutter/material.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 
-enum _SelectedView {
+enum RelatedSelectedView {
   list,
   graph,
 }
@@ -28,6 +28,7 @@ class RelatedAnimeWidget extends StatefulWidget {
   final DisplayType displayType;
   final int id;
   final Map<int, MyListStatus>? statusMap;
+  final RelatedSelectedView selectedView;
   const RelatedAnimeWidget({
     required this.relatedAnimeList,
     this.category = "anime",
@@ -35,6 +36,7 @@ class RelatedAnimeWidget extends StatefulWidget {
     required this.id,
     this.displayType = DisplayType.list_horiz,
     this.statusMap,
+    this.selectedView = RelatedSelectedView.list,
   });
 
   @override
@@ -47,11 +49,12 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
   int pageIndex = 0;
   bool isHoriz = true;
   dynamic _graph;
-  _SelectedView _selectedView = _SelectedView.list;
+  late RelatedSelectedView _selectedView;
 
   @override
   void initState() {
     super.initState();
+    _selectedView = widget.selectedView;
     isHoriz = widget.displayType == DisplayType.list_horiz;
     widget.relatedAnimeList.forEach((relatedAnime) {
       final baseNodes = animeWidgets[relatedAnime.relationTypeFormatted] ?? [];
@@ -88,6 +91,7 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return DefaultTabController(
       length: animeWidgets.keys.length,
       child: isHoriz ? _horizView : _animeGraph,
@@ -95,7 +99,7 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
   }
 
   Widget get _animeGraph {
-    if (_selectedView == _SelectedView.list) {
+    if (_selectedView == RelatedSelectedView.list) {
       return _gridView;
     } else {
       if (_graph is AnimeGraph) {
@@ -174,7 +178,7 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
         IconButton(
           onPressed: () => _switchView(),
           icon: Icon(
-            _selectedView == _SelectedView.list
+            _selectedView == RelatedSelectedView.list
                 ? Icons.graphic_eq
                 : Icons.list_alt,
           ),
@@ -237,9 +241,9 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
 
   void _switchView() {
     setState(() {
-      _selectedView = _selectedView == _SelectedView.list
-          ? _SelectedView.graph
-          : _SelectedView.list;
+      _selectedView = _selectedView == RelatedSelectedView.list
+          ? RelatedSelectedView.graph
+          : RelatedSelectedView.list;
     });
   }
 
@@ -266,6 +270,7 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
         DisplayOption(
           displayType: DisplayType.grid,
           displaySubType: DisplaySubType.compact,
+          gridCrossAxisCount: ResponsiveHelper.getCrossAxisCount(context),
         ),
       ),
     );

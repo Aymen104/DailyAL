@@ -8,6 +8,7 @@ import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/user/user.dart';
+import 'package:dal_api/handlers/handler_core.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:dal_commons/dal_commons.dart' as commons;
 import 'package:html/dom.dart';
@@ -23,9 +24,22 @@ class MalConnect {
     String url,
     Map<String, String> headers,
   ) async {
+    final isDalLocal = url.startsWith('http://localhost:8080');
     final response = await _options.retry(
       // Make a GET request
-      () => http.get(Uri.parse(url), headers: headers).timeout(_retryDuration),
+      () async {
+        if (isDalLocal) {
+          var value = await HandlerCore()
+              .handleRequestAsString(Uri.parse(url))
+              .timeout(_retryDuration);
+          return http.Response.bytes(utf8.encode(value ?? ''), 200, headers: {
+            HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+          });
+        }
+        return http
+            .get(Uri.parse(url), headers: headers)
+            .timeout(_retryDuration);
+      },
       // Retry on SocketException or TimeoutException
       retryIf: (e) {
         logDal('retrying... on $e');
@@ -121,18 +135,17 @@ class MalConnect {
     }
     http.Response response;
     try {
-      final httpRespFuture = retryOnFail
-          ? retryGet(url, headers)
-          : useTimeout
-              ? http
-                  .get(Uri.parse(url), headers: headers)
-                  .timeout(timeoutDuration!, onTimeout: () {
-                  timeoutCache = true;
-                  return http.Response('cached', 200);
-                })
-              : http.get(Uri.parse(url), headers: headers);
-      response = await httpRespFuture;
-      if (response != null && response.statusCode == 200) {
+      response = await _getWithOptions(
+        url,
+        headers,
+        retryOnFail: retryOnFail,
+        useTimeout: useTimeout,
+        timeoutDuration: timeoutDuration,
+        onTimeout: () {
+          timeoutCache = true;
+        },
+      );
+      if (response.statusCode == 200) {
         if (timeoutCache) {
           logDal('from timeoutCache --> $url');
           return cachedResult;
@@ -151,6 +164,36 @@ class MalConnect {
     } catch (e) {
       logDal(e);
       return null;
+    }
+  }
+
+  static Future<http.Response> _getWithOptions(
+    String url,
+    Map<String, String> headers, {
+    required bool retryOnFail,
+    required bool useTimeout,
+    Duration? timeoutDuration,
+    required Function() onTimeout,
+  }) async {
+    final isDalLocal = url.startsWith('http://0.0.0.0:8080');
+    if (retryOnFail) {
+      return retryGet(url, headers);
+    } else if (isDalLocal) {
+      var value = await HandlerCore()
+          .handleRequestAsString(Uri.parse(url))
+          .timeout(_retryDuration);
+      return http.Response.bytes(utf8.encode(value ?? ''), 200, headers: {
+        HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
+      });
+    } else if (useTimeout) {
+      return http
+          .get(Uri.parse(url), headers: headers)
+          .timeout(timeoutDuration!, onTimeout: () {
+        onTimeout();
+        return http.Response('cached', 200);
+      });
+    } else {
+      return http.get(Uri.parse(url), headers: headers);
     }
   }
 

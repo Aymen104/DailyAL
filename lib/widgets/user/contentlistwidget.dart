@@ -429,7 +429,7 @@ class ContentListWithDisplayType extends StatelessWidget {
       return conditional(
         on: isHoriz,
         parent: (child) => SizedBox(
-          width: gridHeight * 2 / 3,
+          width: gridHeight / 1.4,
           child: child,
         ),
         child: buildBaseNodePageItem(
@@ -633,7 +633,8 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
     NodeStatusValue nsv = NodeStatusValue.fromListStatus(myListStatus);
     return ((widget.displayType == DisplayType.grid ||
                 widget.displayType == DisplayType.list_horiz) &&
-            contentTypes.contains(widget.category))
+            (contentTypes.contains(widget.category) ||
+                widget.category.equals('news')))
         ? CFutureBuilder(
             future: DalApi.i.scheduleForMalIds,
             loadingChild: _buildAnimeGridCard(null, nsv, context),

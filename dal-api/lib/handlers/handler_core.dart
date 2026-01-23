@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dal_api/cache/cache_manager.dart';
 import 'package:dal_api/handlers/environemt.dart';
 import 'package:dal_commons/commons.dart';
@@ -71,6 +73,11 @@ class HandlerCore {
     } else {
       return okResponse(json ?? {});
     }
+  }
+
+  Future<String?> handleRequestAsString(Uri uri) async {
+    final json = await handleRequestAsJson(Request('GET', uri));
+    return json != null ? jsonEncode(json) : null;
   }
 
   Future<dynamic> handleLambdaEvent(context, event) async {
@@ -415,7 +422,7 @@ class HandlerCore {
   Future<Map<String, dynamic>> _handleUserFriends(
       PathMatcher p1, Request p2) async {
     final username = queryParams(p2, 'username', '');
-    
+
     return await HttpConnect.htmlPage(
       '${Constants.htmlEnd}profile/$username/friends',
       (p0) => HtmlParsers.parseUserFriends(p0),

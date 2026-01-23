@@ -2,18 +2,15 @@ import 'package:dailyanimelist/api/malapi.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
-import 'package:dailyanimelist/main.dart';
-import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/screens/plainscreen.dart';
-import 'package:dailyanimelist/user/hompagepref.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/customfuture.dart';
-import 'package:dailyanimelist/widgets/home/animecard.dart';
 import 'package:dailyanimelist/widgets/listsortfilter.dart';
 import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dailyanimelist/widgets/slivers.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
+import 'package:dailyanimelist/util/responsive_helper.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
@@ -51,25 +48,35 @@ class _WeeklySchedulePageState extends State<WeeklySchedulePage>
       desc: S.current.Filter_type_of_results,
       values: animeStatusMap.values.toList(),
       apiValues: animeStatusMap.keys.toList(),
+      threeStateOption: 'not_in_list',
     ),
   ];
-  late SortFilterDisplay _sortFilterDisplay;
+  SortFilterDisplay? _sortFilterDisplay;
   String serviceName = 'weekly_schedule';
   String serviceKey = '@me';
   late TabController _tabController;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(
         length: 8, vsync: this, initialIndex: DateTime.now().weekday - 1);
-    _setSortFilterDisplayFuture();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _setSortFilterDisplayFuture();
+      _initialized = true;
+    }
   }
 
   void _setSortFilterDisplayFuture() async {
     _sortFilterDisplay = await SortFilterDisplay.fromCache(
         serviceName, serviceKey, _defaultObject());
-    _sortFilterDisplay = _sortFilterDisplay.copyWith(category: 'anime');
+    _sortFilterDisplay = _sortFilterDisplay!.copyWith(category: 'anime');
     if (mounted) setState(() {});
   }
 
@@ -77,8 +84,13 @@ class _WeeklySchedulePageState extends State<WeeklySchedulePage>
     return SortFilterDisplay(
       sort: _sortOptions[0].clone(),
       displayOption: DisplayOption(
-        displayType: DisplayType.list_vert,
-        displaySubType: DisplaySubType.comfortable,
+        displayType: ResponsiveHelper.isTabletOrLarger(context)
+            ? DisplayType.grid
+            : DisplayType.list_vert,
+        gridCrossAxisCount: 6,
+        displaySubType: ResponsiveHelper.isTabletOrLarger(context)
+            ? DisplaySubType.compact
+            : DisplaySubType.comfortable,
       ),
       filterOutputs: {},
     );
@@ -86,11 +98,12 @@ class _WeeklySchedulePageState extends State<WeeklySchedulePage>
 
   @override
   Widget build(BuildContext context) {
+    if (_sortFilterDisplay == null) return loadingCenter();
     return TitlebarScreen(
       WeeklyAnimeWidget(
         seasonType: widget.seasonType,
         year: widget.year,
-        sortFilterDisplay: _sortFilterDisplay,
+        sortFilterDisplay: _sortFilterDisplay!,
         tabController: _tabController,
       ),
       appbarTitle: '${widget.seasonType?.name.titleCase()} ${widget.year}',
@@ -99,7 +112,7 @@ class _WeeklySchedulePageState extends State<WeeklySchedulePage>
           icon: Icon(LineIcons.filter),
           onPressed: () => showSortFilterDisplayModal(
             context: context,
-            sortFilterDisplay: _sortFilterDisplay,
+            sortFilterDisplay: _sortFilterDisplay!,
             sortFilterOptions: SortFilterOptions(
               sortOptions: _sortOptions,
               filterOptions: _filterOptions,

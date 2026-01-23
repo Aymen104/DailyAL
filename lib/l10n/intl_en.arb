@@ -36,6 +36,7 @@
     "Forums": "Forums",
     "Recommended": "Recommended",
     "Stats": "Stats",
+    "Score_Stats": "Score Stats",
     "Pictures": "Pictures",
     "Related_Anime": "Related Anime",
     "Users": "users",
@@ -1014,5 +1015,7 @@
     "Add_To_Calendar_Prompt": "Add to Calendar",
     "Add_Recurring_Event": "Recurring weekly",
     "Add_Recurring_Event_Desc": "Add future episodes as weekly events",
-    "Add": "Add"
+    "Add": "Add",
+    "View_Related_Graph_Tooltip": "View related anime/manga graph",
+    "Calendar": "Calendar"
 }

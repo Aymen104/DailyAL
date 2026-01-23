@@ -399,12 +399,14 @@ void showCustomSheet({
   bool isScrollControlled = true,
   double elevation = 0,
   bool enableDrag = true,
+  BoxConstraints? constraints,
 }) {
   showModalBottomSheet(
     context: context,
     enableDrag: enableDrag,
     isScrollControlled: isScrollControlled,
     backgroundColor: color,
+    constraints: constraints,
     builder: (context) => Material(color: color, child: child),
   );
 }
@@ -973,6 +975,7 @@ Widget title(
   FontWeight? fontWeight = FontWeight.normal,
   bool selectable = false,
   double? scaleFactor,
+  int? maxLines,
 }) {
   title = title ?? '';
   textStyle ??= TextStyle();
@@ -992,6 +995,7 @@ Widget title(
       title,
       // overflow: TextOverflow.ellipsis,
       overflow: textOverflow,
+      maxLines: maxLines,
       textAlign: align,
       textScaleFactor: scaleFactor,
       style: TextStyle(
@@ -1423,6 +1427,6 @@ Future<void> openFutureAndNavigate<T>({
 enum DeviceType { phone, tablet }
 
 DeviceType getDeviceType() {
-    final display = PlatformDispatcher.instance.views.first.display;
-    return display.size.shortestSide < 600 ? DeviceType.phone :DeviceType.tablet;
+  final display = PlatformDispatcher.instance.views.first.display;
+  return display.size.shortestSide < 600 ? DeviceType.phone : DeviceType.tablet;
 }

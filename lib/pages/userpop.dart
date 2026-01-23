@@ -12,6 +12,7 @@ import 'package:dailyanimelist/pages/side_bar.dart';
 import 'package:dailyanimelist/pages/userpage.dart';
 import 'package:dailyanimelist/screens/user_profile.dart';
 import 'package:dailyanimelist/user/user.dart';
+import 'package:dailyanimelist/util/responsive_helper.dart';
 import 'package:dailyanimelist/util/streamutils.dart';
 import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
@@ -26,11 +27,15 @@ class UserPopSlideOpenPage extends StatefulWidget {
   final VoidCallback? onUiChange;
   final String? username;
   final bool isSelf;
+  final bool isFullScreen;
+  final bool showCloseBtn;
   const UserPopSlideOpenPage({
     super.key,
     this.onUiChange,
     this.username,
     required this.isSelf,
+    this.isFullScreen = false,
+    this.showCloseBtn = true,
   });
 
   @override
@@ -52,9 +57,11 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
       DraggableScrollableController();
   late bool isSelf;
   late Future<UserProf?> _userProfFuture;
+  late UserProf? userProfSync = null;
+  final ScrollController _fullScreenScrollController = ScrollController();
 
   String get _username {
-    return widget.username ?? '';
+    return widget.username ?? userProfSync?.name ?? '';
   }
 
   UserProfileType _userPageType() {
@@ -74,10 +81,12 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
   @override
   void initState() {
     isSelf = widget.isSelf;
-    _userProfFuture = _getUserProfileFuture();
+    _userProfFuture =
+        _getUserProfileFuture().then((value) => userProfSync = value);
     _bgImageRefKey = MalAuth.codeChallenge(10);
     _pageController = PageController(initialPage: 0);
     _pageListner = StreamListener(0);
+    _isFullScreen = widget.isFullScreen;
     super.initState();
   }
 
@@ -99,6 +108,11 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isFullScreen) {
+      return Scaffold(
+        body: _customScrollView(_fullScreenScrollController),
+      );
+    }
     return NotificationListener<DraggableScrollableNotification>(
       onNotification: (notification) {
         final bool isSheetFullScreen = notification.extent >= 0.99;
@@ -117,7 +131,6 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
         shouldCloseOnMinExtent: true,
         controller: _draggableScrollableController,
         builder: (BuildContext context, ScrollController scrollController) {
-          final body = _body(scrollController);
           return Material(
             borderRadius: _isFullScreen
                 ? BorderRadius.zero
@@ -125,21 +138,26 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
                     topLeft: Radius.circular(32.0),
                     topRight: Radius.circular(32.0),
                   ),
-            child: CustomScrollView(
-              controller: scrollController,
-              slivers: [
-                SliverWrapper(_buildHeader()),
-                SB.lh10,
-                SliverWrapper(_headerWidget()),
-                SliverFillRemaining(
-                  hasScrollBody: true,
-                  child: body,
-                )
-              ],
-            ),
+            child: _customScrollView(scrollController),
           );
         },
       ),
+    );
+  }
+
+  CustomScrollView _customScrollView(ScrollController scrollController) {
+    final body = _body(scrollController);
+    return CustomScrollView(
+      controller: scrollController,
+      slivers: [
+        SliverWrapper(_buildHeader()),
+        SB.lh10,
+        SliverWrapper(_headerWidget()),
+        SliverFillRemaining(
+          hasScrollBody: true,
+          child: body,
+        )
+      ],
     );
   }
 
@@ -332,6 +350,7 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
   }
 
   Widget _dragPill(String? data, UserProf? prof) {
+    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -341,19 +360,20 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: Icon(Icons.settings),
-                onPressed: () {
-                  gotoPage(
-                      context: context,
-                      newPage: SettingsPage(
-                        onUiChange: () {
-                          if (widget.onUiChange != null) widget.onUiChange!();
-                        },
-                      ));
-                },
-              ),
-              if (!_isFullScreen)
+              if (!isTablet)
+                IconButton(
+                  icon: Icon(Icons.settings),
+                  onPressed: () {
+                    gotoPage(
+                        context: context,
+                        newPage: SettingsPage(
+                          onUiChange: () {
+                            if (widget.onUiChange != null) widget.onUiChange!();
+                          },
+                        ));
+                  },
+                ),
+              if (!_isFullScreen && !isTablet)
                 Center(
                   child: Container(
                     width: 40,
@@ -377,15 +397,16 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
                 if (!isSelf && prof != null && prof.id != null)
                   _reportUserWidget(prof)
               ],
-              IconButton(
-                icon: Icon(
-                  Icons.close,
-                  weight: 25.0,
+              if (widget.showCloseBtn)
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    weight: 25.0,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
             ],
           ),
         ),
