@@ -1,3 +1,5 @@
+import 'dart:async' as async;
+import 'dart:io';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/dalapi.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
@@ -17,6 +19,7 @@ import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/util/responsive_helper.dart';
+import 'package:dailyanimelist/util/linux_desktop_helper.dart';
 import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/background.dart';
 import 'package:dailyanimelist/widgets/bottomnavbar.dart';
@@ -71,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final backImagePages = [homeIndex];
 
   Map<int, Widget> homeWidgets = {};
+  async.StreamSubscription? _traySubscription;
 
   @override
   void initState() {
@@ -89,7 +93,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     homeWidgets = _getPhoneWidgets();
 
     if (widget.pageIndex != null) {
-      pageIndex = widget.pageIndex! % 4; // Use 4 for initial calculation
+      // Widget pageIndex takes precedence
+      pageIndex = widget.pageIndex!;
     } else {
       pageIndex = user.pref.startUpPage;
     }
@@ -124,6 +129,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ));
         }
       }
+
+      if (Platform.isLinux) {
+        _traySubscription =
+            LinuxDesktopHelper.onNavigationEvent.listen((event) {
+          int targetIndex = homeIndex;
+          switch (event) {
+            case LinuxTrayEvent.search:
+              targetIndex = searchIndex;
+              break;
+            case LinuxTrayEvent.userList:
+              targetIndex = userIndex;
+              break;
+            case LinuxTrayEvent.calendar:
+              targetIndex = calendarIndex;
+              break;
+            case LinuxTrayEvent.home:
+              targetIndex = homeIndex;
+              break;
+          }
+          _onSelected(targetIndex);
+        });
+      }
     });
   }
 
@@ -142,9 +169,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (homeWidgets.length != newWidgets.length) {
       setState(() {
         homeWidgets = newWidgets;
-        // Adjust pageIndex if it's out of bounds
-        if (pageIndex >= homeWidgets.length) {
-          pageIndex = 0;
+        // Use the appropriate startup page for the current screen size
+        if (useNavigationRail) {
+          pageIndex =
+              user.pref.startUpPageTablet.clamp(0, homeWidgets.length - 1);
+        } else {
+          pageIndex = user.pref.startUpPageMobile.clamp(0, phoneProfileIndex);
         }
       });
     }
@@ -182,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       calendarIndex: OpacityAnima(
           child: AnimeCalendarWidget(showCloseButton: false),
           animation: animation),
+      settingsIndex: OpacityAnima(child: SettingsPage(), animation: animation),
     };
   }
 
@@ -197,6 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _traySubscription?.cancel();
     super.dispose();
   }
 
@@ -318,9 +350,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             label: Text(S.current.Social),
                           ),
                           NavigationRailDestination(
-                            icon: Icon(Icons.person_outline),
-                            selectedIcon: Icon(Icons.person),
-                            label: Text(S.current.User),
+                            icon: Icon(Icons.list_outlined),
+                            selectedIcon: Icon(Icons.list),
+                            label: Text(S.current.List),
                           ),
                           NavigationRailDestination(
                             icon: Icon(Icons.explore_outlined),
@@ -347,6 +379,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             icon: _userProfileWidget(),
                             selectedIcon: _userProfileWidget(isSelected: true),
                           ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.settings_outlined),
+                            selectedIcon: Icon(Icons.settings),
+                            label: Text(S.current.Settings),
+                          ),
                         ],
                       ),
                     ),
@@ -360,9 +397,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       );
     } else {
+      // On phone, clamp pageIndex to valid phone navigation range (0-4)
+      final phonePageIndex = pageIndex.clamp(0, phoneProfileIndex);
       return Scaffold(
         bottomNavigationBar: BottomNavBar(
-          startIndex: pageIndex,
+          startIndex: phonePageIndex,
           onChanged: (value) {
             _animationController.reset();
             _animationController.forward();
@@ -378,6 +417,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onSelected(int value) {
+    if (value == settingsIndex) {
+      _animationController.reset();
+      _animationController.forward();
+      if (mounted)
+        setState(() {
+          pageIndex = settingsIndex;
+        });
+      return;
+    }
+    if (value == profileIndex && user.status != AuthStatus.AUTHENTICATED) {
+      gotoPage(context: context, newPage: SettingsPage());
+      return;
+    }
     _animationController.reset();
     _animationController.forward();
     if (mounted)
@@ -388,13 +440,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _userProfileWidget({bool isSelected = false}) {
     if (user.status != AuthStatus.AUTHENTICATED) {
-      return IconButton(
-        icon: Icon(Icons.settings_outlined),
-        onPressed: () {
-          gotoPage(context: context, newPage: SettingsPage());
-        },
-        tooltip: S.current.Settings,
-      );
+      return Icon(isSelected ? Icons.settings : Icons.settings_outlined);
     }
     return CFutureBuilder<UserProf?>(
         loadingChild: SB.z,

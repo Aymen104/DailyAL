@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dal_commons/commons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CredMal {
@@ -34,8 +36,25 @@ class CredMal {
     return '${environment['MAL_CLIENT_SECRET']}';
   }
 
-  ///Redirect Uri
-  static final String redirectUri = "com.teen.dailyanimelist://login-callback";
+  /// Redirect Uri - platform-specific for OAuth callback
+  /// Android/iOS: custom URL scheme
+  /// Linux/Windows/macOS: localhost for flutter_web_auth_2
+  static String get redirectUri {
+    if (!kIsWeb &&
+        (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
+      return "http://localhost:8585/callback";
+    }
+    return "com.teen.dailyanimelist://login-callback";
+  }
+
+  /// Callback URL scheme for flutter_web_auth_2
+  static String get callbackUrlScheme {
+    if (!kIsWeb &&
+        (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
+      return "http://localhost:8585";
+    }
+    return "com.teen.dailyanimelist";
+  }
 
   //oauthEndPoint
   static final String oauthEndPoint =
@@ -66,6 +85,9 @@ class CredMal {
   static const String jikanV4 = "https://api.jikan.moe/v4/";
 
   static const String dalWeb = 'https://dailyanimelist.web.app/';
+
+  static const String webAssetsUrl =
+      'https://raw.githubusercontent.com/JICA98/DailyAL/refs/heads/psycho/web_assets/';
 
   static String get appConfigUrl {
     return '${environment['APP_CONFIG_URL']}';

@@ -66,17 +66,20 @@ class _ExplorePageState extends State<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+    // Use isExpandedOrLarger for consistency with homescreen navigation logic
+    // Medium screens (600-839dp) should still show AppBarHome
+    final isTablet = ResponsiveHelper.isExpandedOrLarger(context);
     final contentPadding = ResponsiveHelper.getContentPadding(context);
     return CustomScrollView(
       slivers: [
-        SB.lh35,
-        if (!isTablet)
+        if (!isTablet) ...[
+          SB.lh35,
           _wrapSliver(AppBarHome(
             onUiChange: () {
               if (mounted) setState(() {});
             },
           )),
+        ],
         _buildAnimeMangaPicker,
         SB.lh20,
         _wrapSliver(_randomPickerWidget),

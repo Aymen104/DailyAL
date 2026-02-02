@@ -134,14 +134,15 @@ class _SigninWidgetState extends State<SigninWidget> {
             ),
           ),
         ),
-        if (kDebugMode) ...[
-          SB.h30,
-          // Enter code manually
+        SB.h30,
+        // Keep manual input only for debug mode as a fallback
+        if (kDebugMode)
           Container(
             padding: EdgeInsets.symmetric(horizontal: 20),
             width: 500,
             child: TextFormField(
-              decoration: InputDecoration(hintText: "Enter code manually"),
+              decoration: InputDecoration(
+                  hintText: "Enter callback URL manually (debug)"),
               onFieldSubmitted: (value) async {
                 var uri = Uri.tryParse(value);
                 if (uri == null || !(await MalAuth.checkIfSignIn(uri))) {
@@ -150,7 +151,7 @@ class _SigninWidgetState extends State<SigninWidget> {
               },
             ),
           ),
-        ]
+        SB.h30,
       ];
     }
 

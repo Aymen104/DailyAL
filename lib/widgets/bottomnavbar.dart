@@ -49,7 +49,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ),
           BottomNavigationBarItem(
             label: '2',
-            icon: LineIcon.user(),
+            icon: LineIcon.list(),
           ),
           BottomNavigationBarItem(
             label: '3',
@@ -85,6 +85,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             url: userProf.data?.picture,
             height: 27,
             width: 27,
+            enableZoom: false,
           ),
         );
       },
