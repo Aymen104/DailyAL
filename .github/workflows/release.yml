@@ -5,13 +5,24 @@ on:
     tags:
       - '20*'
   workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - linux-android
+          - windows
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  build-linux-android:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'linux-android' }}
     
     steps:
     - uses: actions/checkout@v4
@@ -71,11 +82,74 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: release-artifacts
+        name: release-artifacts-linux-android
         path: release-artifacts/*
 
+  build-windows:
+    runs-on: windows-latest
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'windows' }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
+    - name: Enable Windows Desktop
+      run: flutter config --enable-windows-desktop
+
+    - name: Get Dependencies
+      run: flutter pub get
+
+    - name: Build Windows Release
+      run: flutter build windows --release
+
+    - name: Create MSIX
+      run: dart run msix:create --install-certificate false
+
+    - name: Separate MSIX and Compress Windows Build
+      run: |
+        Move-Item -Path build/windows/x64/runner/Release/*.msix -Destination DailyAL-Windows-x64.msix
+        Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath DailyAL-Windows-x64.zip
+
+    - name: Generate SHA1 Checksums
+      run: |
+        Get-FileHash DailyAL-Windows-x64.zip -Algorithm SHA1 | Select-Object -ExpandProperty Hash > DailyAL-Windows-x64.zip.sha1
+        Get-FileHash DailyAL-Windows-x64.msix -Algorithm SHA1 | Select-Object -ExpandProperty Hash > DailyAL-Windows-x64.msix.sha1
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts-windows
+        path: |
+          DailyAL-Windows-x64.msix
+          DailyAL-Windows-x64.msix.sha1
+          DailyAL-Windows-x64.zip
+          DailyAL-Windows-x64.zip.sha1
+
+  release:
+    needs: [build-linux-android, build-windows]
+    runs-on: ubuntu-latest
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/20') }}
+    
+    steps:
+    - name: Download Linux/Android Artifacts
+      if: ${{ needs.build-linux-android.result == 'success' }}
+      uses: actions/download-artifact@v4
+      with:
+        name: release-artifacts-linux-android
+        path: release-artifacts
+
+    - name: Download Windows Artifacts
+      if: ${{ needs.build-windows.result == 'success' }}
+      uses: actions/download-artifact@v4
+      with:
+        name: release-artifacts-windows
+        path: release-artifacts
+
     - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/20')
       uses: softprops/action-gh-release@v1
       with:
         files: |
@@ -83,3 +157,7 @@ jobs:
           release-artifacts/app-release.apk.sha1
           release-artifacts/DailyAL-x86_64.AppImage
           release-artifacts/DailyAL-x86_64.AppImage.sha1
+          release-artifacts/DailyAL-Windows-x64.msix
+          release-artifacts/DailyAL-Windows-x64.msix.sha1
+          release-artifacts/DailyAL-Windows-x64.zip
+          release-artifacts/DailyAL-Windows-x64.zip.sha1

@@ -397,6 +397,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Do you wish to logout?",
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Doujunshi"),
+    "Download_ICS": MessageLookupByLibrary.simpleMessage("Download .ics"),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Drag the field or use arrow keys to move the field",
     ),
@@ -466,6 +467,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
       "Error adding event to calendar",
     ),
+    "Error_Saving_File": MessageLookupByLibrary.simpleMessage(
+      "Error saving file!",
+    ),
     "Error_removing_image": MessageLookupByLibrary.simpleMessage(
       "Error removing image",
     ),
@@ -518,6 +522,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Female": MessageLookupByLibrary.simpleMessage("Female"),
     "Figures": MessageLookupByLibrary.simpleMessage("Figures"),
+    "File_Saved": MessageLookupByLibrary.simpleMessage(
+      "File saved to download folder!",
+    ),
     "Filter": MessageLookupByLibrary.simpleMessage("Filter"),
     "Filter_After_search": MessageLookupByLibrary.simpleMessage(
       "These filters will be used when you do your next search",
@@ -1073,6 +1080,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "Priority_level_qn": MessageLookupByLibrary.simpleMessage(
       "What is your priority level to watch/read this?",
     ),
+    "Private_Note": MessageLookupByLibrary.simpleMessage("Private Note"),
+    "Private_Note_Desc": MessageLookupByLibrary.simpleMessage(
+      "Saved locally, never sent to servers",
+    ),
+    "Private_Note_Hint": MessageLookupByLibrary.simpleMessage(
+      "Write your private note here...",
+    ),
+    "Private_Note_Local_Only": MessageLookupByLibrary.simpleMessage(
+      "This note is local only and won\'t be synced.",
+    ),
     "Profile": MessageLookupByLibrary.simpleMessage("Profile"),
     "Profile_Page": MessageLookupByLibrary.simpleMessage("Profile Page"),
     "Profile_bg_removed": MessageLookupByLibrary.simpleMessage(
@@ -1206,6 +1223,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Score_Distribution": MessageLookupByLibrary.simpleMessage(
       "Score Distribution",
     ),
+    "Score_Stats": MessageLookupByLibrary.simpleMessage("Score Stats"),
     "Screening": MessageLookupByLibrary.simpleMessage("Screening"),
     "Search": MessageLookupByLibrary.simpleMessage("Search"),
     "SearchBarHintText": MessageLookupByLibrary.simpleMessage(
@@ -1291,6 +1309,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Setup Timed out. Please try again.",
     ),
     "Share": MessageLookupByLibrary.simpleMessage("Share"),
+    "Share_ICS": MessageLookupByLibrary.simpleMessage("Share .ics"),
     "Shoujo": MessageLookupByLibrary.simpleMessage("Shoujo"),
     "Should_be_aplhanumeric": MessageLookupByLibrary.simpleMessage(
       "Should be alphanumeric",
@@ -1317,6 +1336,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Show_Menu": MessageLookupByLibrary.simpleMessage("Show Menu"),
     "Show_Original": MessageLookupByLibrary.simpleMessage("Show Original"),
+    "Show_Private_Review": MessageLookupByLibrary.simpleMessage(
+      "Show Private Review",
+    ),
+    "Show_Private_Review_Desc": MessageLookupByLibrary.simpleMessage(
+      "Show private note field in the edit screen",
+    ),
     "Show_Spoiler": MessageLookupByLibrary.simpleMessage("Show Spoiler"),
     "Show_dub_status_AnimeList_Desc": MessageLookupByLibrary.simpleMessage(
       "Show dub (English) status of an anime in list",
@@ -1487,7 +1512,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Top_Manga": MessageLookupByLibrary.simpleMessage("Top Manga"),
     "Top_Manga_Bypopularity": MessageLookupByLibrary.simpleMessage(
-      "Top Manga Bypopularity",
+      "Top Manga by Popularity",
     ),
     "Top_Manhua": MessageLookupByLibrary.simpleMessage("Top Manhua"),
     "Top_Manhwa": MessageLookupByLibrary.simpleMessage("Top Manhwa"),

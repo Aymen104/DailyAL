@@ -7,12 +7,18 @@ import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/screens/plainscreen.dart';
-import 'package:dailyanimelist/widgets/common/image_preview.dart';
+
 import 'package:dailyanimelist/widgets/home/animecard.dart';
 import 'package:dailyanimelist/widgets/selectbottom.dart';
 import 'package:dal_commons/commons.dart' as dal;
 import 'package:flutter/material.dart';
 import 'package:graphview/GraphView.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 enum _GraphOrderType {
   by_sequel,
@@ -54,18 +60,21 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
     _GraphOrderType.by_sequel: S.current.Graph_Order_By_Sequel,
     _GraphOrderType.from_selected: S.current.Graph_Order_From_Selected,
   };
-  _GraphOrderType _graphOrderType = _GraphOrderType.by_sequel;
+  _GraphOrderType _graphOrderType = _GraphOrderType.from_selected;
+  late int _selectedId;
+  final GlobalKey _globalKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+    _selectedId = widget.id;
     widget.graph.nodes?.forEach((node) => _nodeMap[node.id!] = node);
     _setGraph();
 
     _algorithm = SugiyamaAlgorithm(SugiyamaConfiguration()
       ..bendPointShape = CurvedBendPointShape(curveLength: 120.0)
-      ..nodeSeparation = 40
-      ..levelSeparation = 80);
+      ..nodeSeparation = 60
+      ..levelSeparation = 100);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setInitialPosition();
@@ -151,7 +160,7 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
 
   void _setInitialPosition([Size? size]) {
     final position = _algorithm.nodeData.keys.firstWhere((e) {
-      return e.key?.value == widget.id;
+      return e.key?.value == _selectedId;
     }).position;
     final contextSize = size ?? MediaQuery.of(context).size;
     _controller.value = Matrix4.identity()
@@ -183,14 +192,17 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
             minScale: 0.01,
             maxScale: 5.6,
             transformationController: _controller,
-            child: GraphView(
-              graph: _graph,
-              algorithm: _algorithm,
-              animated: false,
-              builder: (Node node) {
-                var a = node.key?.value as int?;
-                return rectangleWidget(_nodeMap[a]!);
-              },
+            child: RepaintBoundary(
+              key: _globalKey,
+              child: GraphView(
+                graph: _graph,
+                algorithm: _algorithm,
+                animated: false,
+                builder: (Node node) {
+                  var a = node.key?.value as int?;
+                  return rectangleWidget(_nodeMap[a]!);
+                },
+              ),
             ),
           ),
           _bottomBar(),
@@ -229,6 +241,7 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
         children: [
           IconButton.filled(
             onPressed: () {
+              _selectedId = widget.id;
               _setInitialPosition();
               if (mounted) setState(() {});
             },
@@ -238,6 +251,11 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
           IconButton.filled(
             onPressed: () => _onEdgeInfo(),
             icon: Icon(Icons.info),
+          ),
+          SB.w20,
+          IconButton.filled(
+            onPressed: () => _captureAndSharePng(),
+            icon: Icon(Icons.camera_alt),
           )
         ],
       ),
@@ -327,7 +345,7 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
       child: Center(
         child: AutoSizeText(
           a.title ?? "",
-          maxLines: 2,
+          maxLines: 3,
           minFontSize: 10.0,
           textAlign: TextAlign.center,
         ),
@@ -419,7 +437,7 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
       child: InkWell(
         borderRadius: BorderRadius.circular(64),
         onTap: () => _setExpanded(a),
-        onLongPress: () => zoomInImage(context, imageUrl),
+        onLongPress: () => _onNodeSelect(a),
         child: Ink(
           child: CircleAvatar(
             backgroundImage: NetworkImage(imageUrl),
@@ -430,6 +448,7 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
     final myListStatus = widget.statusMap[a.id];
     final value = NodeStatusValue.fromListStatus(myListStatus);
     final contains = _expandedIds.contains(a.id);
+    final isSelected = _selectedId == a.id;
     final statusOutline = Container(
       height: 140.0,
       width: 140.0,
@@ -471,7 +490,7 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
       width: 140.0,
       child: Stack(
         children: [
-          if (widget.id == a.id) centerBorder,
+          if (isSelected) centerBorder,
           if (value.color != null || contains) statusOutline,
           Positioned(
             top: 10,
@@ -495,5 +514,127 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
                 medium: a.mainPicture?.medium,
               )),
         ));
+  }
+
+  Future<void> _captureAndSharePng() async {
+    try {
+      RenderRepaintBoundary boundary = _globalKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+
+      ui.Image? graphImage;
+      // Try higher pixel ratios for better quality
+      final ratios = [50.0, 30.0, 15.0, 10.0, 5.0, 3.0, 1.0];
+
+      for (final ratio in ratios) {
+        try {
+          graphImage = await boundary.toImage(pixelRatio: ratio);
+          break;
+        } catch (e) {
+          debugPrint('Failed to capture at ratio $ratio: $e');
+        }
+      }
+
+      if (graphImage == null) {
+        if (mounted) showToast(S.current.Couldnt_generate_graph);
+        return;
+      }
+
+      // Load Logo
+      final logoBytes = await rootBundle.load('assets/images/dal-black-bg.png');
+      final logoCodec = await ui.instantiateImageCodec(
+        logoBytes.buffer.asUint8List(),
+      );
+      final logoFrame = await logoCodec.getNextFrame();
+      final logoImage = logoFrame.image;
+
+      // Calculate sizes
+      // Footer height relative to graph height, but at least enough for logo + padding
+      final footerHeight = (graphImage.height * 0.15).clamp(100.0, 400.0);
+      final totalWidth = graphImage.width;
+      final totalHeight = graphImage.height + footerHeight.toInt();
+      final scaleFactor = totalWidth / 1000.0; // Base scale on width
+
+      // Create Canvas
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(
+          recorder,
+          Rect.fromPoints(Offset.zero,
+              Offset(totalWidth.toDouble(), totalHeight.toDouble())));
+
+      // Draw Graph
+      canvas.drawImage(graphImage, Offset.zero, Paint());
+
+      // Draw Footer Background
+      final footerRect = Rect.fromLTWH(
+          0, graphImage.height.toDouble(), totalWidth.toDouble(), footerHeight);
+      canvas.drawRect(footerRect, Paint()..color = const Color(0xFF151515));
+
+      // Draw Logo
+      final logoSize = footerHeight * 0.7; // Logo takes 80% of footer height
+      final logoY = graphImage.height + (footerHeight - logoSize) / 2;
+      final logoX = 50.0 * scaleFactor; // Padding from left
+      final logoRect = Rect.fromLTWH(logoX, logoY, logoSize, logoSize);
+
+      // Paint logo with high quality filtering
+      paintImage(
+        canvas: canvas,
+        rect: logoRect,
+        image: logoImage,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+      );
+
+      // Draw Text
+      final textSpan = TextSpan(
+        text: 'Created from DailyAL App',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: (footerHeight * 0.35).clamp(24.0, 100.0),
+          fontFamily: 'Roboto', // Default flutter font or app font
+          fontWeight: FontWeight.bold,
+        ),
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+
+      final textX = logoX + logoSize + (40.0 * scaleFactor);
+      final textY = graphImage.height + (footerHeight - textPainter.height) / 2;
+
+      textPainter.paint(canvas, Offset(textX, textY));
+
+      // Finalize Image
+      final picture = recorder.endRecording();
+      final finalImage = await picture.toImage(totalWidth, totalHeight);
+
+      ByteData? byteData =
+          await finalImage.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final node = _nodeMap[widget.id];
+      final title =
+          node?.title?.replaceAll(RegExp(r'[^\w\s]+'), '') ?? 'anime_graph';
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = '${title}_${widget.id}_$timestamp.png';
+
+      final file = await File('${tempDir.path}/$fileName').create();
+      await file.writeAsBytes(pngBytes);
+
+      await Share.shareXFiles([XFile(file.path)], text: fileName);
+    } catch (e) {
+      dal.logDal(e.toString());
+      if (mounted) showToast(S.current.Couldnt_generate_graph);
+    }
+  }
+
+  void _onNodeSelect(dal.GraphNode a) {
+    if (a.id != null) {
+      _selectedId = a.id!;
+      _setInitialPosition();
+      if (mounted) setState(() {});
+    }
   }
 }

@@ -213,6 +213,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Apoye el desarrollo de esta aplicación aquí",
     ),
     "CGDCT": MessageLookupByLibrary.simpleMessage("CGDCT"),
+    "Calendar": MessageLookupByLibrary.simpleMessage("Calendario"),
     "Cancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
     "Cancelled_Restore": MessageLookupByLibrary.simpleMessage(
       "Restauración cancelada",
@@ -420,6 +421,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "¿Deseas cerrar sesión?",
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Forma de dirección"),
+    "Download_ICS": MessageLookupByLibrary.simpleMessage("Descargar .ics"),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Arrastre el campo o use las teclas de flecha para mover el campo",
     ),
@@ -495,6 +497,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
       "Error a agregar evento al calendario",
     ),
+    "Error_Saving_File": MessageLookupByLibrary.simpleMessage(
+      "¡Error al guardar el archivo!",
+    ),
     "Error_removing_image": MessageLookupByLibrary.simpleMessage(
       "Error al eliminar la imagen",
     ),
@@ -549,6 +554,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Female": MessageLookupByLibrary.simpleMessage("Mujer"),
     "Figures": MessageLookupByLibrary.simpleMessage("Cifras"),
+    "File_Saved": MessageLookupByLibrary.simpleMessage(
+      "¡Archivo guardado en la carpeta de descargas!",
+    ),
     "Filter": MessageLookupByLibrary.simpleMessage("Filtrar"),
     "Filter_After_search": MessageLookupByLibrary.simpleMessage(
       "Estos filtros se utilizarán cuando realice su próxima búsqueda.",
@@ -1156,6 +1164,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "Priority_level_qn": MessageLookupByLibrary.simpleMessage(
       "¿Cuál es su nivel de prioridad para ver / leer esto?",
     ),
+    "Private_Note": MessageLookupByLibrary.simpleMessage("Nota Privada"),
+    "Private_Note_Desc": MessageLookupByLibrary.simpleMessage(
+      "Guardado localmente, nunca se envía a los servidores",
+    ),
+    "Private_Note_Hint": MessageLookupByLibrary.simpleMessage(
+      "Escribe tu nota privada aquí...",
+    ),
+    "Private_Note_Local_Only": MessageLookupByLibrary.simpleMessage(
+      "Esta nota es solo local y no se sincronizará.",
+    ),
     "Profile": MessageLookupByLibrary.simpleMessage("Perfil"),
     "Profile_Page": MessageLookupByLibrary.simpleMessage("Página de perfil"),
     "Profile_bg_removed": MessageLookupByLibrary.simpleMessage(
@@ -1297,6 +1315,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Score_Distribution": MessageLookupByLibrary.simpleMessage(
       "Distribución de puntuación",
     ),
+    "Score_Stats": MessageLookupByLibrary.simpleMessage(
+      "Estadísticas de puntuación",
+    ),
     "Screening": MessageLookupByLibrary.simpleMessage("Poner en pantalla"),
     "Search": MessageLookupByLibrary.simpleMessage("Buscar"),
     "SearchBarHintText": MessageLookupByLibrary.simpleMessage(
@@ -1392,6 +1413,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Configuración programada.Inténtalo de nuevo.",
     ),
     "Share": MessageLookupByLibrary.simpleMessage("Cuota"),
+    "Share_ICS": MessageLookupByLibrary.simpleMessage("Compartir .ics"),
     "Shoujo": MessageLookupByLibrary.simpleMessage("Shoujo"),
     "Should_be_aplhanumeric": MessageLookupByLibrary.simpleMessage(
       "debe ser alfanumérico",
@@ -1418,7 +1440,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Show_Menu": MessageLookupByLibrary.simpleMessage("Muestrame el menu"),
     "Show_Original": MessageLookupByLibrary.simpleMessage("Mostrar original"),
+    "Show_Private_Review": MessageLookupByLibrary.simpleMessage(
+      "Mostrar Notas Privadas",
+    ),
+    "Show_Private_Review_Desc": MessageLookupByLibrary.simpleMessage(
+      "Mostrar el campo de notas privadas en la pantalla de edición",
+    ),
     "Show_Spoiler": MessageLookupByLibrary.simpleMessage("Mostrar spoiler"),
+    "Show_dub_status_AnimeList_Desc": MessageLookupByLibrary.simpleMessage(
+      "Mostrar el estado de doblaje (inglés) de un anime en la lista",
+    ),
     "Show_priority_in_anime_manga_list": MessageLookupByLibrary.simpleMessage(
       "Mostrar prioridad en la lista de anime / manga",
     ),
@@ -1686,6 +1717,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Video_Game": MessageLookupByLibrary.simpleMessage("Videojuego"),
     "Videos": MessageLookupByLibrary.simpleMessage("Vídeos"),
     "View_All": MessageLookupByLibrary.simpleMessage("Ver todo"),
+    "View_Related_Graph_Tooltip": MessageLookupByLibrary.simpleMessage(
+      "Ver gráfico de anime/manga relacionado",
+    ),
     "View_all_Discussions": MessageLookupByLibrary.simpleMessage(
       "Ver todas las discusiones",
     ),

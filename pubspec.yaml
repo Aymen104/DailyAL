@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 2026.2.3+105
+version: 2026.2.4+106
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -47,8 +47,8 @@ dependencies:
   scroll_to_index: ^3.0.1
   share_plus: ^10.0.2
   built_collection: ^5.1.0
-  flutter_local_notifications: ^17.2.2
-  timezone: ^0.9.0
+  flutter_local_notifications: ^20.1.0
+  timezone: ^0.10.0
   flutter_custom_tabs: ^2.1.0
   flex_color_picker: ^3.5.1
   translator_plus: ^1.0.1
@@ -95,6 +95,7 @@ dev_dependencies:
   json_serializable: ^6.7.1
   build_runner: ^2.1.7
   intl_utils: ^2.8.4
+  msix: ^3.16.13
 
 flutter:
   generate: true
@@ -192,3 +193,12 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 flutter_intl:
   enabled: true
+
+msix_config:
+  display_name: DailyAL
+  publisher_display_name: JICA98
+  identity_name: io.github.jica98.dailyal
+  publisher: CN=JICA98
+  msix_version: 1.0.0.0
+  logo_path: windows/runner/resources/app_icon.ico
+  capabilities: internetClient

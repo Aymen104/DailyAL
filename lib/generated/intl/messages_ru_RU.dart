@@ -211,6 +211,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Поддержите разработку этого приложения здесь",
     ),
     "CGDCT": MessageLookupByLibrary.simpleMessage("КГДКТ"),
+    "Calendar": MessageLookupByLibrary.simpleMessage("Календарь"),
     "Cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
     "Cancelled_Restore": MessageLookupByLibrary.simpleMessage(
       "Отменено восстановление",
@@ -408,6 +409,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Вы хотите выйти из системы?",
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Как патрулировать"),
+    "Download_ICS": MessageLookupByLibrary.simpleMessage("Скачать .ics"),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Перетащите поле или используйте клавиши со стрелками для перемещения поля.",
     ),
@@ -483,6 +485,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
       "Ошибка добавления события в календарь",
     ),
+    "Error_Saving_File": MessageLookupByLibrary.simpleMessage(
+      "Ошибка сохранения файла!",
+    ),
     "Error_removing_image": MessageLookupByLibrary.simpleMessage(
       "Ошибка удаления изображения.",
     ),
@@ -535,6 +540,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Female": MessageLookupByLibrary.simpleMessage("Женский"),
     "Figures": MessageLookupByLibrary.simpleMessage("Цифры"),
+    "File_Saved": MessageLookupByLibrary.simpleMessage(
+      "Файл сохранен в папке загрузки!",
+    ),
     "Filter": MessageLookupByLibrary.simpleMessage("Фильтр"),
     "Filter_After_search": MessageLookupByLibrary.simpleMessage(
       "Эти фильтры будут использоваться при следующем поиске.",
@@ -1132,6 +1140,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "Priority_level_qn": MessageLookupByLibrary.simpleMessage(
       "Какой у вас приоритет при просмотре/чтении этого?",
     ),
+    "Private_Note": MessageLookupByLibrary.simpleMessage("Личная заметка"),
+    "Private_Note_Desc": MessageLookupByLibrary.simpleMessage(
+      "Сохранено локально, никогда не отправляется на серверы",
+    ),
+    "Private_Note_Hint": MessageLookupByLibrary.simpleMessage(
+      "Напишите здесь свою личную заметку...",
+    ),
+    "Private_Note_Local_Only": MessageLookupByLibrary.simpleMessage(
+      "Эта заметка только локальная и не будет синхронизирована.",
+    ),
     "Profile": MessageLookupByLibrary.simpleMessage("Профиль"),
     "Profile_Page": MessageLookupByLibrary.simpleMessage("Страница профиля"),
     "Profile_bg_removed": MessageLookupByLibrary.simpleMessage(
@@ -1277,6 +1295,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Score_Distribution": MessageLookupByLibrary.simpleMessage(
       "Распределение очков",
     ),
+    "Score_Stats": MessageLookupByLibrary.simpleMessage("Статистика очков"),
     "Screening": MessageLookupByLibrary.simpleMessage("Скрининг"),
     "Search": MessageLookupByLibrary.simpleMessage("Поиск"),
     "SearchBarHintText": MessageLookupByLibrary.simpleMessage(
@@ -1360,6 +1379,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Время установки истекло. Пожалуйста, попробуйте еще раз.",
     ),
     "Share": MessageLookupByLibrary.simpleMessage("Делиться"),
+    "Share_ICS": MessageLookupByLibrary.simpleMessage("Поделиться .ics"),
     "Shoujo": MessageLookupByLibrary.simpleMessage("Сёдзё"),
     "Should_be_aplhanumeric": MessageLookupByLibrary.simpleMessage(
       "Должно быть буквенно-цифровым",
@@ -1386,7 +1406,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Show_Menu": MessageLookupByLibrary.simpleMessage("Показать меню"),
     "Show_Original": MessageLookupByLibrary.simpleMessage("Показать оригинал"),
+    "Show_Private_Review": MessageLookupByLibrary.simpleMessage(
+      "Показать личную заметку",
+    ),
+    "Show_Private_Review_Desc": MessageLookupByLibrary.simpleMessage(
+      "Показать поле личной заметки на экране редактирования",
+    ),
     "Show_Spoiler": MessageLookupByLibrary.simpleMessage("Показать спойлер"),
+    "Show_dub_status_AnimeList_Desc": MessageLookupByLibrary.simpleMessage(
+      "Показывать статус дубляжа (английского) аниме в списке",
+    ),
     "Show_priority_in_anime_manga_list": MessageLookupByLibrary.simpleMessage(
       "Показывать приоритет в списке аниме/манги",
     ),
@@ -1654,6 +1683,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Video_Game": MessageLookupByLibrary.simpleMessage("Видео игра"),
     "Videos": MessageLookupByLibrary.simpleMessage("Видео"),
     "View_All": MessageLookupByLibrary.simpleMessage("Посмотреть все"),
+    "View_Related_Graph_Tooltip": MessageLookupByLibrary.simpleMessage(
+      "Посмотреть связанный график аниме/манги",
+    ),
     "View_all_Discussions": MessageLookupByLibrary.simpleMessage(
       "Просмотреть все обсуждения",
     ),

@@ -211,6 +211,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bu uygulamanın gelişimini buradan destekleyin",
     ),
     "CGDCT": MessageLookupByLibrary.simpleMessage("CGDCT"),
+    "Calendar": MessageLookupByLibrary.simpleMessage("Takvim"),
     "Cancel": MessageLookupByLibrary.simpleMessage("İptal etmek"),
     "Cancelled_Restore": MessageLookupByLibrary.simpleMessage(
       "İptal Edilen Geri Yükleme",
@@ -402,6 +403,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Oturumu kapatmak istiyor musunuz?",
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Devriye nasıl yapılır"),
+    "Download_ICS": MessageLookupByLibrary.simpleMessage(".ics\'i indirin"),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Alanı sürükleyin veya alanı taşımak için ok tuşlarını kullanın",
     ),
@@ -473,6 +475,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
       "Takvime olay ekleme hatası",
     ),
+    "Error_Saving_File": MessageLookupByLibrary.simpleMessage(
+      "Dosya kaydedilirken hata oluştu!",
+    ),
     "Error_removing_image": MessageLookupByLibrary.simpleMessage(
       "Resim kaldırılırken hata oluştu",
     ),
@@ -525,6 +530,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Female": MessageLookupByLibrary.simpleMessage("Dişi"),
     "Figures": MessageLookupByLibrary.simpleMessage("Rakamlar"),
+    "File_Saved": MessageLookupByLibrary.simpleMessage(
+      "Dosya indirme klasörüne kaydedildi!",
+    ),
     "Filter": MessageLookupByLibrary.simpleMessage("Filtre"),
     "Filter_After_search": MessageLookupByLibrary.simpleMessage(
       "Bir sonraki aramanızı yaptığınızda bu filtreler kullanılacaktır",
@@ -1100,6 +1108,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "Priority_level_qn": MessageLookupByLibrary.simpleMessage(
       "Bunu izlemek/okumak için öncelik düzeyiniz nedir?",
     ),
+    "Private_Note": MessageLookupByLibrary.simpleMessage("Özel Not"),
+    "Private_Note_Desc": MessageLookupByLibrary.simpleMessage(
+      "Yerel olarak kaydedilir, asla sunuculara gönderilmez",
+    ),
+    "Private_Note_Hint": MessageLookupByLibrary.simpleMessage(
+      "Özel notunuzu buraya yazın...",
+    ),
+    "Private_Note_Local_Only": MessageLookupByLibrary.simpleMessage(
+      "Bu not yalnızca yereldir ve senkronize edilmeyecektir.",
+    ),
     "Profile": MessageLookupByLibrary.simpleMessage("Profil"),
     "Profile_Page": MessageLookupByLibrary.simpleMessage("Profil sayfası"),
     "Profile_bg_removed": MessageLookupByLibrary.simpleMessage(
@@ -1235,6 +1253,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Sci_fi": MessageLookupByLibrary.simpleMessage("Bilim kurgu"),
     "Score": MessageLookupByLibrary.simpleMessage("Gol"),
     "Score_Distribution": MessageLookupByLibrary.simpleMessage("Puan Dağılımı"),
+    "Score_Stats": MessageLookupByLibrary.simpleMessage("Puan İstatistikleri"),
     "Screening": MessageLookupByLibrary.simpleMessage("Tarama"),
     "Search": MessageLookupByLibrary.simpleMessage("Aramak"),
     "SearchBarHintText": MessageLookupByLibrary.simpleMessage(
@@ -1322,6 +1341,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Kurulum Zaman aşımına uğradı. Lütfen tekrar deneyin.",
     ),
     "Share": MessageLookupByLibrary.simpleMessage("Paylaşmak"),
+    "Share_ICS": MessageLookupByLibrary.simpleMessage(".ics\'i paylaşın"),
     "Shoujo": MessageLookupByLibrary.simpleMessage("Shoujo"),
     "Should_be_aplhanumeric": MessageLookupByLibrary.simpleMessage(
       "Alfasayısal olmalı",
@@ -1348,7 +1368,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Show_Menu": MessageLookupByLibrary.simpleMessage("Menüyü göster"),
     "Show_Original": MessageLookupByLibrary.simpleMessage("Orjinali göster"),
+    "Show_Private_Review": MessageLookupByLibrary.simpleMessage(
+      "Özel Notu Göster",
+    ),
+    "Show_Private_Review_Desc": MessageLookupByLibrary.simpleMessage(
+      "Düzenleme ekranında özel not alanını göster",
+    ),
     "Show_Spoiler": MessageLookupByLibrary.simpleMessage("Spoiler\'ı Göster"),
+    "Show_dub_status_AnimeList_Desc": MessageLookupByLibrary.simpleMessage(
+      "Listede bir animenin dub (İngilizce) durumunu göster",
+    ),
     "Show_priority_in_anime_manga_list": MessageLookupByLibrary.simpleMessage(
       "Anime/manga listesinde önceliği göster",
     ),
@@ -1608,6 +1637,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Video_Game": MessageLookupByLibrary.simpleMessage("Video oyunu"),
     "Videos": MessageLookupByLibrary.simpleMessage("Videolar"),
     "View_All": MessageLookupByLibrary.simpleMessage("Hepsini gör"),
+    "View_Related_Graph_Tooltip": MessageLookupByLibrary.simpleMessage(
+      "İlgili anime/manga grafiğini görüntüleyin",
+    ),
     "View_all_Discussions": MessageLookupByLibrary.simpleMessage(
       "Tüm Tartışmaları Görüntüle",
     ),

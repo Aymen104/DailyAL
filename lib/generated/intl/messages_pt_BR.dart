@@ -213,6 +213,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Apoie o desenvolvimento deste aplicativo aqui",
     ),
     "CGDCT": MessageLookupByLibrary.simpleMessage("CGDCT"),
+    "Calendar": MessageLookupByLibrary.simpleMessage("Calendário"),
     "Cancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
     "Cancelled_Restore": MessageLookupByLibrary.simpleMessage(
       "Restauração cancelada",
@@ -420,6 +421,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Você deseja fazer logout?",
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Maneira de direção"),
+    "Download_ICS": MessageLookupByLibrary.simpleMessage("Baixar .ics"),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Arraste o campo ou use as teclas de seta para movê-lo",
     ),
@@ -495,6 +497,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Error_Adding_Event_To_Calendar": MessageLookupByLibrary.simpleMessage(
       "Erro adicionando evento ao calendário",
     ),
+    "Error_Saving_File": MessageLookupByLibrary.simpleMessage(
+      "Erro ao salvar o arquivo!",
+    ),
     "Error_removing_image": MessageLookupByLibrary.simpleMessage(
       "Erro ao remover imagem",
     ),
@@ -549,6 +554,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Female": MessageLookupByLibrary.simpleMessage("Female"),
     "Figures": MessageLookupByLibrary.simpleMessage("Figuras"),
+    "File_Saved": MessageLookupByLibrary.simpleMessage(
+      "Arquivo salvo na pasta de download!",
+    ),
     "Filter": MessageLookupByLibrary.simpleMessage("Filtro"),
     "Filter_After_search": MessageLookupByLibrary.simpleMessage(
       "Esses filtros serão usados quando você fizer sua próxima pesquisa",
@@ -1162,6 +1170,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "Priority_level_qn": MessageLookupByLibrary.simpleMessage(
       "Qual é o seu nível de prioridade para assistir / ler isso?",
     ),
+    "Private_Note": MessageLookupByLibrary.simpleMessage("Nota Privada"),
+    "Private_Note_Desc": MessageLookupByLibrary.simpleMessage(
+      "Salvo localmente, nunca enviado para servidores",
+    ),
+    "Private_Note_Hint": MessageLookupByLibrary.simpleMessage(
+      "Escreva sua nota privada aqui...",
+    ),
+    "Private_Note_Local_Only": MessageLookupByLibrary.simpleMessage(
+      "Esta nota é apenas local e não será sincronizada.",
+    ),
     "Profile": MessageLookupByLibrary.simpleMessage("Perfil"),
     "Profile_Page": MessageLookupByLibrary.simpleMessage("Página de perfil"),
     "Profile_bg_removed": MessageLookupByLibrary.simpleMessage(
@@ -1303,6 +1321,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Score_Distribution": MessageLookupByLibrary.simpleMessage(
       "Distribuição de pontuação",
     ),
+    "Score_Stats": MessageLookupByLibrary.simpleMessage(
+      "Estatísticas de pontuação",
+    ),
     "Screening": MessageLookupByLibrary.simpleMessage("Triagem"),
     "Search": MessageLookupByLibrary.simpleMessage("Procurar"),
     "SearchBarHintText": MessageLookupByLibrary.simpleMessage(
@@ -1394,6 +1415,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Configuração expirou.Por favor, tente novamente.",
     ),
     "Share": MessageLookupByLibrary.simpleMessage("Compartilhar"),
+    "Share_ICS": MessageLookupByLibrary.simpleMessage("Compartilhe .ics"),
     "Shoujo": MessageLookupByLibrary.simpleMessage("Shoujo."),
     "Should_be_aplhanumeric": MessageLookupByLibrary.simpleMessage(
       "Deve ser alfanumérico",
@@ -1420,7 +1442,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Show_Menu": MessageLookupByLibrary.simpleMessage("Mostrar Menu"),
     "Show_Original": MessageLookupByLibrary.simpleMessage("Mostrar original"),
+    "Show_Private_Review": MessageLookupByLibrary.simpleMessage(
+      "Mostrar Nota Privada",
+    ),
+    "Show_Private_Review_Desc": MessageLookupByLibrary.simpleMessage(
+      "Mostrar campo de nota privada na tela de edição",
+    ),
     "Show_Spoiler": MessageLookupByLibrary.simpleMessage("Mostrar spoiler"),
+    "Show_dub_status_AnimeList_Desc": MessageLookupByLibrary.simpleMessage(
+      "Mostrar status de dublagem (inglês) de um anime na lista",
+    ),
     "Show_priority_in_anime_manga_list": MessageLookupByLibrary.simpleMessage(
       "Mostrar prioridade na lista de anime / mangá",
     ),
@@ -1678,6 +1709,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Video_Game": MessageLookupByLibrary.simpleMessage("Videogame"),
     "Videos": MessageLookupByLibrary.simpleMessage("Vídeos"),
     "View_All": MessageLookupByLibrary.simpleMessage("Ver tudo"),
+    "View_Related_Graph_Tooltip": MessageLookupByLibrary.simpleMessage(
+      "Ver gráfico de anime/mangá relacionado",
+    ),
     "View_all_Discussions": MessageLookupByLibrary.simpleMessage(
       "Ver todas as discussões",
     ),
