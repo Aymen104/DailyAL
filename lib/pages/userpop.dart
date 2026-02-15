@@ -415,8 +415,9 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
   }
 
   void _removeBG() async {
-    if (!(await showConfirmationDialog(
-        context: context, alertTitle: S.current.Remove_the_Bg))) {
+    if (!((await showConfirmationDialog(
+            context: context, alertTitle: S.current.Remove_the_Bg)) ??
+        false)) {
       _imageListener.update(false);
       return;
     }

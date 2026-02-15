@@ -1035,5 +1035,13 @@
     "Love_Status_Quo": "Love Status Quo",
     "Urban_Fantasy": "Urban Fantasy",
     "Villainess": "Villainess",
-    "Memoir": "Memoir"
+    "Memoir": "Memoir",
+    "Download_Install": "Herunterladen und installieren",
+    "Downloading_update": "Update wird heruntergeladen...",
+    "Download_complete": "Download abgeschlossen",
+    "Installing_update": "Update wird installiert...",
+    "Download_failed": "Der Download ist fehlgeschlagen",
+    "Update_consent": "Dadurch wird das Update heruntergeladen und installiert. Weitermachen?",
+    "Update_saved_to": "Update gespeichert unter",
+    "Manual_Install": "Manuelle Installation"
 }

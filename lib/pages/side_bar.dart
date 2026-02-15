@@ -394,8 +394,9 @@ class _AppSideBarState extends State<AppSideBar> with TickerProviderStateMixin {
   }
 
   void _removeBG() async {
-    if (!(await showConfirmationDialog(
-        context: context, alertTitle: S.current.Remove_the_Bg))) {
+    if (!((await showConfirmationDialog(
+            context: context, alertTitle: S.current.Remove_the_Bg)) ??
+        false)) {
       _imageListener.update(false);
       return;
     }
@@ -494,8 +495,7 @@ class _AppSideBarState extends State<AppSideBar> with TickerProviderStateMixin {
                 text: S.current.Buy_Me_A_Copy,
                 // desc: S.current.Buy_Me_A_Copy_Desc,
                 iconData: Icons.coffee,
-                onPressed: () =>
-                    launchURL("https://ko-fi.com/abhaybyte"),
+                onPressed: () => launchURL("https://ko-fi.com/abhaybyte"),
               );
             else
               return SB.z;

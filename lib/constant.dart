@@ -573,7 +573,7 @@ bool hasText(String? text) {
   return text.isNotBlank;
 }
 
-Future<bool> showConfirmationDialog({
+Future<bool?> showConfirmationDialog({
   String alertTitle = "",
   String desc = "",
   required BuildContext context,
@@ -661,7 +661,7 @@ void launchLogOutConfirmation({required BuildContext context}) async {
       context: context,
       alertTitle: S.current.Logout_Confirmation,
       desc: S.current.Do_you_wish_to_logout);
-  if (result) {
+  if (result ?? false) {
     try {
       await MalAuth.signOut();
       restartApp(context);

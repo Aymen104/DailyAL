@@ -400,11 +400,12 @@ class NotificationService {
       final alamPerm = await Permission.scheduleExactAlarm.status;
       if (notifPerm == PermissionStatus.denied ||
           alamPerm == PermissionStatus.denied) {
-        bool allowed = await showConfirmationDialog(
-          alertTitle: S.current.ConfirmNotifPerm,
-          desc: S.current.ConfirmNotifPermDesc,
-          context: MyApp.navigatorKey.currentContext!,
-        );
+        bool allowed = (await showConfirmationDialog(
+              alertTitle: S.current.ConfirmNotifPerm,
+              desc: S.current.ConfirmNotifPermDesc,
+              context: MyApp.navigatorKey.currentContext!,
+            )) ??
+            false;
         if (allowed) {
           allowed = await _askNotifPermissionUsingLocal();
         } else {

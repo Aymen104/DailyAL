@@ -603,7 +603,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
       alertTitle: S.current.Item_delete_confi,
       desc: S.current.Item_delete_desc,
     );
-    if (!result) {
+    if (!(result ?? false)) {
       return;
     }
     _loading = true;

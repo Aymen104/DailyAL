@@ -34,7 +34,7 @@ class _BackUpAndRestorePageState extends State<BackUpAndRestorePage> {
       desc: S.current.Backup_Confirmation_Desc,
       addtionalActions: [],
     );
-    if (result) {
+    if (result ?? false) {
       try {
         await FileStorage.writeFile(data, name);
         showToast(S.current.BackUpFileSaved);
@@ -56,10 +56,10 @@ class _BackUpAndRestorePageState extends State<BackUpAndRestorePage> {
         if (path != null) {
           File file = File(path);
           final bytes = await file.readAsBytes();
-          
+
           // Use utf8.decode to properly handle special characters (tildes, ñ, emojis, etc.)
           final data = utf8.decode(bytes);
-          
+
           final result = await CacheManager.instance.restoreData(data);
           if (result) {
             user = await User.getInstance();

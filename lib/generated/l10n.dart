@@ -7733,6 +7733,86 @@ class S {
   String get Memoir {
     return Intl.message('Memoir', name: 'Memoir', desc: '', args: []);
   }
+
+  /// `Download & Install`
+  String get Download_Install {
+    return Intl.message(
+      'Download & Install',
+      name: 'Download_Install',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading update...`
+  String get Downloading_update {
+    return Intl.message(
+      'Downloading update...',
+      name: 'Downloading_update',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download complete`
+  String get Download_complete {
+    return Intl.message(
+      'Download complete',
+      name: 'Download_complete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installing update...`
+  String get Installing_update {
+    return Intl.message(
+      'Installing update...',
+      name: 'Installing_update',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download failed`
+  String get Download_failed {
+    return Intl.message(
+      'Download failed',
+      name: 'Download_failed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will download and install the update. Continue?`
+  String get Update_consent {
+    return Intl.message(
+      'This will download and install the update. Continue?',
+      name: 'Update_consent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update saved to`
+  String get Update_saved_to {
+    return Intl.message(
+      'Update saved to',
+      name: 'Update_saved_to',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manual Install`
+  String get Manual_Install {
+    return Intl.message(
+      'Manual Install',
+      name: 'Manual_Install',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

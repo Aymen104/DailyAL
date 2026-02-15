@@ -48,7 +48,7 @@ class _HomePageSettingsState extends State<HomePageSettings> {
                   context: context,
                   alertTitle: S.current.Reset_homepage,
                   desc: S.current.Reset_homepage_warning);
-              if (result) {
+              if (result ?? false) {
                 if (mounted)
                   setState(() {
                     user.pref.hpApiPrefList = defaultHPPrefList.toList();
@@ -651,8 +651,10 @@ class _HomePageEditPreferenceState extends State<HomePageEditPreference> {
                         showToast(S.current.Please_select_a_board_or_sub_board);
                       } else {
                         apiPref.value.title = controller.text;
-                        final originalTitle = HomePageUtils().titleBuilder(apiPref);
-                        apiPref.value.titleChanged = !originalTitle.equals(apiPref.value.title);
+                        final originalTitle =
+                            HomePageUtils().titleBuilder(apiPref);
+                        apiPref.value.titleChanged =
+                            !originalTitle.equals(apiPref.value.title);
                         if (widget.onSaved != null) widget.onSaved!(apiPref);
                         Navigator.pop(context);
                       }

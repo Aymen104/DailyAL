@@ -513,7 +513,7 @@ class _SettingsPageState extends State<SettingsPage> {
       alertTitle: "Clear App Storage?",
       desc: "This will remove all data and settings. App will restart.",
     );
-    if (result) {
+    if (result ?? false) {
       await CacheManager.instance.clearAppStorage();
       showToast("App Storage Cleared");
       RestartApp.restartApp(context);

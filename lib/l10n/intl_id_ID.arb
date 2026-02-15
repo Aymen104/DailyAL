@@ -1034,5 +1034,13 @@
     "Love_Status_Quo": "Love Status Quo",
     "Urban_Fantasy": "Urban Fantasy",
     "Villainess": "Villainess",
-    "Memoir": "Memoir"
+    "Memoir": "Memoir",
+    "Download_Install": "Unduh & Instal",
+    "Downloading_update": "Mengunduh pembaruan...",
+    "Download_complete": "Pengunduhan selesai",
+    "Installing_update": "Menginstal pembaruan...",
+    "Download_failed": "Pengunduhan gagal",
+    "Update_consent": "Ini akan mengunduh dan menginstal pembaruan. Melanjutkan?",
+    "Update_saved_to": "Pembaruan disimpan ke",
+    "Manual_Install": "Instalasi Manual"
 }

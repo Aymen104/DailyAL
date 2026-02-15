@@ -1032,5 +1032,13 @@
     "Love_Status_Quo": "Love Status Quo",
     "Urban_Fantasy": "Urban Fantasy",
     "Villainess": "Villainess",
-    "Memoir": "Memoir"
+    "Memoir": "Memoir",
+    "Download_Install": "\u0130ndir ve Y\u00fckle",
+    "Downloading_update": "G\u00fcncelleme indiriliyor...",
+    "Download_complete": "\u0130ndirme tamamland\u0131",
+    "Installing_update": "G\u00fcncelleme y\u00fckleniyor...",
+    "Download_failed": "\u0130ndirme ba\u015far\u0131s\u0131z oldu",
+    "Update_consent": "Bu, g\u00fcncellemeyi indirip y\u00fckleyecektir. Devam etmek?",
+    "Update_saved_to": "G\u00fcncelleme \u015furaya kaydedildi:",
+    "Manual_Install": "Manuel Kurulum"
 }
