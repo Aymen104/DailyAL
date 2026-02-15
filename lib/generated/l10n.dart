@@ -6784,10 +6784,10 @@ class S {
     );
   }
 
-  /// `Show card around the content in list view (comfirtable) wherever possible`
+  /// `Show card around the content in list view (Comfortable) wherever possible`
   String get showAnimeMangaCardDesc {
     return Intl.message(
-      'Show card around the content in list view (comfirtable) wherever possible',
+      'Show card around the content in list view (Comfortable) wherever possible',
       name: 'showAnimeMangaCardDesc',
       desc: '',
       args: [],
@@ -7702,6 +7702,36 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Love Status Quo`
+  String get Love_Status_Quo {
+    return Intl.message(
+      'Love Status Quo',
+      name: 'Love_Status_Quo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Urban Fantasy`
+  String get Urban_Fantasy {
+    return Intl.message(
+      'Urban Fantasy',
+      name: 'Urban_Fantasy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Villainess`
+  String get Villainess {
+    return Intl.message('Villainess', name: 'Villainess', desc: '', args: []);
+  }
+
+  /// `Memoir`
+  String get Memoir {
+    return Intl.message('Memoir', name: 'Memoir', desc: '', args: []);
   }
 }
 

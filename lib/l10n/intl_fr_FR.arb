@@ -1030,5 +1030,9 @@
     "Show_Private_Review_Desc": "Afficher le champ de note priv\u00e9e dans l'\u00e9cran d'\u00e9dition",
     "Private_Note_Desc": "Enregistr\u00e9 localement, jamais envoy\u00e9 aux serveurs",
     "Private_Note_Hint": "\u00c9crivez votre note priv\u00e9e ici...",
-    "Private_Note_Local_Only": "Cette note est locale uniquement et ne sera pas synchronis\u00e9e."
+    "Private_Note_Local_Only": "Cette note est locale uniquement et ne sera pas synchronis\u00e9e.",
+    "Love_Status_Quo": "Love Status Quo",
+    "Urban_Fantasy": "Urban Fantasy",
+    "Villainess": "Villainess",
+    "Memoir": "Memoir"
 }
