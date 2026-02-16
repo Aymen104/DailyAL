@@ -742,7 +742,6 @@ class SearchableSelect extends StatefulWidget {
 
 class _SearchableSelectState extends State<SearchableSelect> {
   late TextEditingController _controller;
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -774,10 +773,8 @@ class _SearchableSelectState extends State<SearchableSelect> {
       final value = widget.option.values![index];
       widget.onChanged(value);
       _controller.text = value;
-    } else {
-      // Custom value not allowed
     }
-    _focusNode.unfocus();
+    FocusScope.of(context).unfocus();
   }
 
   @override
