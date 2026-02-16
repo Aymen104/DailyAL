@@ -42,6 +42,7 @@ class FilterOption {
   String? value;
   String? modalField;
   final String? threeStateOption;
+  final String? modalType;
 
   FilterOption({
     this.type,
@@ -63,6 +64,7 @@ class FilterOption {
     this.hideOption = false,
     this.openTextFormAsModal = false,
     this.threeStateOption,
+    this.modalType,
   });
 
   FilterOption clone() {
@@ -86,6 +88,7 @@ class FilterOption {
       hideOption: hideOption,
       openTextFormAsModal: openTextFormAsModal,
       threeStateOption: threeStateOption,
+      modalType: modalType,
     );
   }
 
@@ -276,6 +279,19 @@ class FilterModal extends StatelessWidget {
 
     switch (option.type) {
       case FilterType.select:
+        if (option.modalType == 'search_dropdown') {
+          return SearchableSelect(
+            option: option,
+            onChanged: (value) {
+              if (value != null) {
+                option.value = value;
+                filterOutputs[option.apiFieldName!] = option;
+                onChange!(filterOutputs);
+              }
+            },
+            onClear: () => removeFilter(option),
+          );
+        }
         // Use ThreeStateSelectBar if threeStateOption is specified
         if (option.threeStateOption != null) {
           return ThreeStateSelectBar(
@@ -536,9 +552,7 @@ class _TextFormFilterState extends State<TextFormFilter> {
   Future<void> onTap() async {
     final unescape = HtmlUnescape();
     TextEditingController _controller = TextEditingController(
-      text: unescape
-          .convert(controller.text)
-          .replaceAll("<br />", ""),
+      text: unescape.convert(controller.text).replaceAll("<br />", ""),
     );
     final value = await showModalBottomSheet(
         context: context,
@@ -706,6 +720,145 @@ class CustomTextForm extends StatelessWidget {
         hintStyle: TextStyle(fontSize: 14),
         errorStyle: TextStyle(fontSize: 14),
       ),
+    );
+  }
+}
+
+class SearchableSelect extends StatefulWidget {
+  final FilterOption option;
+  final Function(String?) onChanged;
+  final VoidCallback onClear;
+
+  const SearchableSelect({
+    Key? key,
+    required this.option,
+    required this.onChanged,
+    required this.onClear,
+  }) : super(key: key);
+
+  @override
+  _SearchableSelectState createState() => _SearchableSelectState();
+}
+
+class _SearchableSelectState extends State<SearchableSelect> {
+  late TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    _setInitialValue();
+  }
+
+  void _setInitialValue() {
+    final selectedValue = widget.option.value;
+    if (selectedValue != null) {
+      // Find display text for the selected API value
+      final index = widget.option.apiValues
+          ?.indexOf(int.tryParse(selectedValue) ?? selectedValue);
+      if (index != null && index != -1) {
+        _controller.text = widget.option.values?[index] ?? selectedValue;
+      } else {
+        _controller.text = selectedValue;
+      }
+    }
+  }
+
+  void _onSelected(String displayValue) {
+    // Find API value for the display value
+    final index = widget.option.values?.indexOf(displayValue);
+    if (index != null && index != -1) {
+      final apiValue = widget.option.apiValues?[index];
+      widget.onChanged(apiValue?.toString() ?? displayValue);
+    } else {
+      // Custom value
+      widget.onChanged(displayValue);
+    }
+    _focusNode.unfocus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+      child: LayoutBuilder(builder: (context, constraints) {
+        return Autocomplete<String>(
+          initialValue: TextEditingValue(text: _controller.text),
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return const Iterable<String>.empty();
+            }
+            return (widget.option.values ?? []).where((String option) {
+              return option
+                  .toLowerCase()
+                  .contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          onSelected: _onSelected,
+          fieldViewBuilder: (BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted) {
+            // Sync controllers if needed
+            if (_controller.text != fieldTextEditingController.text &&
+                fieldTextEditingController.text.isNotEmpty) {
+              _controller.text = fieldTextEditingController.text;
+            }
+            return TextField(
+              controller: fieldTextEditingController,
+              focusNode: fieldFocusNode,
+              decoration: InputDecoration(
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                hintText: 'Search or enter custom ${widget.option.fieldName}',
+                labelText: widget.option.fieldName,
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    fieldTextEditingController.clear();
+                    _controller.clear();
+                    widget.onClear();
+                  },
+                ),
+              ),
+              onSubmitted: (value) {
+                _onSelected(value);
+              },
+            );
+          },
+          optionsViewBuilder: (BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4.0,
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  height: 200,
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: options.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final String option = options.elementAt(index);
+                      return InkWell(
+                        onTap: () {
+                          onSelected(option);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(option),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }

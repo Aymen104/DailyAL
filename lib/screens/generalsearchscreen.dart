@@ -1786,6 +1786,7 @@ class CustomFilters {
       desc: "Producer",
       apiFieldName: "producer",
       modalField: "studios",
+      modalType: "search_dropdown",
       apiValues: Mal.animeStudios.keys.toList(),
       values: Mal.animeStudios.values.toList());
 
