@@ -75,10 +75,11 @@ TextButton _closeButton(BuildContext context) {
 
 /// Stateful dialog that shows update info and handles download progress.
 class _UpdateDialog extends StatefulWidget {
+  final String? title;
   final GithubRelease release;
   final String? changeLog;
 
-  const _UpdateDialog({required this.release, this.changeLog});
+  const _UpdateDialog({required this.release, this.changeLog, this.title});
 
   @override
   State<_UpdateDialog> createState() => _UpdateDialogState();
@@ -97,7 +98,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       valueListenable: DownloadManager.instance.progress,
       builder: (context, downloadProgress, _) {
         return AlertDialog(
-          title: Text(S.current.Update_available),
+          title: Text(widget.title ?? S.current.Update_available),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,8 +134,8 @@ class _UpdateDialogState extends State<_UpdateDialog> {
           child: _buildDownloadStatus(downloadProgress),
         ),
       if (hasError) const SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      OverflowBar(
+        alignment: MainAxisAlignment.end,
         children: [
           if (isDownloading)
             TextButton(
@@ -402,7 +403,7 @@ class _AboutPageState extends State<AboutPage> {
           try {
             final tagName = r.tagName ?? '';
             final build = int.tryParse(tagName.split('+')[1]);
-            return build != null && build > 106;
+            return build != null && build > 108;
           } catch (e) {
             return false;
           }
@@ -419,7 +420,6 @@ class _AboutPageState extends State<AboutPage> {
                 final release = filtered[index];
                 return ListTile(
                   title: Text(release.tagName ?? '?'),
-                  subtitle: Text(release.changeLog?.split('\n').first ?? ''),
                   onTap: () {
                     Navigator.pop(context);
                     showDialog(
@@ -427,6 +427,7 @@ class _AboutPageState extends State<AboutPage> {
                       builder: (context) => _UpdateDialog(
                         release: release,
                         changeLog: release.changeLog,
+                        title: S.current.Manual_Install,
                       ),
                     );
                   },

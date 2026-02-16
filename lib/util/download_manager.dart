@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/pages/settings/about.dart';
@@ -7,6 +8,7 @@ import 'package:dal_commons/dal_commons.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -200,21 +202,14 @@ class DownloadManager {
   }
 
   Future<Directory> _getDownloadDir() async {
-    if (Platform.isAndroid) {
-      final extDir = await getExternalCacheDirectories();
-      final dir = Directory('${extDir!.first.path}/updates');
-      if (!await dir.exists()) {
-        await dir.create(recursive: true);
-      }
-      return dir;
-    } else {
-      final dir = await getTemporaryDirectory();
-      final updateDir = Directory('${dir.path}/updates');
-      if (!await updateDir.exists()) {
-        await updateDir.create(recursive: true);
-      }
-      return updateDir;
+    // Use internal cache directory for all platforms
+    // This avoids the need for MANAGE_EXTERNAL_STORAGE permission on Android 11+
+    final dir = await getTemporaryDirectory();
+    final updateDir = Directory('${dir.path}/updates');
+    if (!await updateDir.exists()) {
+      await updateDir.create(recursive: true);
     }
+    return updateDir;
   }
 
   Future<void> _installUpdate(String filePath, BuildContext context) async {
@@ -257,6 +252,33 @@ class DownloadManager {
       return;
     }
 
+    // Try using Android Intent with content URI first (more reliable on Android 11+)
+    try {
+      await DeviceInfoPlugin().androidInfo;
+      final packageName =
+          'io.github.jica98'; // Package name for FileProvider authority
+
+      // Create content URI using FileProvider
+      final contentUri =
+          'content://$packageName.fileProvider/internal_cache/${filePath.split('/').last}';
+      logDal('Attempting to install with content URI: $contentUri');
+
+      final intent = AndroidIntent(
+        action: 'android.intent.action.INSTALL_PACKAGE',
+        data: contentUri,
+        flags: <int>[
+          0x10000000, // FLAG_ACTIVITY_NEW_TASK
+          0x00000001, // FLAG_GRANT_READ_URI_PERMISSION
+        ],
+      );
+      await intent.launch();
+      logDal('Install intent launched successfully');
+      return;
+    } on PlatformException catch (e) {
+      logDal('Android Intent failed: ${e.message}, falling back to OpenFilex');
+    }
+
+    // Fallback to OpenFilex for older Android versions
     final result = await OpenFilex.open(filePath,
         type: 'application/vnd.android.package-archive');
     logDal('OpenFilex result: ${result.type}, message: ${result.message}');
