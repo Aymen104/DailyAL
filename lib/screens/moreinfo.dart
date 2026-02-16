@@ -11,7 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:dal_commons/dal_commons.dart';
 
 void onStudioTap(AnimeStudio e, BuildContext context) {
-  final animeStudio = Mal.animeStudios[e.id];
+  var filter = CustomFilters.animeStudiosFilter;
+  if (!Mal.animeStudios.containsKey(e.id) && e.id != null && e.name != null) {
+    if (!filter.apiValues!.contains(e.id)) {
+      filter.apiValues!.add(e.id);
+      filter.values!.add(e.name!);
+    }
+  }
+
+  final val = Mal.animeStudios[e.id] ?? e.name;
+
   gotoPage(
       context: context,
       newPage: GeneralSearchScreen(
@@ -20,8 +29,7 @@ void onStudioTap(AnimeStudio e, BuildContext context) {
         category: 'anime',
         filterOutputs: {
           CustomFilters.animeStudiosFilter.apiFieldName!:
-              CustomFilters.animeStudiosFilter
-                ..value = (animeStudio ?? e.name?.replaceAll(' ', '_'))
+              CustomFilters.animeStudiosFilter..value = val
         },
       ));
 }

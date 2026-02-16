@@ -767,13 +767,15 @@ class _SearchableSelectState extends State<SearchableSelect> {
 
   void _onSelected(String displayValue) {
     // Find API value for the display value
-    final index = widget.option.values?.indexOf(displayValue);
+    final index = widget.option.values?.indexWhere(
+        (element) => element.toLowerCase() == displayValue.toLowerCase());
+
     if (index != null && index != -1) {
-      final apiValue = widget.option.apiValues?[index];
-      widget.onChanged(apiValue?.toString() ?? displayValue);
+      final value = widget.option.values![index];
+      widget.onChanged(value);
+      _controller.text = value;
     } else {
-      // Custom value
-      widget.onChanged(displayValue);
+      // Custom value not allowed
     }
     _focusNode.unfocus();
   }
@@ -811,7 +813,7 @@ class _SearchableSelectState extends State<SearchableSelect> {
               decoration: InputDecoration(
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                hintText: 'Search or enter custom ${widget.option.fieldName}',
+                hintText: 'Search ${widget.option.fieldName}',
                 labelText: widget.option.fieldName,
                 suffixIcon: IconButton(
                   icon: Icon(Icons.clear),
