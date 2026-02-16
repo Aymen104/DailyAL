@@ -1795,6 +1795,8 @@ class CustomFilters {
       type: FilterType.select,
       desc: "Magazines",
       apiFieldName: "magazines",
+      modalField: "magazines",
+      modalType: "search_dropdown",
       apiValues: Mal.mangaMagazines.keys.toList(),
       values: Mal.mangaMagazines.values.toList());
   static final animeTypeFilter = FilterOption(

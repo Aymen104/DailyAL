@@ -34,6 +34,33 @@ void onStudioTap(AnimeStudio e, BuildContext context) {
       ));
 }
 
+void onMagazineTap(dynamic magazine, BuildContext context) {
+  var filter = CustomFilters.mangaMagazinesFilter;
+  if (!Mal.mangaMagazines.containsKey(magazine.id) &&
+      magazine.id != null &&
+      magazine.name != null) {
+    if (!filter.apiValues!.contains(magazine.id)) {
+      filter.apiValues!.add(magazine.id);
+      filter.values!.add(magazine.name!);
+    }
+  }
+
+  // Use name for initial search value as per JikanHelper expectation
+  final val = Mal.mangaMagazines[magazine.id] ?? magazine.name;
+
+  gotoPage(
+      context: context,
+      newPage: GeneralSearchScreen(
+        autoFocus: false,
+        showBackButton: true,
+        category: 'manga',
+        filterOutputs: {
+          CustomFilters.mangaMagazinesFilter.apiFieldName!:
+              CustomFilters.mangaMagazinesFilter..value = val
+        },
+      ));
+}
+
 void onMediaTypeTap(
   String mediaType,
   String category,
@@ -265,15 +292,13 @@ class MoreInfoAnime extends StatelessWidget {
                       ?.capitalize() ??
                   "?"),
             ),
-          ] else
-            _field(
+          ] else if (category.equals('manga') &&
+              !nullOrEmpty(contentDetailed.serialization))
+            _fieldList<dynamic>(
               S.current.Serialization,
-              ((contentDetailed.serialization == null ||
-                      contentDetailed.serialization.length == 0)
-                  ? "?"
-                  : (contentDetailed.serialization?.map((e) => e.name)?.reduce(
-                          (value, element) => value + "," + element)) ??
-                      "?"),
+              contentDetailed.serialization,
+              (item) => onMagazineTap(item, context),
+              (item) => item.name ?? '?',
             ),
           if (!nullOrEmpty(contentDetailed.alternateTitles?.synonyms))
             _field(
