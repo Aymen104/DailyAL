@@ -656,6 +656,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "German": MessageLookupByLibrary.simpleMessage("Jerman"),
     "Ghibli": MessageLookupByLibrary.simpleMessage("Ghibli."),
     "Girls_Love": MessageLookupByLibrary.simpleMessage("Girls_Love"),
+    "Global_Seasonal_Filter": MessageLookupByLibrary.simpleMessage(
+      "Filter Musiman Global",
+    ),
+    "Global_Seasonal_Filter_Desc": MessageLookupByLibrary.simpleMessage(
+      "Terapkan filter musiman ke semua musim/tahun",
+    ),
     "Good": MessageLookupByLibrary.simpleMessage("Bagus"),
     "Gore": MessageLookupByLibrary.simpleMessage("Menanduk"),
     "Gourmet": MessageLookupByLibrary.simpleMessage("makanan lezat"),

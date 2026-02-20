@@ -1043,5 +1043,7 @@
     "Download_failed": "Der Download ist fehlgeschlagen",
     "Update_consent": "Dadurch wird das Update heruntergeladen und installiert. Weitermachen?",
     "Update_saved_to": "Update gespeichert unter",
-    "Manual_Install": "Manuelle Installation"
+    "Manual_Install": "Manuelle Installation",
+    "Global_Seasonal_Filter": "Globaler Saisonfilter",
+    "Global_Seasonal_Filter_Desc": "Wenden Sie saisonale Filter auf alle Jahreszeiten/Jahre an"
 }

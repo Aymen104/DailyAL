@@ -650,6 +650,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "German": MessageLookupByLibrary.simpleMessage("Almanca"),
     "Ghibli": MessageLookupByLibrary.simpleMessage("üçgen çatı"),
     "Girls_Love": MessageLookupByLibrary.simpleMessage("Girls_Love"),
+    "Global_Seasonal_Filter": MessageLookupByLibrary.simpleMessage(
+      "Küresel Mevsimsel Filtre",
+    ),
+    "Global_Seasonal_Filter_Desc": MessageLookupByLibrary.simpleMessage(
+      "Tüm mevsimlere/yıllara mevsimsel filtreler uygulayın",
+    ),
     "Good": MessageLookupByLibrary.simpleMessage("İyi"),
     "Gore": MessageLookupByLibrary.simpleMessage("Kan"),
     "Gourmet": MessageLookupByLibrary.simpleMessage("Gurme"),

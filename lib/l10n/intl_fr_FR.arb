@@ -1042,5 +1042,7 @@
     "Download_failed": "Le t\u00e9l\u00e9chargement a \u00e9chou\u00e9",
     "Update_consent": "Cela t\u00e9l\u00e9chargera et installera la mise \u00e0 jour. Continuer?",
     "Update_saved_to": "Mise \u00e0 jour enregistr\u00e9e dans",
-    "Manual_Install": "Installation manuelle"
+    "Manual_Install": "Installation manuelle",
+    "Global_Seasonal_Filter": "Global Seasonal Filter",
+    "Global_Seasonal_Filter_Desc": "Appliquer des filtres saisonniers \u00e0 toutes les saisons/ann\u00e9es"
 }

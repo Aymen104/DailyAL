@@ -1042,5 +1042,7 @@
     "Download_failed": "\ub2e4\uc6b4\ub85c\ub4dc \uc2e4\ud328",
     "Update_consent": "\uadf8\ub7ec\uba74 \uc5c5\ub370\uc774\ud2b8\uac00 \ub2e4\uc6b4\ub85c\ub4dc\ub418\uc5b4 \uc124\uce58\ub429\ub2c8\ub2e4. \uacc4\uc18d\ud558\ub2e4?",
     "Update_saved_to": "\uc5c5\ub370\uc774\ud2b8\uac00 \ub2e4\uc74c\uc5d0 \uc800\uc7a5\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
-    "Manual_Install": "\uc218\ub3d9 \uc124\uce58"
+    "Manual_Install": "\uc218\ub3d9 \uc124\uce58",
+    "Global_Seasonal_Filter": "\uae00\ub85c\ubc8c \uacc4\uc808 \ud544\ud130",
+    "Global_Seasonal_Filter_Desc": "Apply seasonal filters to all seasons/years"
 }

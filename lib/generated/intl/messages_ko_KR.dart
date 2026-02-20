@@ -538,6 +538,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "German": MessageLookupByLibrary.simpleMessage("독일 사람"),
     "Ghibli": MessageLookupByLibrary.simpleMessage("Ghibli."),
     "Girls_Love": MessageLookupByLibrary.simpleMessage("소녀_사랑"),
+    "Global_Seasonal_Filter": MessageLookupByLibrary.simpleMessage("글로벌 계절 필터"),
+    "Global_Seasonal_Filter_Desc": MessageLookupByLibrary.simpleMessage(
+      "Apply seasonal filters to all seasons/years",
+    ),
     "Good": MessageLookupByLibrary.simpleMessage("좋은"),
     "Gore": MessageLookupByLibrary.simpleMessage("핏덩어리"),
     "Gourmet": MessageLookupByLibrary.simpleMessage("식도락가"),

@@ -1042,5 +1042,7 @@
     "Download_failed": "Pengunduhan gagal",
     "Update_consent": "Ini akan mengunduh dan menginstal pembaruan. Melanjutkan?",
     "Update_saved_to": "Pembaruan disimpan ke",
-    "Manual_Install": "Instalasi Manual"
+    "Manual_Install": "Instalasi Manual",
+    "Global_Seasonal_Filter": "Filter Musiman Global",
+    "Global_Seasonal_Filter_Desc": "Terapkan filter musiman ke semua musim/tahun"
 }

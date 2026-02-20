@@ -1040,5 +1040,7 @@
     "Download_failed": "\u0130ndirme ba\u015far\u0131s\u0131z oldu",
     "Update_consent": "Bu, g\u00fcncellemeyi indirip y\u00fckleyecektir. Devam etmek?",
     "Update_saved_to": "G\u00fcncelleme \u015furaya kaydedildi:",
-    "Manual_Install": "Manuel Kurulum"
+    "Manual_Install": "Manuel Kurulum",
+    "Global_Seasonal_Filter": "K\u00fcresel Mevsimsel Filtre",
+    "Global_Seasonal_Filter_Desc": "T\u00fcm mevsimlere/y\u0131llara mevsimsel filtreler uygulay\u0131n"
 }

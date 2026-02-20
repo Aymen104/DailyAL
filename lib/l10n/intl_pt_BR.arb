@@ -1043,5 +1043,7 @@
     "Download_failed": "Falha no download",
     "Update_consent": "Isso far\u00e1 o download e instalar\u00e1 a atualiza\u00e7\u00e3o. Continuar?",
     "Update_saved_to": "Atualiza\u00e7\u00e3o salva em",
-    "Manual_Install": "Instala\u00e7\u00e3o manual"
+    "Manual_Install": "Instala\u00e7\u00e3o manual",
+    "Global_Seasonal_Filter": "Filtro Sazonal Global",
+    "Global_Seasonal_Filter_Desc": "Aplique filtros sazonais a todas as esta\u00e7\u00f5es/anos"
 }
