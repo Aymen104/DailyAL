@@ -410,6 +410,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Как патрулировать"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage("Скачать .ics"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage(
+      "Скачать и установить",
+    ),
+    "Download_complete": MessageLookupByLibrary.simpleMessage(
+      "Загрузка завершена",
+    ),
+    "Download_failed": MessageLookupByLibrary.simpleMessage(
+      "Загрузка не удалась",
+    ),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "Загрузка обновления...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Перетащите поле или используйте клавиши со стрелками для перемещения поля.",
     ),
@@ -733,6 +745,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("индонезийский"),
     "Informative": MessageLookupByLibrary.simpleMessage("Информативный"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "Установка обновления...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("Интерес"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("Стек интересов"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -895,6 +910,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("Манга Серия"),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("Статистика манги"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("Мангака"),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage("Ручная установка"),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("Боевые искусства"),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("Шедевр"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage(
@@ -1643,6 +1659,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Update": MessageLookupByLibrary.simpleMessage("Обновлять"),
     "Update_available": MessageLookupByLibrary.simpleMessage(
       "Доступно обновление",
+    ),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "Это позволит загрузить и установить обновление. Продолжать?",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "Обновление сохранено в",
     ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "Обновления и объявления",

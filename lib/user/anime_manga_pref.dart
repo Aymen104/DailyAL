@@ -18,6 +18,7 @@ class AnimeMangaPagePreferences {
   String? defaultAnimeAddToList;
   String? defaultMangaAddToList;
   bool showPrivateNotes;
+  bool globalSeasonalFilter;
   List<ContentCardProps>? contentCardProps;
 
   AnimeMangaPagePreferences({
@@ -25,6 +26,7 @@ class AnimeMangaPagePreferences {
     required this.mangaTabs,
     this.timezonePref = TimezonePref.local,
     this.showPrivateNotes = false,
+    this.globalSeasonalFilter = false,
     this.defaultTab,
     this.defaultAnimeTab,
     this.defaultMangaTab,
@@ -75,9 +77,11 @@ class AnimeMangaPagePreferences {
       if (!existingAnimeTypes.contains(defaultTab.tabType)) {
         // Find the position to insert (after Stats if it's Score_Stats)
         if (defaultTab.tabType == TabType.Score_Stats) {
-          final statsIndex = animeTabs.indexWhere((t) => t.tabType == TabType.Stats);
+          final statsIndex =
+              animeTabs.indexWhere((t) => t.tabType == TabType.Stats);
           if (statsIndex != -1) {
-            animeTabs.insert(statsIndex + 1, AnimeMangaTabPreference(defaultTab.tabType, true));
+            animeTabs.insert(statsIndex + 1,
+                AnimeMangaTabPreference(defaultTab.tabType, true));
           } else {
             animeTabs.add(AnimeMangaTabPreference(defaultTab.tabType, true));
           }

@@ -152,6 +152,19 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
                   ),
                 ),
                 OptionTile(
+                  text: S.current.Global_Seasonal_Filter,
+                  iconData: Icons.filter_alt,
+                  multiLine: true,
+                  desc: S.current.Global_Seasonal_Filter_Desc,
+                  onPressed: () => _changeGlobalSeasonalFilter(!user
+                      .pref.animeMangaPagePreferences.globalSeasonalFilter),
+                  trailing: ToggleButton(
+                    toggleValue: user
+                        .pref.animeMangaPagePreferences.globalSeasonalFilter,
+                    onToggled: (value) => _changeGlobalSeasonalFilter(value),
+                  ),
+                ),
+                OptionTile(
                   text: S.current.Anime_Timezone_Pref,
                   iconData: Icons.timelapse_rounded,
                   multiLine: false,
@@ -177,7 +190,8 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
                   iconData: Icons.playlist_add_check,
                   multiLine: false,
                   trailing: SelectButton(
-                    popupText: "${S.current.Add_to_List} (${S.current.Anime_Caps})",
+                    popupText:
+                        "${S.current.Add_to_List} (${S.current.Anime_Caps})",
                     selectedOption: myAnimeStatusMap[user
                             .pref
                             .animeMangaPagePreferences
@@ -191,8 +205,7 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
                         user.pref.animeMangaPagePreferences
                                 .defaultAnimeAddToList =
                             myAnimeStatusMap.keys.elementAt(idx);
-                        user.setIntance(
-                            shouldNotify: false, updateAuth: false);
+                        user.setIntance(shouldNotify: false, updateAuth: false);
                         setState(() {});
                       }
                     },
@@ -204,7 +217,8 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
                   iconData: Icons.playlist_add_check,
                   multiLine: false,
                   trailing: SelectButton(
-                    popupText: "${S.current.Add_to_List} (${S.current.Manga_Caps})",
+                    popupText:
+                        "${S.current.Add_to_List} (${S.current.Manga_Caps})",
                     selectedOption: myMangaStatusMap[user
                             .pref
                             .animeMangaPagePreferences
@@ -218,8 +232,7 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
                         user.pref.animeMangaPagePreferences
                                 .defaultMangaAddToList =
                             myMangaStatusMap.keys.elementAt(idx);
-                        user.setIntance(
-                            shouldNotify: false, updateAuth: false);
+                        user.setIntance(shouldNotify: false, updateAuth: false);
                         setState(() {});
                       }
                     },
@@ -262,6 +275,12 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
 
   void _changePrivateNotes(bool value) {
     user.pref.animeMangaPagePreferences.showPrivateNotes = value;
+    user.setIntance();
+    setState(() {});
+  }
+
+  void _changeGlobalSeasonalFilter(bool value) {
+    user.pref.animeMangaPagePreferences.globalSeasonalFilter = value;
     user.setIntance();
     setState(() {});
   }

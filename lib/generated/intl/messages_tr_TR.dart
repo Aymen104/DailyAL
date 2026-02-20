@@ -404,6 +404,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Devriye nasıl yapılır"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage(".ics\'i indirin"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage("İndir ve Yükle"),
+    "Download_complete": MessageLookupByLibrary.simpleMessage(
+      "İndirme tamamlandı",
+    ),
+    "Download_failed": MessageLookupByLibrary.simpleMessage(
+      "İndirme başarısız oldu",
+    ),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "Güncelleme indiriliyor...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Alanı sürükleyin veya alanı taşımak için ok tuşlarını kullanın",
     ),
@@ -711,6 +721,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("Endonezya dili"),
     "Informative": MessageLookupByLibrary.simpleMessage("bilgilendirici"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "Güncelleme yükleniyor...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("Faiz"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("Faiz Yığını"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -875,6 +888,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("Manga Serisi"),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("Manga İstatistikleri"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("Mangaka"),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage("Manuel Kurulum"),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("Dövüş sanatları"),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("Başyapıt"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage(
@@ -1599,6 +1613,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Update": MessageLookupByLibrary.simpleMessage("Güncelleme"),
     "Update_available": MessageLookupByLibrary.simpleMessage(
       "Güncelleme uygun",
+    ),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "Bu, güncellemeyi indirip yükleyecektir. Devam etmek?",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "Güncelleme şuraya kaydedildi:",
     ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "Güncellemeler ve Duyurular",

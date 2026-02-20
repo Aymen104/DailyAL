@@ -21,6 +21,7 @@ AnimeMangaPagePreferences _$AnimeMangaPagePreferencesFromJson(
           $enumDecodeNullable(_$TimezonePrefEnumMap, json['timezonePref']) ??
               TimezonePref.local,
       showPrivateNotes: json['showPrivateNotes'] as bool? ?? false,
+      globalSeasonalFilter: json['globalSeasonalFilter'] as bool? ?? false,
       defaultTab: json['defaultTab'] as String?,
       defaultAnimeTab: json['defaultAnimeTab'] as String?,
       defaultMangaTab: json['defaultMangaTab'] as String?,
@@ -43,6 +44,7 @@ Map<String, dynamic> _$AnimeMangaPagePreferencesToJson(
       'defaultAnimeAddToList': instance.defaultAnimeAddToList,
       'defaultMangaAddToList': instance.defaultMangaAddToList,
       'showPrivateNotes': instance.showPrivateNotes,
+      'globalSeasonalFilter': instance.globalSeasonalFilter,
       'contentCardProps': instance.contentCardProps,
     };
 

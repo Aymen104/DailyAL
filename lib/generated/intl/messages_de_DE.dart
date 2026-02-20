@@ -422,6 +422,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "Download_ICS": MessageLookupByLibrary.simpleMessage(
       "Laden Sie .ics herunter",
     ),
+    "Download_Install": MessageLookupByLibrary.simpleMessage(
+      "Herunterladen und installieren",
+    ),
+    "Download_complete": MessageLookupByLibrary.simpleMessage(
+      "Download abgeschlossen",
+    ),
+    "Download_failed": MessageLookupByLibrary.simpleMessage(
+      "Der Download ist fehlgeschlagen",
+    ),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "Update wird heruntergeladen...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Ziehen Sie das Feld oder verwenden Sie die Pfeiltasten, um das Feld zu verschieben",
     ),
@@ -733,6 +745,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("Indonesisch"),
     "Informative": MessageLookupByLibrary.simpleMessage("Informativ"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "Update wird installiert...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("Interesse"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("Zinsstapel"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -893,6 +908,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("Manga-Serie."),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("Manga-Statistiken"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("Mangaka"),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage(
+      "Manuelle Installation",
+    ),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("Martial_arts."),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("Meisterwerk"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage(
@@ -1643,6 +1661,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Update": MessageLookupByLibrary.simpleMessage("Aktualisieren"),
     "Update_available": MessageLookupByLibrary.simpleMessage(
       "Update verfügbar",
+    ),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "Dadurch wird das Update heruntergeladen und installiert. Weitermachen?",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "Update gespeichert unter",
     ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "Updates & Ankündigungen.",

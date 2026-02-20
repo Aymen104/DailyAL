@@ -704,6 +704,8 @@
     "Made_With_Flutter": "Made with",
     "Anime_Manga_BG": "Background for Anime/Manga",
     "Anime_Manga_BG_Desc": "Show anime/manga picture as background",
+    "Global_Seasonal_Filter": "Global Seasonal Filter",
+    "Global_Seasonal_Filter_Desc": "Apply seasonal filters to all seasons/years",
     "Streaming_Platforms": "Streaming Platforms",
     "Add_Edit_Msg": "Add or Edit your about section.",
     "Edit_About": "Edit about",

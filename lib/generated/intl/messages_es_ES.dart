@@ -422,6 +422,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Forma de dirección"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage("Descargar .ics"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage(
+      "Descargar e instalar",
+    ),
+    "Download_complete": MessageLookupByLibrary.simpleMessage(
+      "Descarga completa",
+    ),
+    "Download_failed": MessageLookupByLibrary.simpleMessage("Descarga fallida"),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "Descargando actualización...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Arrastre el campo o use las teclas de flecha para mover el campo",
     ),
@@ -751,6 +761,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("Indonesian"),
     "Informative": MessageLookupByLibrary.simpleMessage("Informativo"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "Instalando actualización...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("Interesar"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("Pila de intereses"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -913,6 +926,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("Serie de manga"),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("Estadísticas Manga"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("Mangaka"),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage(
+      "Instalación manual",
+    ),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("Artes marciales"),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("Obra maestra"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage(
@@ -1679,6 +1695,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Update": MessageLookupByLibrary.simpleMessage("Actualizar"),
     "Update_available": MessageLookupByLibrary.simpleMessage(
       "Actualización disponible",
+    ),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "Esto descargará e instalará la actualización. ¿Continuar?",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "Actualización guardada en",
     ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "Actualizaciones y Anuncios",

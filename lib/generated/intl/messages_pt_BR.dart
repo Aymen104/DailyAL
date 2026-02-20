@@ -422,6 +422,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Maneira de direção"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage("Baixar .ics"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage("Baixe e instale"),
+    "Download_complete": MessageLookupByLibrary.simpleMessage(
+      "Download concluído",
+    ),
+    "Download_failed": MessageLookupByLibrary.simpleMessage(
+      "Falha no download",
+    ),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "Baixando atualização...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Arraste o campo ou use as teclas de seta para movê-lo",
     ),
@@ -751,6 +761,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("Indonesian"),
     "Informative": MessageLookupByLibrary.simpleMessage("Informativo"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "Instalando atualização...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("Interesse"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage(
       "Pilha de Interesse",
@@ -923,6 +936,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Estatísticas de mangá",
     ),
     "Mangaka": MessageLookupByLibrary.simpleMessage("Mangaka."),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage("Instalação manual"),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("Artes marciais"),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("Obra de arte"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage(
@@ -1673,6 +1687,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Update": MessageLookupByLibrary.simpleMessage("Atualizar"),
     "Update_available": MessageLookupByLibrary.simpleMessage(
       "Atualização disponível",
+    ),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "Isso fará o download e instalará a atualização. Continuar?",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "Atualização salva em",
     ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "Atualizações e Anúncios",

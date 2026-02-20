@@ -47,6 +47,8 @@ class UserContentBuilder extends StatefulWidget {
   final SortOption? sortOption;
   final Future<List<BaseNode>> Function(CustomSearchInput) customFuture;
   final int pageSize;
+  final SortFilterDisplay? sortFilterDisplay;
+  final bool disableOwnFilter;
 
   const UserContentBuilder({
     this.category = "anime",
@@ -60,6 +62,8 @@ class UserContentBuilder extends StatefulWidget {
     this.pageSize = 300,
     this.optionsCacheKey,
     this.sortOption,
+    this.sortFilterDisplay,
+    this.disableOwnFilter = false,
   }) : super(key: key);
 
   @override
@@ -133,17 +137,21 @@ class _UserContentBuilderState extends State<UserContentBuilder>
     bool fromCache = false,
   }) async {
     try {
-      final sortFilterDisplay = _sortFilterDisplay!.copyWith(
-        display: (_sortFilterDisplay?.displayOption.displaySubType ==
+      final overrideSortFilterDisplay =
+          widget.sortFilterDisplay ?? _sortFilterDisplay!;
+      final sortFilterDisplay = overrideSortFilterDisplay.copyWith(
+        display: (overrideSortFilterDisplay.displayOption.displaySubType ==
                     DisplaySubType.custom &&
                 widget.category.notEquals('anime'))
-            ? _sortFilterDisplay?.displayOption.copyWith(
+            ? overrideSortFilterDisplay.displayOption.copyWith(
                 displayType: DisplayType.list_vert,
                 displaySubType: DisplaySubType.comfortable,
               )
-            : _sortFilterDisplay?.displayOption,
+            : overrideSortFilterDisplay.displayOption,
       );
-      _sortFilterDisplay = sortFilterDisplay.clone();
+      if (widget.sortFilterDisplay == null) {
+        _sortFilterDisplay = sortFilterDisplay.clone();
+      }
       return _getFuture(fromCache, sortFilterDisplay, offset);
     } catch (e) {
       logDal(e);
@@ -236,12 +244,13 @@ class _UserContentBuilderState extends State<UserContentBuilder>
               },
             ),
           ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: Material(
-              child: _listSubHeaderWidget(),
+          if (!widget.disableOwnFilter)
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Material(
+                child: _listSubHeaderWidget(),
+              ),
             ),
-          ),
         ],
       ),
     );

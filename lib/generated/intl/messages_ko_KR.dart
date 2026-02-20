@@ -324,6 +324,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("방향의 방법"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage(".ics 다운로드"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage("다운로드 및 설치"),
+    "Download_complete": MessageLookupByLibrary.simpleMessage("다운로드 완료"),
+    "Download_failed": MessageLookupByLibrary.simpleMessage("다운로드 실패"),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "업데이트 다운로드 중...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "필드를 드래그하거나 화살표 키를 사용하여 필드를 이동하세요.",
     ),
@@ -593,6 +599,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("인도네시아 인"),
     "Informative": MessageLookupByLibrary.simpleMessage("유익한"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage("업데이트 설치 중..."),
     "Interest": MessageLookupByLibrary.simpleMessage("관심"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("관심 스택"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -731,6 +738,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("만화 시리즈"),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("만화 통계"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("망가카"),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage("수동 설치"),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("martial_arts."),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("걸작"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage("최대 도달!"),
@@ -1325,6 +1333,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Unseen": MessageLookupByLibrary.simpleMessage("보이지 않는 것"),
     "Update": MessageLookupByLibrary.simpleMessage("업데이트"),
     "Update_available": MessageLookupByLibrary.simpleMessage("업데이트 가능"),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "그러면 업데이트가 다운로드되어 설치됩니다. 계속하다?",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "업데이트가 다음에 저장되었습니다.",
+    ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage("업데이트 및 알림장"),
     "Updating": MessageLookupByLibrary.simpleMessage("업데이트"),
     "Urban_Fantasy": MessageLookupByLibrary.simpleMessage("Urban Fantasy"),

@@ -12,6 +12,8 @@ import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:dailyanimelist/util/responsive_helper.dart';
+import 'package:dailyanimelist/main.dart';
 
 class SeasonalConstants {
   static const totalYears = 64;
@@ -69,6 +71,10 @@ class _SeasonalScreenState extends State<SeasonalScreen>
   int get pageLimit => 500;
   bool _isRefreshing = false;
 
+  SortFilterDisplay? _globalSortFilter;
+  bool get _isGlobalFilter =>
+      user.pref.animeMangaPagePreferences.globalSeasonalFilter;
+
   @override
   void initState() {
     super.initState();
@@ -77,6 +83,35 @@ class _SeasonalScreenState extends State<SeasonalScreen>
     _sortOption = _getSortOption();
     refKey = MalAuth.codeChallenge(10);
     setImageUrl();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isGlobalFilter && _globalSortFilter == null) {
+      _loadGlobalSortFilter();
+    }
+  }
+
+  void _loadGlobalSortFilter() async {
+    final isTablet = ResponsiveHelper.isTabletOrLarger(context);
+    final defObj = SortFilterDisplay(
+      sort: SortOption(name: 'Updated At', value: 'list_updated_at'),
+      displayOption: DisplayOption(
+        displayType: isTablet ? DisplayType.grid : user.pref.defaultDisplayType,
+        displaySubType:
+            isTablet ? DisplaySubType.compact : DisplaySubType.comfortable,
+        gridCrossAxisCount: ResponsiveHelper.getCrossAxisCount(context),
+      ),
+      filterOutputs: {},
+    );
+    _globalSortFilter = await SortFilterDisplay.fromCache(
+        'UserContentBuilderSeasonal_Screen', 'anime-@me', defObj);
+    _globalSortFilter = _globalSortFilter!.copyWith(category: 'anime');
+    if (_sortOption != null) {
+      _globalSortFilter = _globalSortFilter!.copyWith(sort: _sortOption!);
+    }
+    if (mounted) setState(() {});
   }
 
   SortOption? _getSortOption() {
@@ -143,6 +178,26 @@ class _SeasonalScreenState extends State<SeasonalScreen>
 
   List<Widget> get _buildActions {
     return [
+      if (_isGlobalFilter && _globalSortFilter != null)
+        ToolTipButton(
+          message: S.current.Filter,
+          onTap: () {
+            showSortFilterDisplayModal(
+              context: context,
+              sortFilterDisplay: _globalSortFilter!.clone(),
+              onSortFilterChange: (value) {
+                _globalSortFilter = value.clone();
+                value.toCache('UserContentBuilderSeasonal_Screen', 'anime-@me');
+                if (mounted) setState(() {});
+              },
+            );
+          },
+          child: Icon(
+            _globalSortFilter!.filterOutputs.isEmpty
+                ? LineIcons.filter
+                : filterLengthIcon(_globalSortFilter!.filterOutputs.length),
+          ),
+        ),
       ToolTipButton(
         message: S.current.Search_Bar_Text,
         onTap: () => gotoPage(
@@ -215,6 +270,9 @@ class _SeasonalScreenState extends State<SeasonalScreen>
   }
 
   Widget _buildStateFullSeason(_Season e) {
+    if (_isGlobalFilter && _globalSortFilter == null)
+      return loadingCenterColored;
+
     return UserContentBuilder(
       username: '@me',
       category: 'anime',
@@ -222,6 +280,10 @@ class _SeasonalScreenState extends State<SeasonalScreen>
       optionsCacheKey: 'Seasonal_Screen',
       customFuture: (input) => seasonalFuture(e, input),
       sortOption: _sortOption,
+      sortFilterDisplay: _isGlobalFilter ? _globalSortFilter : null,
+      disableOwnFilter: _isGlobalFilter,
+      refreshKey:
+          _isGlobalFilter ? _globalSortFilter.hashCode.toString() : null,
     );
   }
 }

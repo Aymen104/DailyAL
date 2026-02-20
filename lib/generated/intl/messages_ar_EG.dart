@@ -380,6 +380,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("طريقة الاتجاه"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage("تحميل .ics"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage("تحميل وتثبيت"),
+    "Download_complete": MessageLookupByLibrary.simpleMessage("اكتمل التنزيل"),
+    "Download_failed": MessageLookupByLibrary.simpleMessage("فشل التنزيل"),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "جارٍ تنزيل التحديث...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "اسحب الحقل أو استخدم مفاتيح الأسهم لتحريك الحقل",
     ),
@@ -677,6 +683,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("إندونيسي"),
     "Informative": MessageLookupByLibrary.simpleMessage("غنيا بالمعلومات"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "جارٍ تثبيت التحديث...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("فائدة"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("كومة الفائدة"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -831,6 +840,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("سلسلة مانغا"),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("إحصائيات المانجا"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("مانجكا"),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage("التثبيت اليدوي"),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("الفنون العسكرية"),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("تحفة"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage(
@@ -1532,6 +1542,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Unseen": MessageLookupByLibrary.simpleMessage("غير مرئي"),
     "Update": MessageLookupByLibrary.simpleMessage("تحديث"),
     "Update_available": MessageLookupByLibrary.simpleMessage("التحديث متاح"),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "سيؤدي هذا إلى تنزيل التحديث وتثبيته. يكمل؟",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "تم حفظ التحديث في",
+    ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "التحديثات والإعلانات",
     ),

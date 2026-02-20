@@ -5044,6 +5044,26 @@ class S {
     );
   }
 
+  /// `Global Seasonal Filter`
+  String get Global_Seasonal_Filter {
+    return Intl.message(
+      'Global Seasonal Filter',
+      name: 'Global_Seasonal_Filter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply seasonal filters to all seasons/years`
+  String get Global_Seasonal_Filter_Desc {
+    return Intl.message(
+      'Apply seasonal filters to all seasons/years',
+      name: 'Global_Seasonal_Filter_Desc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Streaming Platforms`
   String get Streaming_Platforms {
     return Intl.message(

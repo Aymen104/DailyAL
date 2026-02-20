@@ -330,6 +330,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("道順し"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage(".icsをダウンロード"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage("ダウンロードとインストール"),
+    "Download_complete": MessageLookupByLibrary.simpleMessage("ダウンロード完了"),
+    "Download_failed": MessageLookupByLibrary.simpleMessage("ダウンロードに失敗しました"),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "アップデートをダウンロード中...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "フィールドをドラッグするか、矢印キーを使用してフィールドを移動します",
     ),
@@ -611,6 +617,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("インドネシア語"),
     "Informative": MessageLookupByLibrary.simpleMessage("有益な"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "アップデートをインストールしています...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("興味"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("関心スタック"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -753,6 +762,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("マンガシリーズ"),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("マンガ統計"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("マンガカ"),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage("手動インストール"),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("martial_arts"),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("傑作"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage("最大到達！"),
@@ -1353,6 +1363,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "Unseen": MessageLookupByLibrary.simpleMessage("見えない"),
     "Update": MessageLookupByLibrary.simpleMessage("アップデート"),
     "Update_available": MessageLookupByLibrary.simpleMessage("利用可能なアップデート"),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "これにより、アップデートがダウンロードされ、インストールされます。続く？",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage("アップデートの保存先"),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "アップデートとお知らせ",
     ),

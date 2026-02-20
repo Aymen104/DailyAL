@@ -404,6 +404,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Doujunshi": MessageLookupByLibrary.simpleMessage("Cara arah"),
     "Download_ICS": MessageLookupByLibrary.simpleMessage("Unduh .ics"),
+    "Download_Install": MessageLookupByLibrary.simpleMessage("Unduh & Instal"),
+    "Download_complete": MessageLookupByLibrary.simpleMessage(
+      "Pengunduhan selesai",
+    ),
+    "Download_failed": MessageLookupByLibrary.simpleMessage(
+      "Pengunduhan gagal",
+    ),
+    "Downloading_update": MessageLookupByLibrary.simpleMessage(
+      "Mengunduh pembaruan...",
+    ),
     "Drag_the_field": MessageLookupByLibrary.simpleMessage(
       "Seret bidang atau gunakan tombol panah untuk memindahkan bidang",
     ),
@@ -721,6 +731,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "Indonesian": MessageLookupByLibrary.simpleMessage("bahasa Indonesia"),
     "Informative": MessageLookupByLibrary.simpleMessage("Informatif"),
+    "Installing_update": MessageLookupByLibrary.simpleMessage(
+      "Menginstal pembaruan...",
+    ),
     "Interest": MessageLookupByLibrary.simpleMessage("Minat"),
     "Interest_Stack": MessageLookupByLibrary.simpleMessage("Tumpukan Bunga"),
     "Interest_Stack_Type_Desc": MessageLookupByLibrary.simpleMessage(
@@ -877,6 +890,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "Manga_Series": MessageLookupByLibrary.simpleMessage("Manga Series."),
     "Manga_Stats": MessageLookupByLibrary.simpleMessage("Statistik Manga"),
     "Mangaka": MessageLookupByLibrary.simpleMessage("Mangaka."),
+    "Manual_Install": MessageLookupByLibrary.simpleMessage("Instalasi Manual"),
     "Martial_Arts": MessageLookupByLibrary.simpleMessage("Seni bela diri"),
     "Masterpiece": MessageLookupByLibrary.simpleMessage("Mahakarya"),
     "Maximum_reached": MessageLookupByLibrary.simpleMessage(
@@ -1609,6 +1623,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Update": MessageLookupByLibrary.simpleMessage("Memperbarui"),
     "Update_available": MessageLookupByLibrary.simpleMessage(
       "Pembaruan tersedia",
+    ),
+    "Update_consent": MessageLookupByLibrary.simpleMessage(
+      "Ini akan mengunduh dan menginstal pembaruan. Melanjutkan?",
+    ),
+    "Update_saved_to": MessageLookupByLibrary.simpleMessage(
+      "Pembaruan disimpan ke",
     ),
     "Updates_Announcements": MessageLookupByLibrary.simpleMessage(
       "Pembaruan & Pengumuman",
