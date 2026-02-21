@@ -152,6 +152,11 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     if (user.pref.preferAniList && user.isAniListConnected) {
       _activeAccount = ActiveAccount.anilist;
       _fetchAniListEntry();
+      // Also ensure MAL data is loaded for when user switches back
+      if (contentDetailed?.myListStatus == null && !widget.updateCache) {
+        cacheUpdated = false;
+        updateCache();
+      }
     }
   }
 
@@ -901,7 +906,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   // ─── AniList independent view ───────────────────────────────
 
   /// Fetch the AniList entry for the current content.
-  void _fetchAniListEntry() async {
+  Future<void> _fetchAniListEntry() async {
     final id = _id;
     if (id == null) return;
     if (mounted)
@@ -1601,6 +1606,34 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                     }
                   },
                   saveAniListEntry: _saveAniListEntry,
+                  loadMalData: () async {
+                    await updateCache();
+                    if (mounted) {
+                      setState(() {
+                        checkForUpdatesDuringBuild();
+                      });
+                    }
+                  },
+                  loadAniListData: () async {
+                    await _fetchAniListEntry();
+                    if (mounted) {
+                      setState(() {
+                        checkForUpdatesDuringBuild();
+                      });
+                    }
+                  },
+                  getLatestAniListData: () {
+                    return {
+                      'status': _alStatus,
+                      'score': _alScore,
+                      'progress': _alProgress,
+                      'progressVolumes': _alProgressVolumes,
+                      'startDate': _alStartDate,
+                      'completedDate': _alCompletedDate,
+                      'repeat': _alRepeat,
+                      'notes': _alNotes,
+                    };
+                  },
                 );
               },
               icon: const Icon(Icons.sync),
@@ -1650,6 +1683,12 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
               if (_activeAccount == ActiveAccount.anilist &&
                   _anilistEntry == null) {
                 _fetchAniListEntry();
+              }
+              // Fetch MAL data when switching to it if not already loaded
+              if (_activeAccount == ActiveAccount.mal &&
+                  contentDetailed?.myListStatus == null &&
+                  !cacheUpdated) {
+                updateCache();
               }
             }
           },

@@ -40,6 +40,9 @@ class SyncHelper {
       String? notes,
       bool? private_,
     }) saveAniListEntry,
+    required Future<void> Function() loadMalData,
+    required Future<void> Function() loadAniListData,
+    required Function() getLatestAniListData,
   }) {
     showDialog(
       context: context,
@@ -78,7 +81,10 @@ class SyncHelper {
                           contentDetailed: contentDetailed,
                           onSyncedToAniList: onSyncedToAniList,
                           saveAniListEntry: saveAniListEntry,
+                          loadMalData: loadMalData,
                         );
+                        // Reload AniList data after sync to get the updated values
+                        await loadAniListData();
                         if (context.mounted) {
                           setState(() {
                             isSyncingMalToAni = false;
@@ -100,19 +106,48 @@ class SyncHelper {
                         setState(() {
                           isSyncingAniToMal = true;
                         });
+
+                        // Load AniList data if not already loaded
+                        var currentAnilistStatus = anilistStatus;
+                        var currentAnilistScore = anilistScore;
+                        var currentAnilistProgress = anilistProgress;
+                        var currentAnilistProgressVolumes =
+                            anilistProgressVolumes;
+                        var currentAnilistStartDate = anilistStartDate;
+                        var currentAnilistCompletedDate = anilistCompletedDate;
+                        var currentAnilistRepeat = anilistRepeat;
+                        var currentAnilistNotes = anilistNotes;
+
+                        if (currentAnilistStatus == null) {
+                          await loadAniListData();
+                          final latestData = getLatestAniListData();
+                          currentAnilistStatus = latestData['status'];
+                          currentAnilistScore = latestData['score'];
+                          currentAnilistProgress = latestData['progress'];
+                          currentAnilistProgressVolumes =
+                              latestData['progressVolumes'];
+                          currentAnilistStartDate = latestData['startDate'];
+                          currentAnilistCompletedDate =
+                              latestData['completedDate'];
+                          currentAnilistRepeat = latestData['repeat'];
+                          currentAnilistNotes = latestData['notes'];
+                        }
+
                         await _syncToMal(
                           malId: malId,
                           category: category,
-                          anilistStatus: anilistStatus,
-                          anilistScore: anilistScore,
-                          anilistProgress: anilistProgress,
-                          anilistProgressVolumes: anilistProgressVolumes,
-                          anilistStartDate: anilistStartDate,
-                          anilistCompletedDate: anilistCompletedDate,
-                          anilistRepeat: anilistRepeat,
-                          anilistNotes: anilistNotes,
+                          anilistStatus: currentAnilistStatus,
+                          anilistScore: currentAnilistScore,
+                          anilistProgress: currentAnilistProgress,
+                          anilistProgressVolumes: currentAnilistProgressVolumes,
+                          anilistStartDate: currentAnilistStartDate,
+                          anilistCompletedDate: currentAnilistCompletedDate,
+                          anilistRepeat: currentAnilistRepeat,
+                          anilistNotes: currentAnilistNotes,
                           onSyncedToMal: onSyncedToMal,
                         );
+                        // Reload MAL data after sync to get the updated values
+                        await loadMalData();
                         if (context.mounted) {
                           setState(() {
                             isSyncingAniToMal = false;
@@ -211,11 +246,18 @@ class SyncHelper {
       String? notes,
       bool? private_,
     }) saveAniListEntry,
+    required Future<void> Function() loadMalData,
   }) async {
-    final malStatus = contentDetailed?.myListStatus;
+    // Check if MAL data is loaded, if not load it first
+    var malStatus = contentDetailed?.myListStatus;
     if (malStatus == null) {
-      showToast('No MAL data to sync');
-      return;
+      showToast('Loading MAL data...');
+      await loadMalData();
+      malStatus = contentDetailed?.myListStatus;
+      if (malStatus == null) {
+        showToast('No MAL data to sync');
+        return;
+      }
     }
     final isAnime = category.equals('anime');
 
@@ -288,6 +330,7 @@ class SyncHelper {
   }) async {
     final id = malId;
     if (id == null) return;
+
     if (anilistStatus == null) {
       showToast('No AniList data to sync');
       return;
