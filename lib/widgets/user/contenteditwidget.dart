@@ -1015,27 +1015,43 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                 children: [
                   Expanded(
                     child: expandedChild(
-                      isAnime ? 'Watching Status' : 'Reading Status',
+                      isAnime ? S.current.Status : S.current.Reading_Status,
                       statusWidget_al(statusMap),
                     ),
                   ),
+                  SB.w20,
                   Expanded(
                     child: expandedChild(
-                      isAnime ? 'Episode Progress' : 'Chapter Progress',
+                      isAnime
+                          ? S.current.Episodes_seen
+                          : "${S.current.Chapters} " +
+                              ((!(contentDetailed is MangaDetailed) ||
+                                      contentDetailed?.numChapters == null ||
+                                      contentDetailed.numChapters == 0)
+                                  ? S.current.Read
+                                  : "(${contentDetailed.numChapters})"),
                       _buildAlProgressWidget(isAnime),
                     ),
                   ),
-                  if (!isAnime)
+                  if (!isAnime) ...[
+                    SB.w20,
                     Expanded(
                       child: expandedChild(
-                        'Volume Progress',
+                        "${S.current.Volumes} " +
+                            ((!(contentDetailed is MangaDetailed) ||
+                                    contentDetailed?.numVolumes == null ||
+                                    contentDetailed.numVolumes == 0)
+                                ? S.current.Read
+                                : "(${contentDetailed.numVolumes})"),
                         _buildAlVolumeWidget(),
                       ),
                     ),
+                  ]
                 ],
               ),
               SB.h5,
               _alScoreBarWidget(),
+              SB.h20,
             ],
           ),
         ),
@@ -1197,17 +1213,26 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   }
 
   Widget _alScoreBarWidget() {
-    final value = _alScore?.round() ?? 0;
+    final double rawValue = _alScore ?? 0.0;
     final keys = List.generate(21, (i) => i / 2); // 0.0, 0.5, ... 10.0
 
     // Find closest valid score or default to 0
-    int initIndex = keys.indexWhere((k) => (k - (_alScore ?? 0.0)).abs() < 0.1);
+    int initIndex = keys.indexWhere((k) => (k - rawValue).abs() < 0.1);
     if (initIndex == -1) initIndex = 0;
+
+    String scoreLabel = '';
+    if (rawValue != 0.0) {
+      if (rawValue % 1 == 0 && myStarMap.containsKey(rawValue.toInt())) {
+        scoreLabel = ' · ${myStarMap[rawValue.toInt()]}';
+      } else {
+        scoreLabel = ' · $rawValue';
+      }
+    }
 
     return Column(
       children: [
         SB.h20,
-        Text('${S.current.Score}${value == 0 ? '' : ' · ${value}'}'),
+        Text('${S.current.Score}$scoreLabel'),
         SB.h15,
         SizedBox(
           height: 45.0,

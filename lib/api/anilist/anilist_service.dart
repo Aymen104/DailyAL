@@ -13,7 +13,7 @@ class AniListService {
   static const _entryFields = '''
     id
     status
-    score(format: POINT_10)
+    score(format: POINT_10_DECIMAL)
     progress
     progressVolumes
     startedAt { year month day }
