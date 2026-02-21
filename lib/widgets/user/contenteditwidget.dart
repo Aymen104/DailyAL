@@ -11,6 +11,7 @@ import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/screens/homescreen.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/util/error/error_reporting.dart';
+import 'package:dailyanimelist/util/sync_helper.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/search/filtermodal.dart';
@@ -248,7 +249,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   updateCache() async {
     try {
       var field =
-          "num_episodes,my_list_status{is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}";
+          "num_episodes,my_list_status{status,score,num_episodes_watched,num_watched_episodes,num_chapters_read,num_volumes_read,is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}";
       var content = contentDetailed;
       if (contentDetailed is BaseNode) {
         content = contentDetailed?.content;
@@ -540,28 +541,44 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   }
 
   checkForUpdatesDuringBuild() {
-    starValue = contentDetailed?.myListStatus?.score?.round();
-    statusValue = contentDetailed?.myListStatus?.status;
+    if (_activeAccount == ActiveAccount.anilist) {
+      starValue = _alScore?.round();
+      statusValue = _alStatus;
+    } else {
+      starValue = contentDetailed?.myListStatus?.score?.round();
+      statusValue = contentDetailed?.myListStatus?.status;
+    }
     initComplete = true;
     try {
       if (widget.category.equals("anime")) {
-        episodeController.text =
-            (contentDetailed?.myListStatus?.numEpisodesWatched == null
-                    ? "0"
-                    : contentDetailed?.myListStatus?.numEpisodesWatched
-                        ?.toString()) ??
-                '';
+        if (_activeAccount == ActiveAccount.anilist) {
+          episodeController.text = _alProgress?.toString() ?? "0";
+        } else {
+          episodeController.text =
+              (contentDetailed?.myListStatus?.numEpisodesWatched == null
+                      ? "0"
+                      : contentDetailed?.myListStatus?.numEpisodesWatched
+                          ?.toString()) ??
+                  '';
+        }
       } else {
-        chapterController
-            .text = (contentDetailed?.myListStatus?.numChaptersRead == null
-                ? "0"
-                : contentDetailed?.myListStatus?.numChaptersRead?.toString()) ??
-            '';
-        volumesController
-            .text = (contentDetailed?.myListStatus?.numVolumesRead == null
-                ? "0"
-                : contentDetailed?.myListStatus?.numVolumesRead?.toString()) ??
-            '';
+        if (_activeAccount == ActiveAccount.anilist) {
+          chapterController.text = _alProgress?.toString() ?? "0";
+          volumesController.text = _alProgressVolumes?.toString() ?? "0";
+        } else {
+          chapterController.text =
+              (contentDetailed?.myListStatus?.numChaptersRead == null
+                      ? "0"
+                      : contentDetailed?.myListStatus?.numChaptersRead
+                          ?.toString()) ??
+                  '';
+          volumesController.text =
+              (contentDetailed?.myListStatus?.numVolumesRead == null
+                      ? "0"
+                      : contentDetailed?.myListStatus?.numVolumesRead
+                          ?.toString()) ??
+                  '';
+        }
       }
     } catch (e) {
       logDal(e);
@@ -1538,6 +1555,53 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
       child: Row(
         children: [
           if (showToggle) _accountToggleChip,
+          if (showToggle) ...[
+            SB.w10,
+            IconButton(
+              onPressed: () {
+                SyncHelper.showSyncOptions(
+                  context: context,
+                  contentDetailed: contentDetailed,
+                  category: widget.category,
+                  malId: _id,
+                  anilistStatus: _alStatus,
+                  anilistScore: _alScore,
+                  anilistProgress: _alProgress,
+                  anilistProgressVolumes: _alProgressVolumes,
+                  anilistStartDate: _alStartDate,
+                  anilistCompletedDate: _alCompletedDate,
+                  anilistRepeat: _alRepeat,
+                  anilistNotes: _alNotes,
+                  onSyncedToAniList: (newStatus,
+                      newScore,
+                      newProgress,
+                      newProgressVolumes,
+                      newStartDate,
+                      newCompletedDate,
+                      newRepeat,
+                      newNotes) {
+                    setState(() {
+                      _alStatus = newStatus;
+                      _alScore =
+                          newScore ?? _alScore; // Keep current score if null
+                      _alProgress = newProgress;
+                      _alProgressVolumes = newProgressVolumes;
+                      _alStartDate = newStartDate;
+                      _alCompletedDate = newCompletedDate;
+                      _alRepeat = newRepeat;
+                      _alNotes = newNotes;
+                    });
+                  },
+                  onSyncedToMal: () async {
+                    await updateCache();
+                    checkForUpdatesDuringBuild();
+                  },
+                  saveAniListEntry: _saveAniListEntry,
+                );
+              },
+              icon: const Icon(Icons.sync),
+            ),
+          ],
           const Spacer(),
           ShadowButton(
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),

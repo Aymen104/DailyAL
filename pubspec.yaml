@@ -120,6 +120,7 @@ flutter:
     - assets/images/user_dal.png
     - assets/images/myanimelist-logo.jpg
     - assets/images/mal-icon.png
+    - assets/images/anilist.png 
     - assets/images/anime-icon.png
     - assets/images/general-icon.png
     - assets/images/anime-collage.jpg
