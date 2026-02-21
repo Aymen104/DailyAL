@@ -630,7 +630,8 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
   @override
   Widget build(BuildContext context) {
     final String nodeTitle = getNodeTitle(widget.dynContent?.content);
-    NodeStatusValue nsv = NodeStatusValue.fromListStatus(myListStatus);
+    NodeStatusValue nsv = NodeStatusValue.fromListStatus(myListStatus,
+        category: widget.category, id: widget.dynContent?.content?.id);
     return ((widget.displayType == DisplayType.grid ||
                 widget.displayType == DisplayType.list_horiz) &&
             (contentTypes.contains(widget.category) ||

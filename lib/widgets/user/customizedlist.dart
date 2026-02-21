@@ -71,13 +71,13 @@ class _ContentCustomizerState extends State<ContentCustomizer> {
     );
   }
 
-  void _showUpdateDialog(bool editMode, [
+  void _showUpdateDialog(
+    bool editMode, [
     ContentCardProps? props,
   ]) {
     showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog.adaptive(
+        builder: (context) => AlertDialog.adaptive(
               title: Text(editMode
                   ? S.current.Edit_Display_Profile
                   : S.current.Add_display_profile),
@@ -121,32 +121,30 @@ class _ContentCustomizerState extends State<ContentCustomizer> {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) =>
-                AlertDialog(
-                  title: Text(S.current.Delete_Profile),
-                  content: Text(
-                      S.current.Are_you_sure_you_want_to_delete_profile),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(S.current.Cancel),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        user.pref.animeMangaPagePreferences.contentCardProps!
-                            .remove(item);
-                        user.setIntance();
-                        Navigator.of(context).pop();
-                        if (mounted) {
-                          setState(() {});
-                        }
-                      },
-                      child: Text(S.current.Delete),
-                    ),
-                  ],
+            builder: (context) => AlertDialog(
+              title: Text(S.current.Delete_Profile),
+              content: Text(S.current.Are_you_sure_you_want_to_delete_profile),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(S.current.Cancel),
                 ),
+                TextButton(
+                  onPressed: () {
+                    user.pref.animeMangaPagePreferences.contentCardProps!
+                        .remove(item);
+                    user.setIntance();
+                    Navigator.of(context).pop();
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
+                  child: Text(S.current.Delete),
+                ),
+              ],
+            ),
           );
         },
         icon: Icon(Icons.delete),
@@ -195,16 +193,16 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
 
     showContentEditSheet(context, 'anime', _dynContent,
         updateCache: widget.updateCacheOnEdit, onListStatusChange: (status) {
-          if (mounted && status != null)
-            setState(() {
-              myListStatus = status;
-            });
-        }, onDelete: () {
-          if (mounted)
-            setState(() {
-              myListStatus = null;
-            });
+      if (mounted && status != null)
+        setState(() {
+          myListStatus = status;
         });
+    }, onDelete: () {
+      if (mounted)
+        setState(() {
+          myListStatus = null;
+        });
+    });
   }
 
   @override
@@ -227,7 +225,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
 
   MyAnimeListStatus? get myListStatus {
     var myListStatusFromContent =
-    widget.node?.content?.myListStatus as MyAnimeListStatus?;
+        widget.node?.content?.myListStatus as MyAnimeListStatus?;
     var myListStatusFromNode = widget.node?.myListStatus as MyAnimeListStatus?;
     if (myListStatusFromContent?.status != null ||
         myListStatusFromContent?.score != null ||
@@ -262,9 +260,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(
-                  color: Theme
-                      .of(context)
-                      .dividerColor,
+                  color: Theme.of(context).dividerColor,
                   width: 0.5,
                 ),
               ),
@@ -275,10 +271,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
               Text(S.current.Tap_to_select, style: TextStyle(fontSize: 11)),
             SB.h10,
             HeaderWidget(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
+              width: MediaQuery.of(context).size.width,
               header: _fieldNames,
               fontSize: 13.0,
               applyTextColor: true,
@@ -376,7 +369,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
         _fieldValues.remove(selectedField);
 
         final newFieldValues =
-        LinkedHashMap<CustomizableFieldType, CustomizableField>();
+            LinkedHashMap<CustomizableFieldType, CustomizableField>();
         _fieldValues.forEach((key, value) {
           newFieldValues[key] = value;
           if (key == nextFieldKey) {
@@ -401,7 +394,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
         _fieldValues.remove(selectedField);
 
         final newFieldValues =
-        LinkedHashMap<CustomizableFieldType, CustomizableField>();
+            LinkedHashMap<CustomizableFieldType, CustomizableField>();
         _fieldValues.forEach((key, value) {
           if (key == previousFieldKey) {
             newFieldValues[selectedField!] = selectedFieldValue;
@@ -418,10 +411,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
 
   SizedBox _populateFields() {
     return SizedBox(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      width: MediaQuery.of(context).size.width,
       height: props.height,
       child: Card(
         shape: RoundedRectangleBorder(
@@ -429,13 +419,12 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
         ),
         child: conditional(
           on: !widget.editMode,
-          parent: (child) =>
-              InkWell(
-                onTap: () {
-                  onNodeTap(widget.node?.content, 'anime', context);
-                },
-                child: child,
-              ),
+          parent: (child) => InkWell(
+            onTap: () {
+              onNodeTap(widget.node?.content, 'anime', context);
+            },
+            child: child,
+          ),
           child: Stack(
             children: [
               for (final field in _fieldValues.values)
@@ -460,9 +449,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
     }
     var isSelected = selectedField == field.type;
     var borderColor =
-    isSelected ? Theme
-        .of(context)
-        .dividerColor : Colors.transparent;
+        isSelected ? Theme.of(context).dividerColor : Colors.transparent;
     return GestureDetector(
       onTap: () => _setSelected(field.type),
       onPanUpdate: (details) {
@@ -529,10 +516,9 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
       CustomizableFieldType.image => _imageWidget(),
       CustomizableFieldType.media_type => _mediaTypeWidget(),
       CustomizableFieldType.mean_score =>
-          starWwidget(node?.mean?.toString() ?? '-', EdgeInsets.zero),
+        starWwidget(node?.mean?.toString() ?? '-', EdgeInsets.zero),
       CustomizableFieldType.num_list_users => _listUserWidget(),
-      CustomizableFieldType.list_score =>
-      myListStatus?.score == null
+      CustomizableFieldType.list_score => myListStatus?.score == null
           ? SB.z
           : starWwidget(myListStatus?.score?.toString() ?? '-'),
       CustomizableFieldType.edit_and_watched_button => _editWatchedBtnWidget(),
@@ -544,7 +530,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
       CustomizableFieldType.edit_btn => _editBtnWidget(),
       CustomizableFieldType.airing_date => _airingDateWidget(),
       CustomizableFieldType.next_episode_full_counter =>
-          _nextEpisodeFullCounterWidget(),
+        _nextEpisodeFullCounterWidget(),
       _ => SB.z
     };
   }
@@ -558,28 +544,26 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
       height: 30.0,
       child: CountDownWidget(
         timestamp: data!.timestamp!,
-        customTimer: (timer) =>
-            ShadowButton(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              onPressed: widget.editMode
-                  ? () =>
-                  _setSelected(CustomizableFieldType.next_episode_counter)
-                  : () {
-                showToast(
-                    '${S.current.Next_episode} ${data.episode} in ${timer
-                        .expanded()}');
-              },
-              child: Text(
-                timer.highestOnly(),
-                style: TextStyle(fontSize: 12),
-              ),
-            ),
+        customTimer: (timer) => ShadowButton(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          onPressed: widget.editMode
+              ? () => _setSelected(CustomizableFieldType.next_episode_counter)
+              : () {
+                  showToast(
+                      '${S.current.Next_episode} ${data.episode} in ${timer.expanded()}');
+                },
+          child: Text(
+            timer.highestOnly(),
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
       ),
     );
   }
 
   SizedBox _editWatchedBtnWidget() {
-    NodeStatusValue nsv = NodeStatusValue.fromListStatus(myListStatus);
+    NodeStatusValue nsv = NodeStatusValue.fromListStatus(myListStatus,
+        category: 'anime', id: node?.id);
     final data = DalApi.i.scheduleForMalIdsSync[node!.id!];
     int? episodes;
     if (node?.numEpisodes == null || node!.numEpisodes == 0) {
@@ -602,12 +586,12 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
         child: myListStatus == null
             ? Icon(Icons.edit)
             : AutoSizeText(
-          s,
-          minFontSize: 6,
-          maxFontSize: 13,
-          style:
-          nsv.color == null ? null : TextStyle(color: Colors.white),
-        ),
+                s,
+                minFontSize: 6,
+                maxFontSize: 13,
+                style:
+                    nsv.color == null ? null : TextStyle(color: Colors.white),
+              ),
       ),
     );
   }
@@ -629,12 +613,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
       (content?.mediaType ?? '').standardize()!.titleCase(),
       style: TextStyle(
         fontSize: 12,
-        color: Theme
-            .of(context)
-            .textTheme
-            .bodyMedium
-            ?.color
-            ?.withOpacity(0.7),
+        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
       ),
     );
   }
@@ -763,7 +742,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
               child: TextFormField(
                 initialValue: props.profileName,
                 onSaved: (newValue) =>
-                props = props.copyWith(profileName: newValue!),
+                    props = props.copyWith(profileName: newValue!),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return S.current.Enter_valid_profile;
@@ -836,25 +815,24 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
   Future<bool> _discardChangedPopUp() async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text(S.current.Discard_changes),
-            content: Text(S.current.Are_you_sure_you_want_to_discard),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: Text(S.current.Cancel),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: Text(S.current.Discard),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text(S.current.Discard_changes),
+        content: Text(S.current.Are_you_sure_you_want_to_discard),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(S.current.Cancel),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: Text(S.current.Discard),
+          ),
+        ],
+      ),
     );
     return result ?? true;
   }

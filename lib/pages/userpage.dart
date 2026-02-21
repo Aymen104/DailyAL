@@ -26,6 +26,7 @@ import 'package:dailyanimelist/widgets/togglebutton.dart';
 import 'package:dailyanimelist/widgets/user/contentbuilder.dart';
 import 'package:dailyanimelist/widgets/user/signinpage.dart';
 import 'package:dailyanimelist/widgets/user/userchart.dart';
+import 'package:dailyanimelist/user/userlistcache.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 
@@ -606,6 +607,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     }
     final contentResult = await future;
     var list = contentResult.data ?? [];
+    if (widget.isSelf) {
+      UserListCache.updateCache(list, category);
+    }
     bool isSorted = false;
     final _isAnime = category.equals('anime');
     final orderMap =

@@ -20,6 +20,7 @@ import 'package:dailyanimelist/widgets/fadingeffect.dart';
 import 'package:dailyanimelist/widgets/home/nodebadge.dart';
 import 'package:dailyanimelist/widgets/user/contentlistwidget.dart';
 import 'package:dailyanimelist/widgets/user/stats_screen.dart';
+import 'package:dailyanimelist/user/userlistcache.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
@@ -191,7 +192,8 @@ class AnimeGridCard extends StatelessWidget {
     double borderRadius,
     MyListStatus? myListStatus,
   ) {
-    final value = parentNsv ?? NodeStatusValue.fromStatus(node);
+    final value =
+        parentNsv ?? NodeStatusValue.fromStatus(node, category: category);
     return Align(
       alignment: AlignmentDirectional.bottomCenter,
       child: Row(
@@ -233,7 +235,7 @@ class AnimeGridCard extends StatelessWidget {
   AnimeCardBar _comfortableEdit(BuildContext context) {
     return AnimeCardBar(
       radius: borderRadius,
-      nsv: parentNsv ?? NodeStatusValue.fromStatus(node),
+      nsv: parentNsv ?? NodeStatusValue.fromStatus(node, category: category),
       node: node,
       showEdit: showEdit,
       smallHeight: smallHeight,
@@ -716,13 +718,22 @@ class NodeStatusValue {
 
   NodeStatusValue({required status, color = Colors.transparent});
 
-  NodeStatusValue.fromListStatus(myListStatus) {
+  NodeStatusValue.fromListStatus(myListStatus, {String? category, int? id}) {
     try {
-      setDynStatus(myListStatus.status);
+      dynamic dynStatus;
+      if (myListStatus != null) {
+        try {
+          dynStatus = myListStatus.status;
+        } catch (e) {}
+      }
+      if (dynStatus == null && category != null && id != null) {
+        dynStatus = UserListCache.getStatus(id, category);
+      }
+      setDynStatus(dynStatus);
     } catch (e) {}
   }
 
-  NodeStatusValue.fromStatus(dynamic node) {
+  NodeStatusValue.fromStatus(dynamic node, {String? category}) {
     dynamic dynStatus;
     if (node.myListStatus is MyAnimeListStatus) {
       dynStatus = node.myListStatus as MyAnimeListStatus;
@@ -731,6 +742,13 @@ class NodeStatusValue {
       dynStatus = node.myListStatus as MyMangaListStatus;
       dynStatus = dynStatus.status;
     }
+
+    if (dynStatus == null && category != null) {
+      try {
+        dynStatus = UserListCache.getStatus(node.id, category);
+      } catch (e) {}
+    }
+
     setDynStatus(dynStatus);
     // logDal(status);
   }

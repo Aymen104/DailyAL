@@ -446,7 +446,8 @@ class _AnimeGraphWidgetState extends State<AnimeGraphWidget> {
       ),
     );
     final myListStatus = widget.statusMap[a.id];
-    final value = NodeStatusValue.fromListStatus(myListStatus);
+    final value = NodeStatusValue.fromListStatus(myListStatus,
+        category: 'anime', id: a.id);
     final contains = _expandedIds.contains(a.id);
     final isSelected = _selectedId == a.id;
     final statusOutline = Container(
