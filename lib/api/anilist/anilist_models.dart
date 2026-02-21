@@ -30,15 +30,21 @@ class AniListUser {
 
 // ─── Status Mappings ────────────────────────────────────────────────
 
+/// Helper function to transform status strings to map keys
+String transformStatusKey(String? status) {
+  if (status == null) return '';
+  return status.replaceAll(RegExp(r'[\s_]'), '').toLowerCase();
+}
+
 /// Maps MAL status keys → AniList MediaListStatus enum values.
 const malStatusToAniList = <String, String>{
   'watching': 'CURRENT',
   'reading': 'CURRENT',
   'completed': 'COMPLETED',
-  'on_hold': 'PAUSED',
+  'onhold': 'PAUSED',
   'dropped': 'DROPPED',
-  'plan_to_watch': 'PLANNING',
-  'plan_to_read': 'PLANNING',
+  'plantowatch': 'PLANNING',
+  'plantoread': 'PLANNING',
 };
 
 /// Reverse: AniList → MAL (anime).

@@ -43,58 +43,89 @@ class SyncHelper {
   }) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Sync Data', textAlign: TextAlign.center),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildSyncOption(
-                context,
-                'assets/images/mal-icon.png',
-                'assets/images/anilist.png',
-                'MAL',
-                'AniList',
-                () {
-                  Navigator.pop(context);
-                  _syncToAniList(
-                    category: category,
-                    contentDetailed: contentDetailed,
-                    onSyncedToAniList: onSyncedToAniList,
-                    saveAniListEntry: saveAniListEntry,
-                  );
-                },
+        bool isSyncingMalToAni = false;
+        bool isSyncingAniToMal = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Sync Data', textAlign: TextAlign.center),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              content: SizedBox(
+                width: 320,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildSyncOption(
+                      context,
+                      'assets/images/mal-icon.png',
+                      'assets/images/anilist.png',
+                      'MAL',
+                      'AniList',
+                      isSyncingMalToAni,
+                      () async {
+                        if (isSyncingMalToAni || isSyncingAniToMal) return;
+                        setState(() {
+                          isSyncingMalToAni = true;
+                        });
+                        await _syncToAniList(
+                          category: category,
+                          contentDetailed: contentDetailed,
+                          onSyncedToAniList: onSyncedToAniList,
+                          saveAniListEntry: saveAniListEntry,
+                        );
+                        if (context.mounted) {
+                          setState(() {
+                            isSyncingMalToAni = false;
+                          });
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSyncOption(
+                      context,
+                      'assets/images/anilist.png',
+                      'assets/images/mal-icon.png',
+                      'AniList',
+                      'MAL',
+                      isSyncingAniToMal,
+                      () async {
+                        if (isSyncingMalToAni || isSyncingAniToMal) return;
+                        setState(() {
+                          isSyncingAniToMal = true;
+                        });
+                        await _syncToMal(
+                          malId: malId,
+                          category: category,
+                          anilistStatus: anilistStatus,
+                          anilistScore: anilistScore,
+                          anilistProgress: anilistProgress,
+                          anilistProgressVolumes: anilistProgressVolumes,
+                          anilistStartDate: anilistStartDate,
+                          anilistCompletedDate: anilistCompletedDate,
+                          anilistRepeat: anilistRepeat,
+                          anilistNotes: anilistNotes,
+                          onSyncedToMal: onSyncedToMal,
+                        );
+                        if (context.mounted) {
+                          setState(() {
+                            isSyncingAniToMal = false;
+                          });
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 15),
-              _buildSyncOption(
-                context,
-                'assets/images/anilist.png',
-                'assets/images/mal-icon.png',
-                'AniList',
-                'MAL',
-                () {
-                  Navigator.pop(context);
-                  _syncToMal(
-                    malId: malId,
-                    category: category,
-                    anilistStatus: anilistStatus,
-                    anilistScore: anilistScore,
-                    anilistProgress: anilistProgress,
-                    anilistProgressVolumes: anilistProgressVolumes,
-                    anilistStartDate: anilistStartDate,
-                    anilistCompletedDate: anilistCompletedDate,
-                    anilistRepeat: anilistRepeat,
-                    anilistNotes: anilistNotes,
-                    onSyncedToMal: onSyncedToMal,
-                  );
-                },
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -106,43 +137,57 @@ class SyncHelper {
     String targetIcon,
     String sourceText,
     String targetText,
+    bool isLoading,
     VoidCallback onTap,
   ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        height: 64,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Theme.of(context).dividerColor),
+          border: Border.all(
+              color: Theme.of(context).dividerColor.withOpacity(0.5)),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(sourceIcon, width: 28, height: 28, fit: BoxFit.contain),
-            const SizedBox(width: 8),
-            Text(sourceText,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Icon(Icons.arrow_forward_rounded,
-                  size: 24,
-                  color: Theme.of(context).textTheme.bodySmall?.color),
-            ),
-            Image.asset(targetIcon, width: 28, height: 28, fit: BoxFit.contain),
-            const SizedBox(width: 8),
-            Text(targetText,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          ],
+        child: Center(
+          child: isLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(sourceIcon,
+                        width: 24, height: 24, fit: BoxFit.contain),
+                    const SizedBox(width: 8),
+                    Text(sourceText,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Icon(Icons.arrow_forward_rounded,
+                          size: 20,
+                          color: Theme.of(context).textTheme.bodySmall?.color),
+                    ),
+                    Image.asset(targetIcon,
+                        width: 24, height: 24, fit: BoxFit.contain),
+                    const SizedBox(width: 8),
+                    Text(targetText,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                  ],
+                ),
         ),
       ),
     );
   }
 
-  static void _syncToAniList({
+  static Future<void> _syncToAniList({
     required String category,
     required dynamic contentDetailed,
     required Function(
@@ -166,7 +211,7 @@ class SyncHelper {
       String? notes,
       bool? private_,
     }) saveAniListEntry,
-  }) {
+  }) async {
     final malStatus = contentDetailed?.myListStatus;
     if (malStatus == null) {
       showToast('No MAL data to sync');
@@ -182,8 +227,9 @@ class SyncHelper {
       return null;
     }
 
-    String? newStatus =
-        malStatus.status != null ? malStatusToAniList[malStatus.status] : null;
+    String? newStatus = malStatus.status != null
+        ? malStatusToAniList[transformStatusKey(malStatus.status)]
+        : null;
     double? newScore = malStatus.score?.toDouble();
     int? newProgress;
     int? newProgressVolumes;
@@ -214,7 +260,7 @@ class SyncHelper {
       newNotes,
     );
 
-    saveAniListEntry(
+    await saveAniListEntry(
       status: newStatus,
       score: newScore,
       progress: newProgress,

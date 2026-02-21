@@ -1594,7 +1594,11 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   },
                   onSyncedToMal: () async {
                     await updateCache();
-                    checkForUpdatesDuringBuild();
+                    if (mounted) {
+                      setState(() {
+                        checkForUpdatesDuringBuild();
+                      });
+                    }
                   },
                   saveAniListEntry: _saveAniListEntry,
                 );

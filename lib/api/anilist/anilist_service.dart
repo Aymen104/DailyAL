@@ -98,8 +98,9 @@ class AniListService {
     if (user.anilistToken == null) return null;
 
     // If status is a MAL key, convert to AniList enum
-    final aniStatus =
-        status != null ? (malStatusToAniList[status] ?? status) : null;
+    final aniStatus = status != null
+        ? (malStatusToAniList[transformStatusKey(status)] ?? status)
+        : null;
 
     final mutation = '''
     mutation (
