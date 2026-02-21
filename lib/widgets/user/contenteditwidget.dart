@@ -124,6 +124,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   };
 
   final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemScrollController _alScoreScrollController = ItemScrollController();
   bool _loading = false;
   final ItemScrollController _episodeScrollController = ItemScrollController();
 
@@ -869,10 +870,11 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
             : (widget.category.equals("anime")
                 ? animeStatusWidget()
                 : mangaStatusWidget()),
-        ExpandedSection(
-          expand: showAdvancedEdit,
-          child: advancedWidget,
-        ),
+        if (_activeAccount == ActiveAccount.mal)
+          ExpandedSection(
+            expand: showAdvancedEdit,
+            child: advancedWidget,
+          ),
         _bottomBar,
         SB.h30,
       ],
@@ -998,149 +1000,262 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
 
     final statusMap = aniListStatusDisplayMap;
     final isAnime = widget.category.equals('anime');
+    final unescape = HtmlUnescape();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      child: Column(
-        children: [
-          // ── Row 1: Status | Score ──
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Your List Status (Always visible, like MAL) ──
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+          child: Column(
             children: [
-              Expanded(
-                child: _alField(
-                  S.current.Status,
-                  _anilistSaving
-                      ? SizedBox(height: 50, child: loadingCenter())
-                      : statusWidget_al(statusMap),
-                ),
-              ),
-              SB.w10,
-              Expanded(
-                child: _alField(
-                  S.current.Score,
-                  _buildAlScoreDropdown(),
-                ),
-              ),
-            ],
-          ),
-          SB.h15,
-
-          // ── Row 2: Episode/Chapter Progress | Volume Progress ──
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _alField(
-                  isAnime ? 'Episode Progress' : 'Chapter Progress',
-                  _buildAlProgressWidget(isAnime),
-                ),
-              ),
-              SB.w10,
-              Expanded(
-                child: isAnime
-                    ? const SizedBox()
-                    : _alField(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: expandedChild(
+                      isAnime ? 'Watching Status' : 'Reading Status',
+                      statusWidget_al(statusMap),
+                    ),
+                  ),
+                  Expanded(
+                    child: expandedChild(
+                      isAnime ? 'Episode Progress' : 'Chapter Progress',
+                      _buildAlProgressWidget(isAnime),
+                    ),
+                  ),
+                  if (!isAnime)
+                    Expanded(
+                      child: expandedChild(
                         'Volume Progress',
                         _buildAlVolumeWidget(),
                       ),
-              ),
-            ],
-          ),
-          SB.h15,
-
-          // ── Row 3: Start Date | Finish Date ──
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _alField(
-                  S.current.Start_Date,
-                  _buildAlDatePicker(
-                    value: _alStartDate,
-                    onChanged: (v) {
-                      _alStartDate = v;
-                      _saveAniListEntry(startedAt: v);
-                    },
-                  ),
-                ),
-              ),
-              SB.w10,
-              Expanded(
-                child: _alField(
-                  S.current.Finish_Date,
-                  _buildAlDatePicker(
-                    value: _alCompletedDate,
-                    onChanged: (v) {
-                      _alCompletedDate = v;
-                      _saveAniListEntry(completedAt: v);
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SB.h15,
-
-          // ── Row 4: Total Rewatches | Private ──
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _alField(
-                  isAnime ? 'Total Rewatches' : 'Total Rereads',
-                  _buildAlNumberField(
-                    value: _alRepeat ?? 0,
-                    onChanged: (v) {
-                      _alRepeat = v;
-                      _saveAniListEntry(repeat: v);
-                    },
-                  ),
-                ),
-              ),
-              SB.w10,
-              Expanded(
-                child: _alField(
-                  'Private',
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Switch(
-                      value: _alPrivate,
-                      onChanged: (v) {
-                        _alPrivate = v;
-                        _saveAniListEntry(private_: v);
-                        if (mounted) setState(() {});
-                      },
                     ),
+                ],
+              ),
+              SB.h5,
+              _alScoreBarWidget(),
+            ],
+          ),
+        ),
+
+        ExpandedSection(
+          expand: showAdvancedEdit,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Dates ──
+              sectionHeading(
+                S.current
+                    .Dates_Priority, // Prioriy is excluded since AniList doesn't have it natively, but heading kept for consistency
+                isOpen: accordions[S.current.Dates_Priority] ?? false,
+                onChange: () {
+                  if (mounted)
+                    setState(() {
+                      accordions[S.current.Dates_Priority] =
+                          !(accordions[S.current.Dates_Priority] ?? false);
+                    });
+                },
+              ),
+              ExpandedSection(
+                expand: accordions[S.current.Dates_Priority] ?? false,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      field(
+                        S.current.Start_Date,
+                        _buildAlDatePicker(
+                          value: _alStartDate,
+                          onChanged: (v) {
+                            _alStartDate = v;
+                            _saveAniListEntry(startedAt: v);
+                          },
+                        ),
+                      ),
+                      field(
+                        S.current.Finish_Date,
+                        _buildAlDatePicker(
+                          value: _alCompletedDate,
+                          onChanged: (v) {
+                            _alCompletedDate = v;
+                            _saveAniListEntry(completedAt: v);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Others (Rewatch, Notes, Private) ──
+              sectionHeading(
+                S.current.Others,
+                isOpen: accordions[S.current.Others] ?? false,
+                onChange: () {
+                  if (mounted)
+                    setState(() {
+                      accordions[S.current.Others] =
+                          !(accordions[S.current.Others] ?? false);
+                    });
+                },
+              ),
+              ExpandedSection(
+                expand: accordions[S.current.Others] ?? false,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Rewatch / Reread (Moved here from its own section)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            field(
+                              isAnime
+                                  ? S.current.Times_Rewatched
+                                  : S.current.Times_Reread,
+                              _buildAlNumberField(
+                                value: _alRepeat ?? 0,
+                                onChanged: (v) {
+                                  _alRepeat = v;
+                                  _saveAniListEntry(repeat: v);
+                                },
+                              ),
+                            ),
+                            field(
+                              'Private',
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5),
+                                child: SizedBox(
+                                  height: 45.0,
+                                  child: ShadowButton(
+                                    onPressed: () {
+                                      _alPrivate = !_alPrivate;
+                                      _saveAniListEntry(private_: _alPrivate);
+                                      if (mounted) setState(() {});
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          _alPrivate
+                                              ? Icons.lock
+                                              : Icons.public,
+                                          size: 16,
+                                        ),
+                                        SB.w10,
+                                        Text(_alPrivate ? 'Private' : 'Public'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Notes
+                      field(
+                        'Notes',
+                        TextFormFilter(
+                          onFieldSubmitted: (v) {
+                            _alNotes = v;
+                            _saveAniListEntry(notes: v);
+                          },
+                          option: FilterOption(
+                            value: unescape
+                                .convert(_alNotes ?? '')
+                                .replaceAll("<br />", ""),
+                            fieldName: "Notes",
+                            openTextFormAsModal: true,
+                          ),
+                        ),
+                        null,
+                        100.0,
+                        CrossAxisAlignment.start,
+                        const EdgeInsets.only(left: 20, bottom: 8),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-          SB.h15,
+        ),
+      ],
+    );
+  }
 
-          // ── Notes (full width) ──
-          _alField(
-            'Notes',
-            TextFormField(
-              initialValue: _alNotes,
-              minLines: 2,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Add a note...',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                contentPadding: const EdgeInsets.all(10),
-              ),
-              onFieldSubmitted: (v) {
-                _alNotes = v;
-                _saveAniListEntry(notes: v);
-              },
-            ),
-          ),
-          SB.h10,
-        ],
-      ),
+  Widget _alScoreBarWidget() {
+    final value = _alScore?.round() ?? 0;
+    final keys = List.generate(21, (i) => i / 2); // 0.0, 0.5, ... 10.0
+
+    // Find closest valid score or default to 0
+    int initIndex = keys.indexWhere((k) => (k - (_alScore ?? 0.0)).abs() < 0.1);
+    if (initIndex == -1) initIndex = 0;
+
+    return Column(
+      children: [
+        SB.h20,
+        Text('${S.current.Score}${value == 0 ? '' : ' · ${value}'}'),
+        SB.h15,
+        SizedBox(
+          height: 45.0,
+          child: _anilistSaving
+              ? loadingCenter()
+              : ScrollablePositionedList.builder(
+                  itemScrollController: _alScoreScrollController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const ClampingScrollPhysics(),
+                  initialAlignment: 0.5,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 160.0, vertical: 2.0), // match mal padding
+                  initialScrollIndex: initIndex,
+                  itemCount: keys.length,
+                  itemBuilder: (context, i) {
+                    final v = keys[i];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: ShadowButton(
+                        onPressed: () {
+                          _alScoreScrollController.scrollTo(
+                            index: i,
+                            alignment: 0.5,
+                            duration: const Duration(milliseconds: 200),
+                          );
+                          _alScore = v;
+                          _saveAniListEntry(score: _alScore);
+                        },
+                        child: Text(v == 0.0
+                            ? S.current.Select
+                            : (v % 1 == 0
+                                ? v.toInt().toString()
+                                : v.toString())),
+                        padding: EdgeInsets.zero,
+                        shape: ((_alScore ?? 0.0) - v).abs() < 0.1
+                            ? RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(32),
+                                side: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                    width: 1.0))
+                            : RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(32)),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 
@@ -1159,46 +1274,6 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
           _saveAniListEntry(status: v);
         },
       ),
-    );
-  }
-
-  /// Score dropdown for AniList (compact number picker instead of scroll).
-  Widget _buildAlScoreDropdown() {
-    final score = _alScore?.round() ?? 0;
-    return SizedBox(
-      height: 50,
-      child: _anilistSaving
-          ? loadingCenter()
-          : SelectButton(
-              options: myStarMap.keys.map((k) => k.toString()).toList(),
-              displayValues: myStarMap.values.toList(),
-              selectedOption: score.toString(),
-              useShadowChild: true,
-              popupText: S.current.Score,
-              onChanged: (v) {
-                final val = int.tryParse(v) ?? 0;
-                _alScore = val.toDouble();
-                _saveAniListEntry(score: _alScore);
-              },
-            ),
-    );
-  }
-
-  Widget _alField(String label, Widget child) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(label,
-            style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.color
-                    ?.withOpacity(0.7))),
-        SB.h5,
-        SizedBox(width: double.infinity, child: child),
-      ],
     );
   }
 
