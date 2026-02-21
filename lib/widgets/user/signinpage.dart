@@ -1,3 +1,4 @@
+import 'package:dailyanimelist/api/anilist/anilist_auth.dart';
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
@@ -152,6 +153,8 @@ class _SigninWidgetState extends State<SigninWidget> {
             ),
           ),
         SB.h30,
+        // ─── AniList connect section ───
+        _buildAniListConnectSection(),
       ];
     }
 
@@ -197,4 +200,64 @@ class _SigninWidgetState extends State<SigninWidget> {
       : user.status == AuthStatus.AUTHENTICATED
           ? S.current.Logged_In
           : S.current.Sign_in_Suggestions;
+
+  Widget _buildAniListConnectSection() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: Row(
+            children: [
+              Expanded(child: Divider()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text('AniList',
+                    style: TextStyle(fontSize: 13, color: Colors.grey)),
+              ),
+              Expanded(child: Divider()),
+            ],
+          ),
+        ),
+        SB.h20,
+        if (user.isAniListConnected) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.check_circle,
+                  color: const Color(0xFF3DB4F2), size: 18),
+              const SizedBox(width: 6),
+              Text(
+                user.anilistUser?.name ?? 'AniList Connected',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          SB.h10,
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            width: double.infinity,
+            height: 40,
+            child: OutlinedButton(
+              onPressed: () async {
+                await AniListAuth.signOut();
+                if (mounted) setState(() {});
+              },
+              child: Text('Disconnect AniList'),
+            ),
+          ),
+        ] else
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            width: double.infinity,
+            height: 40,
+            child: OutlinedButton.icon(
+              onPressed: () => AniListAuth.handleSignIn(),
+              icon: Icon(Icons.link, size: 18),
+              label: Text('Connect AniList'),
+            ),
+          ),
+        SB.h20,
+      ],
+    );
+  }
 }

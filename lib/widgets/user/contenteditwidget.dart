@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:dailyanimelist/api/anilist/anilist_models.dart';
+import 'package:dailyanimelist/api/anilist/anilist_service.dart';
 import 'package:dailyanimelist/api/dalapi.dart';
 import 'package:dailyanimelist/api/malapi.dart';
 import 'package:dailyanimelist/api/maluser.dart';
@@ -28,6 +30,8 @@ import '../togglebutton.dart';
 enum EditMode { floating, full }
 
 enum EpisodeSelectMode { text, bar }
+
+enum ActiveAccount { mal, anilist }
 
 class ContentEditWidget extends StatefulWidget {
   final int? id;
@@ -97,6 +101,21 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   DateTime? startDate, finishDate;
   ScheduleData? _scheduleData;
   EpisodeSelectMode _episodeSelectMode = EpisodeSelectMode.bar;
+  ActiveAccount _activeAccount = ActiveAccount.mal;
+
+  // ─── Separate AniList state ──────────────────────────────────────
+  AniListMediaEntry? _anilistEntry;
+  bool _anilistLoading = false;
+  bool _anilistSaving = false;
+  String? _alStatus;
+  double? _alScore;
+  int? _alProgress;
+  int? _alProgressVolumes;
+  String? _alStartDate;
+  String? _alCompletedDate;
+  int? _alRepeat;
+  String? _alNotes;
+  bool _alPrivate = false;
 
   Map<String, bool> accordions = {
     S.current.Your_List_Status: true,
@@ -126,6 +145,12 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         ' Status'] = true;
 
     _setScheduleData();
+
+    // Restore persisted account toggle
+    if (user.pref.preferAniList && user.isAniListConnected) {
+      _activeAccount = ActiveAccount.anilist;
+      _fetchAniListEntry();
+    }
   }
 
   void _setScheduleData() async {
@@ -285,6 +310,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
       setState(() {
         modifyEpisodes = true;
       });
+
     var status = await MalUser.updateMyAnimeListStatus(content.id,
         numEpisodesWatched: _episodes, status: watchStatus);
     if (status != null) {
@@ -487,6 +513,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     if (contentDetailed is BaseNode) {
       content = contentDetailed?.content;
     }
+
     var status;
     if (widget.category.equals("anime")) {
       status = await MalUser.updateMyAnimeListStatus(content.id, score: value);
@@ -837,16 +864,390 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                 });
               onAdvancedEdit();
             })),
-        widget.category.equals("anime")
-            ? animeStatusWidget()
-            : mangaStatusWidget(),
+        _activeAccount == ActiveAccount.anilist
+            ? _anilistEditView()
+            : (widget.category.equals("anime")
+                ? animeStatusWidget()
+                : mangaStatusWidget()),
         ExpandedSection(
           expand: showAdvancedEdit,
           child: advancedWidget,
         ),
-        _deleteButton,
+        _bottomBar,
         SB.h30,
       ],
+    );
+  }
+
+  // ─── AniList independent view ───────────────────────────────
+
+  /// Fetch the AniList entry for the current content.
+  void _fetchAniListEntry() async {
+    final id = _id;
+    if (id == null) return;
+    if (mounted)
+      setState(() {
+        _anilistLoading = true;
+      });
+    final entry = await AniListService.searchMediaByMalId(id, widget.category);
+    if (mounted) {
+      setState(() {
+        _anilistLoading = false;
+        _anilistEntry = entry;
+        if (entry != null && entry.hasEntry) {
+          _alStatus = entry.status;
+          _alScore = entry.score;
+          _alProgress = entry.progress;
+          _alProgressVolumes = entry.progressVolumes;
+          _alStartDate = entry.startedAt;
+          _alCompletedDate = entry.completedAt;
+          _alRepeat = entry.repeat;
+          _alNotes = entry.notes;
+          _alPrivate = entry.private_ ?? false;
+        }
+      });
+    }
+  }
+
+  /// Save AniList entry with current state.
+  Future<void> _saveAniListEntry({
+    String? status,
+    double? score,
+    int? progress,
+    int? progressVolumes,
+    String? startedAt,
+    String? completedAt,
+    int? repeat,
+    String? notes,
+    bool? private_,
+  }) async {
+    final id = _id;
+    if (id == null) return;
+    if (mounted)
+      setState(() {
+        _anilistSaving = true;
+      });
+    final result = await AniListService.updateByMalId(
+      malId: id,
+      category: widget.category,
+      status: status ?? _alStatus,
+      score: score ?? _alScore,
+      progress: progress ?? _alProgress,
+      progressVolumes: progressVolumes ?? _alProgressVolumes,
+      startedAt: startedAt ?? _alStartDate,
+      completedAt: completedAt ?? _alCompletedDate,
+      repeat: repeat ?? _alRepeat,
+      notes: notes ?? _alNotes,
+      private_: private_ ?? _alPrivate,
+    );
+    if (mounted) {
+      setState(() {
+        _anilistSaving = false;
+        if (result != null) {
+          _alStatus = result.status ?? _alStatus;
+          _alScore = result.score ?? _alScore;
+          _alProgress = result.progress ?? _alProgress;
+          _alProgressVolumes = result.progressVolumes ?? _alProgressVolumes;
+          _alStartDate = result.startedAt ?? _alStartDate;
+          _alCompletedDate = result.completedAt ?? _alCompletedDate;
+          _alRepeat = result.repeat ?? _alRepeat;
+          _alNotes = result.notes ?? _alNotes;
+          _alPrivate = result.private_ ?? _alPrivate;
+        } else {
+          showToast(S.current.Couldnt_Update);
+        }
+      });
+    }
+    updateParent(result != null);
+  }
+
+  /// Delete from AniList.
+  Future<void> _deleteAniListEntry() async {
+    final id = _id;
+    if (id == null) return;
+    final ok = await AniListService.deleteByMalId(id, widget.category);
+    if (ok) {
+      if (mounted)
+        setState(() {
+          _anilistEntry = null;
+          _alStatus = null;
+          _alScore = null;
+          _alProgress = null;
+          _alProgressVolumes = null;
+          _alStartDate = null;
+          _alCompletedDate = null;
+          _alRepeat = null;
+          _alNotes = null;
+          _alPrivate = false;
+        });
+      showToast('Deleted from AniList');
+    } else {
+      showToast(S.current.Couldnt_Update);
+    }
+    updateParent(ok);
+  }
+
+  /// Build the independent AniList edit pane.
+  Widget _anilistEditView() {
+    if (_anilistLoading) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Center(child: loadingCenter()),
+      );
+    }
+
+    final statusMap = aniListStatusDisplayMap;
+    final isAnime = widget.category.equals('anime');
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      child: Column(
+        children: [
+          // ── Row 1: Status | Score ──
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _alField(
+                  S.current.Status,
+                  _anilistSaving
+                      ? SizedBox(height: 50, child: loadingCenter())
+                      : statusWidget_al(statusMap),
+                ),
+              ),
+              SB.w10,
+              Expanded(
+                child: _alField(
+                  S.current.Score,
+                  _buildAlScoreDropdown(),
+                ),
+              ),
+            ],
+          ),
+          SB.h15,
+
+          // ── Row 2: Episode/Chapter Progress | Volume Progress ──
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _alField(
+                  isAnime ? 'Episode Progress' : 'Chapter Progress',
+                  _buildAlProgressWidget(isAnime),
+                ),
+              ),
+              SB.w10,
+              Expanded(
+                child: isAnime
+                    ? const SizedBox()
+                    : _alField(
+                        'Volume Progress',
+                        _buildAlVolumeWidget(),
+                      ),
+              ),
+            ],
+          ),
+          SB.h15,
+
+          // ── Row 3: Start Date | Finish Date ──
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _alField(
+                  S.current.Start_Date,
+                  _buildAlDatePicker(
+                    value: _alStartDate,
+                    onChanged: (v) {
+                      _alStartDate = v;
+                      _saveAniListEntry(startedAt: v);
+                    },
+                  ),
+                ),
+              ),
+              SB.w10,
+              Expanded(
+                child: _alField(
+                  S.current.Finish_Date,
+                  _buildAlDatePicker(
+                    value: _alCompletedDate,
+                    onChanged: (v) {
+                      _alCompletedDate = v;
+                      _saveAniListEntry(completedAt: v);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SB.h15,
+
+          // ── Row 4: Total Rewatches | Private ──
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _alField(
+                  isAnime ? 'Total Rewatches' : 'Total Rereads',
+                  _buildAlNumberField(
+                    value: _alRepeat ?? 0,
+                    onChanged: (v) {
+                      _alRepeat = v;
+                      _saveAniListEntry(repeat: v);
+                    },
+                  ),
+                ),
+              ),
+              SB.w10,
+              Expanded(
+                child: _alField(
+                  'Private',
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Switch(
+                      value: _alPrivate,
+                      onChanged: (v) {
+                        _alPrivate = v;
+                        _saveAniListEntry(private_: v);
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SB.h15,
+
+          // ── Notes (full width) ──
+          _alField(
+            'Notes',
+            TextFormField(
+              initialValue: _alNotes,
+              minLines: 2,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Add a note...',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: const EdgeInsets.all(10),
+              ),
+              onFieldSubmitted: (v) {
+                _alNotes = v;
+                _saveAniListEntry(notes: v);
+              },
+            ),
+          ),
+          SB.h10,
+        ],
+      ),
+    );
+  }
+
+  /// AniList status dropdown (separate from MAL's statusWidget).
+  Widget statusWidget_al(Map<String, String> statusMap) {
+    return SizedBox(
+      height: 50,
+      child: SelectButton(
+        options: statusMap.keys.toList(),
+        displayValues: statusMap.values.toList(),
+        selectedOption: _alStatus,
+        useShadowChild: true,
+        popupText: 'Status',
+        onChanged: (v) {
+          _alStatus = v;
+          _saveAniListEntry(status: v);
+        },
+      ),
+    );
+  }
+
+  /// Score dropdown for AniList (compact number picker instead of scroll).
+  Widget _buildAlScoreDropdown() {
+    final score = _alScore?.round() ?? 0;
+    return SizedBox(
+      height: 50,
+      child: _anilistSaving
+          ? loadingCenter()
+          : SelectButton(
+              options: myStarMap.keys.map((k) => k.toString()).toList(),
+              displayValues: myStarMap.values.toList(),
+              selectedOption: score.toString(),
+              useShadowChild: true,
+              popupText: S.current.Score,
+              onChanged: (v) {
+                final val = int.tryParse(v) ?? 0;
+                _alScore = val.toDouble();
+                _saveAniListEntry(score: _alScore);
+              },
+            ),
+    );
+  }
+
+  Widget _alField(String label, Widget child) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.color
+                    ?.withOpacity(0.7))),
+        SB.h5,
+        SizedBox(width: double.infinity, child: child),
+      ],
+    );
+  }
+
+  Widget _buildAlProgressWidget(bool isAnime) {
+    return plusMinusWidget(
+      (val) {
+        final newVal = (val ?? 0).clamp(0, 99999);
+        _alProgress = newVal;
+        _saveAniListEntry(progress: newVal);
+      },
+      modify: _anilistSaving,
+      initialValue: (_alProgress ?? 0).toString(),
+    );
+  }
+
+  Widget _buildAlVolumeWidget() {
+    return plusMinusWidget(
+      (val) {
+        final newVal = (val ?? 0).clamp(0, 99999);
+        _alProgressVolumes = newVal;
+        _saveAniListEntry(progressVolumes: newVal);
+      },
+      modify: _anilistSaving,
+      initialValue: (_alProgressVolumes ?? 0).toString(),
+    );
+  }
+
+  Widget _buildAlDatePicker({
+    required String? value,
+    required ValueChanged<String> onChanged,
+  }) {
+    DateTime? dateValue;
+    if (value != null) {
+      dateValue = DateTime.tryParse(value);
+    }
+    return SelectDate(
+      onChangedFormatted: onChanged,
+      selectDate: dateValue,
+    );
+  }
+
+  Widget _buildAlNumberField({
+    required int value,
+    required ValueChanged<int> onChanged,
+  }) {
+    return plusMinusWidget(
+      (val) => onChanged((val ?? 0).clamp(0, 9999)),
+      modify: _anilistSaving,
+      initialValue: value.toString(),
     );
   }
 
@@ -1029,20 +1430,63 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     );
   }
 
-  Widget get _deleteButton {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        SB.w10,
-        ShadowButton(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          onPressed: () => deleteFromList(),
-          child: iconAndText(Icons.delete, S.current.Delete_from_List),
-        ),
-        SB.w10,
-      ],
+  Widget get _bottomBar {
+    final showToggle =
+        user.isAniListConnected && user.status == AuthStatus.AUTHENTICATED;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        children: [
+          if (showToggle) _accountToggleChip,
+          const Spacer(),
+          ShadowButton(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            onPressed: () {
+              if (_activeAccount == ActiveAccount.anilist) {
+                _deleteAniListEntry();
+              } else {
+                deleteFromList();
+              }
+            },
+            child: iconAndText(Icons.delete, S.current.Delete_from_List),
+          ),
+          SB.w10,
+        ],
+      ),
     );
   }
+
+  Widget get _accountToggleChip => Padding(
+        padding: const EdgeInsets.only(left: 6),
+        child: SegmentedButton<ActiveAccount>(
+          segments: const <ButtonSegment<ActiveAccount>>[
+            ButtonSegment<ActiveAccount>(
+                value: ActiveAccount.mal, label: Text('MAL')),
+            ButtonSegment<ActiveAccount>(
+                value: ActiveAccount.anilist, label: Text('AniList')),
+          ],
+          selected: {_activeAccount},
+          style: ButtonStyle(
+            visualDensity: VisualDensity.compact,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          onSelectionChanged: (Set<ActiveAccount> selection) {
+            if (mounted) {
+              setState(() {
+                _activeAccount = selection.first;
+              });
+              // Persist preference
+              user.pref.preferAniList = _activeAccount == ActiveAccount.anilist;
+              user.setIntance(updateAuth: false);
+              // Fetch AniList data when switching to it
+              if (_activeAccount == ActiveAccount.anilist &&
+                  _anilistEntry == null) {
+                _fetchAniListEntry();
+              }
+            }
+          },
+        ),
+      );
 
   Widget get dateStatusWidget => Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1727,6 +2171,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     );
   }
 
+  // MAL status widget (unchanged – keeps its own cache/state)
   Widget statusWidget() {
     final Widget child;
     Map<String, String> myStatusMap =

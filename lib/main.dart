@@ -142,6 +142,8 @@ class MyApp extends StatelessWidget {
         loadingChild: loadingStartup,
         done: (snap) {
           user = snap.data!;
+          // Load AniList credentials async (global `user` is now set)
+          User.loadAniListCredentials();
           return DynamicColorBuilder(
               builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
             final colorScheme = currentColorScheme(

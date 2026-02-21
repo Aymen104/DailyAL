@@ -1,3 +1,4 @@
+import 'package:dailyanimelist/api/anilist/anilist_auth.dart';
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/main.dart';
@@ -126,6 +127,9 @@ class DalPathUtils {
             } else {
               return HomeScreen(pageIndex: userIndex);
             }
+          } else if (await AniListAuth.checkIfSignIn(uri)) {
+            // AniList token handled — return to home
+            return HomeScreen(pageIndex: userIndex);
           } else {
             showToast("Couldn't handle Url");
           }

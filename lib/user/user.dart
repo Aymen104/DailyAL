@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:dailyanimelist/api/anilist/anilist_auth.dart';
+import 'package:dailyanimelist/api/anilist/anilist_models.dart';
+
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/auth/authresp.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
@@ -28,6 +31,11 @@ class User with ChangeNotifier {
   String? themeNameV2;
   UserPreferences pref;
 
+  // AniList integration
+  String? anilistToken;
+  AniListUser? anilistUser;
+  bool get isAniListConnected => anilistToken != null;
+
   User({
     this.authResponse,
     required this.pref,
@@ -35,6 +43,8 @@ class User with ChangeNotifier {
     required this.theme,
     this.themeV2,
     this.themeNameV2,
+    this.anilistToken,
+    this.anilistUser,
   });
 
   void updateUserStatus() {
@@ -49,6 +59,11 @@ class User with ChangeNotifier {
       newUser.authResponse = await _getAuthResponse();
     }
     return newUser;
+  }
+
+  /// Load AniList credentials from secure storage (call after user global is set).
+  static Future<void> loadAniListCredentials() async {
+    await AniListAuth.loadFromStorage();
   }
 
   static Future<AuthResponse> _getAuthResponse() async {

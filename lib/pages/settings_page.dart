@@ -4,6 +4,7 @@ import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/icons/dub_icons.dart';
 import 'package:dailyanimelist/pages/settings/about.dart';
+import 'package:dailyanimelist/pages/settings/accounts_settings.dart';
 import 'package:dailyanimelist/pages/settings/anime_manga_settings.dart';
 import 'package:dailyanimelist/pages/settings/backup_restore.dart';
 import 'package:dailyanimelist/pages/settings/cachesettings.dart';
@@ -68,29 +69,10 @@ class _SettingsPageState extends State<SettingsPage> {
   List<_SettingsItem> _getSettingsItems() {
     return [
       _SettingsItem(
-        text: S.current.Logout,
-        desc: S.current.Logout_desc,
-        iconData: Icons.logout,
-        authOnly: true,
-        contentBuilder: (context, onUiChange) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.logout,
-                  size: 64, color: Theme.of(context).colorScheme.primary),
-              SB.h20,
-              Text(S.current.Logout,
-                  style: Theme.of(context).textTheme.headlineSmall),
-              SB.h10,
-              Text(S.current.Logout_desc),
-              SB.h30,
-              FilledButton(
-                onPressed: () => launchLogOutConfirmation(context: context),
-                child: Text(S.current.Logout),
-              ),
-            ],
-          ),
-        ),
+        text: 'Accounts',
+        desc: 'Manage your MAL and AniList accounts',
+        iconData: Icons.manage_accounts,
+        contentBuilder: (context, onUiChange) => AccountsSettingsPage(),
       ),
       _SettingsItem(
         text: S.current.Theme_Settings,
@@ -396,12 +378,11 @@ class _SettingsPageState extends State<SettingsPage> {
   List<Widget> _buildCompactSettingOptions(BuildContext context) {
     return [
       OptionTile(
-          text: S.current.Logout,
-          desc: S.current.Logout_desc,
-          authOnly: true,
-          iconData: Icons.logout,
+          text: 'Accounts',
+          desc: 'Manage your MAL and AniList accounts',
+          iconData: Icons.manage_accounts,
           onPressed: () {
-            launchLogOutConfirmation(context: context);
+            gotoPage(context: context, newPage: AccountsSettingsPage());
           }),
       OptionTile(
           text: S.current.Theme_Settings,
