@@ -200,6 +200,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "Clear": MessageLookupByLibrary.simpleMessage("분명한"),
     "Clear_All": MessageLookupByLibrary.simpleMessage("모두 지우기"),
     "Clear_All_Desc": MessageLookupByLibrary.simpleMessage("모든 기록 지우기"),
+    "Clear_and_reschedule_all_notifications":
+        MessageLookupByLibrary.simpleMessage("모든 알림 지우기 및 일정 변경"),
     "Close": MessageLookupByLibrary.simpleMessage("닫다"),
     "Clubs": MessageLookupByLibrary.simpleMessage("클럽"),
     "Cold_hearted": MessageLookupByLibrary.simpleMessage("마음 감기"),

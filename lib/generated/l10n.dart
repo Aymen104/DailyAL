@@ -1189,6 +1189,16 @@ class S {
     );
   }
 
+  /// `Clear and reschedule all notifications`
+  String get Clear_and_reschedule_all_notifications {
+    return Intl.message(
+      'Clear and reschedule all notifications',
+      name: 'Clear_and_reschedule_all_notifications',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `User Preferences`
   String get User_Preferences {
     return Intl.message(

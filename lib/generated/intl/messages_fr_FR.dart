@@ -270,6 +270,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "Clear_All_Desc": MessageLookupByLibrary.simpleMessage(
       "Effacer tout l\'historique",
     ),
+    "Clear_and_reschedule_all_notifications":
+        MessageLookupByLibrary.simpleMessage(
+          "Effacer et reprogrammer toutes les notifications",
+        ),
     "Close": MessageLookupByLibrary.simpleMessage("proche"),
     "Clubs": MessageLookupByLibrary.simpleMessage("Clubs"),
     "Cold_hearted": MessageLookupByLibrary.simpleMessage("Coeur froid"),

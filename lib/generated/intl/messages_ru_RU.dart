@@ -258,6 +258,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "Clear_All_Desc": MessageLookupByLibrary.simpleMessage(
       "Очистить всю историю",
     ),
+    "Clear_and_reschedule_all_notifications":
+        MessageLookupByLibrary.simpleMessage(
+          "Очистить и перенести все уведомления",
+        ),
     "Close": MessageLookupByLibrary.simpleMessage("Закрывать"),
     "Clubs": MessageLookupByLibrary.simpleMessage("Клубы"),
     "Cold_hearted": MessageLookupByLibrary.simpleMessage("Хладнокровный"),

@@ -1044,5 +1044,6 @@
     "Update_saved_to": "Pembaruan disimpan ke",
     "Manual_Install": "Instalasi Manual",
     "Global_Seasonal_Filter": "Filter Musiman Global",
-    "Global_Seasonal_Filter_Desc": "Terapkan filter musiman ke semua musim/tahun"
+    "Global_Seasonal_Filter_Desc": "Terapkan filter musiman ke semua musim/tahun",
+    "Clear_and_reschedule_all_notifications": "Hapus dan jadwalkan ulang semua notifikasi"
 }

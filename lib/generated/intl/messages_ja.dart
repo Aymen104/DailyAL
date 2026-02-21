@@ -206,6 +206,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "Clear": MessageLookupByLibrary.simpleMessage("クリア"),
     "Clear_All": MessageLookupByLibrary.simpleMessage("すべてクリア"),
     "Clear_All_Desc": MessageLookupByLibrary.simpleMessage("すべての履歴を消去"),
+    "Clear_and_reschedule_all_notifications":
+        MessageLookupByLibrary.simpleMessage("すべての通知をクリアしてスケジュールを変更する"),
     "Close": MessageLookupByLibrary.simpleMessage("選ぶ"),
     "Clubs": MessageLookupByLibrary.simpleMessage("クラブ"),
     "Cold_hearted": MessageLookupByLibrary.simpleMessage("寒さ"),

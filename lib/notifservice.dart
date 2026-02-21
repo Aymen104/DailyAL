@@ -136,10 +136,10 @@ class NotificationService {
     }
   }
 
-  void scheduledNotifcation() async {
+  void scheduledNotifcation({bool force = false}) async {
     var validMyListStatus = ["watching", "plan_to_watch"];
     var nowDate = DateTime.now();
-    if (user.pref.notifPref.daySubscribed != null) {
+    if (!force && user.pref.notifPref.daySubscribed != null) {
       if (nowDate.difference(user.pref.notifPref.daySubscribed!).inDays < 1) {
         return;
       }

@@ -256,6 +256,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "Clear": MessageLookupByLibrary.simpleMessage("Clear"),
     "Clear_All": MessageLookupByLibrary.simpleMessage("CLEAR ALL"),
     "Clear_All_Desc": MessageLookupByLibrary.simpleMessage("Clear all history"),
+    "Clear_and_reschedule_all_notifications":
+        MessageLookupByLibrary.simpleMessage(
+          "Clear and reschedule all notifications",
+        ),
     "Close": MessageLookupByLibrary.simpleMessage("Close"),
     "Clubs": MessageLookupByLibrary.simpleMessage("Clubs"),
     "Cold_hearted": MessageLookupByLibrary.simpleMessage("Cold hearted"),

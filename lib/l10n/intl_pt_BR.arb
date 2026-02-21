@@ -1045,5 +1045,6 @@
     "Update_saved_to": "Atualiza\u00e7\u00e3o salva em",
     "Manual_Install": "Instala\u00e7\u00e3o manual",
     "Global_Seasonal_Filter": "Filtro Sazonal Global",
-    "Global_Seasonal_Filter_Desc": "Aplique filtros sazonais a todas as esta\u00e7\u00f5es/anos"
+    "Global_Seasonal_Filter_Desc": "Aplique filtros sazonais a todas as esta\u00e7\u00f5es/anos",
+    "Clear_and_reschedule_all_notifications": "Limpar e reprogramar todas as notifica\u00e7\u00f5es"
 }

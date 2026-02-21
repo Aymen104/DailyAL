@@ -1042,5 +1042,6 @@
     "Update_saved_to": "G\u00fcncelleme \u015furaya kaydedildi:",
     "Manual_Install": "Manuel Kurulum",
     "Global_Seasonal_Filter": "K\u00fcresel Mevsimsel Filtre",
-    "Global_Seasonal_Filter_Desc": "T\u00fcm mevsimlere/y\u0131llara mevsimsel filtreler uygulay\u0131n"
+    "Global_Seasonal_Filter_Desc": "T\u00fcm mevsimlere/y\u0131llara mevsimsel filtreler uygulay\u0131n",
+    "Clear_and_reschedule_all_notifications": "T\u00fcm bildirimleri temizleyin ve yeniden planlay\u0131n"
 }

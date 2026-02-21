@@ -238,6 +238,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "Clear": MessageLookupByLibrary.simpleMessage("واضح"),
     "Clear_All": MessageLookupByLibrary.simpleMessage("امسح الكل"),
     "Clear_All_Desc": MessageLookupByLibrary.simpleMessage("مسح كل التاريخ"),
+    "Clear_and_reschedule_all_notifications":
+        MessageLookupByLibrary.simpleMessage("مسح وإعادة جدولة كافة الإخطارات"),
     "Close": MessageLookupByLibrary.simpleMessage("قريب"),
     "Clubs": MessageLookupByLibrary.simpleMessage("الأندية"),
     "Cold_hearted": MessageLookupByLibrary.simpleMessage("قلب بارد"),

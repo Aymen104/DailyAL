@@ -105,6 +105,22 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               showToast(S.current.NotifScheduled);
             },
           ),
+          OptionTile(
+            iconData: Icons.clear_all,
+            text: S.current.Clear_and_reschedule_all_notifications,
+            onPressed: () async {
+              try {
+                await NotificationService()
+                    .flutterLocalNotificationsPlugin
+                    .cancelAll();
+                NotificationService().scheduledNotifcation(force: true);
+                showToast("Notifications cleared and rescheduled");
+              } catch (e) {
+                logDal(e);
+                showToast("Failed to handle notifications");
+              }
+            },
+          ),
           Padding(
             padding: EdgeInsets.only(top: 40, left: 30, right: 30),
             child: title(S.current.Notification_settings_warning, fontSize: 14),

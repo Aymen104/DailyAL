@@ -1044,5 +1044,6 @@
     "Update_saved_to": "Mise \u00e0 jour enregistr\u00e9e dans",
     "Manual_Install": "Installation manuelle",
     "Global_Seasonal_Filter": "Global Seasonal Filter",
-    "Global_Seasonal_Filter_Desc": "Appliquer des filtres saisonniers \u00e0 toutes les saisons/ann\u00e9es"
+    "Global_Seasonal_Filter_Desc": "Appliquer des filtres saisonniers \u00e0 toutes les saisons/ann\u00e9es",
+    "Clear_and_reschedule_all_notifications": "Effacer et reprogrammer toutes les notifications"
 }

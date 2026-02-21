@@ -256,6 +256,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "Clear_All_Desc": MessageLookupByLibrary.simpleMessage(
       "Tüm geçmişi temizle",
     ),
+    "Clear_and_reschedule_all_notifications":
+        MessageLookupByLibrary.simpleMessage(
+          "Tüm bildirimleri temizleyin ve yeniden planlayın",
+        ),
     "Close": MessageLookupByLibrary.simpleMessage("Kapalı"),
     "Clubs": MessageLookupByLibrary.simpleMessage("Kulüpler"),
     "Cold_hearted": MessageLookupByLibrary.simpleMessage("Soğuk kalpli"),
