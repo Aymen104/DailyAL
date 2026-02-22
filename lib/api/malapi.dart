@@ -60,7 +60,7 @@ class MalApi {
           "?fields=id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics";
     }
     return SearchResult.fromJson(
-        await MalConnect.getContent(url, fromCache: fromCache),
+        await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?,
         category: category);
   }
 
@@ -77,7 +77,7 @@ class MalApi {
     }
 
     return SearchResult.fromJson(
-        await MalConnect.getContent(url ?? '', fromCache: fromCache));
+        await MalConnect.getContent(url ?? '', fromCache: fromCache) as Map<String, dynamic>?);
   }
 
   /// Get Any Anime using Id with default values for fields
@@ -94,7 +94,7 @@ class MalApi {
     }
 
     return AnimeDetailed.fromJson(
-        await MalConnect.getContent(url, fromCache: fromCache));
+        await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?);
   }
 
   /// Get AnimeRanking using RankingType with default values limit=100, offset=0
@@ -119,7 +119,7 @@ class MalApi {
     }
 
     return SearchResult.fromJson(
-      await MalConnect.getContent(url, fromCache: fromCache),
+      await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?,
       category: category,
     );
   }
@@ -148,7 +148,7 @@ class MalApi {
       url += "&fields=" +
           fields.reduce((value, element) => (value + "," + element));
     }
-    var result = await MalConnect.getContent(url, fromCache: fromCache);
+    var result = await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?;
     return SearchResult.fromJson(result);
   }
 
@@ -172,7 +172,7 @@ class MalApi {
     final date = DateTime.now();
     final month = date.month;
     final day = date.day;
-    final seasonType;
+    final SeasonType seasonType;
     if ((month == 12 && day >= 28) ||
         (month == 1) ||
         (month == 2) ||
@@ -238,7 +238,7 @@ class MalApi {
   static Future<SearchResult> getAnimeListFromUrl(String url,
       {bool fromCache = false}) async {
     return SearchResult.fromJson(
-        await MalConnect.getContent(url, fromCache: fromCache));
+        await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?);
   }
 
   /// Get Any Manga using Id with default values for fields
@@ -255,7 +255,7 @@ class MalApi {
     }
 
     return MangaDetailed.fromJson(
-        await MalConnect.getContent(url, fromCache: fromCache));
+        await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?);
   }
 
   static Future<SearchResult?> searchAllCategories(String query) async {
@@ -368,7 +368,7 @@ class MalApi {
     return null;
   }
 
-  static timeZoneName(DateTime datetime) {
+  static String timeZoneName(DateTime datetime) {
     return switch (user.pref.animeMangaPagePreferences.timezonePref) {
       TimezonePref.jst => 'JST',
       TimezonePref.utc => 'UTC',

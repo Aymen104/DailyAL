@@ -62,7 +62,7 @@ class MalAuth {
     try {
       var response = await httpPostAsync(url, body: body);
       AuthResponse authResponse =
-          AuthResponse.fromJson(jsonDecode(response.body));
+          AuthResponse.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
       user.authResponse = authResponse;
       user.status = AuthStatus.AUTHENTICATED;
       user.setIntance();
@@ -97,7 +97,7 @@ class MalAuth {
     try {
       var response = await httpPostAsync(url, body: body);
       AuthResponse authResponse =
-          AuthResponse.fromJson(jsonDecode(response.body));
+          AuthResponse.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
       user.authResponse = authResponse;
       user.status = AuthStatus.AUTHENTICATED;
       user.updateUserStatus();

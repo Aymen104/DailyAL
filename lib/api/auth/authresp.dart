@@ -15,13 +15,13 @@ class AuthResponse {
   factory AuthResponse.fromJson(Map<String, dynamic>? json) {
     return json != null
         ? AuthResponse(
-            accessToken: json["access_token"],
-            expiresIn: json["expires_in"],
-            tokenType: json["token_type"],
+            accessToken: json["access_token"] as String?,
+            expiresIn: json["expires_in"] as int?,
+            tokenType: json["token_type"] as String?,
             createdTime: json["created_time"] != null
-                ? (DateTime.tryParse(json["created_time"]))
+                ? (DateTime.tryParse(json["created_time"] as String) ?? DateTime.now())
                 : DateTime.now(),
-            refreshToken: json["refresh_token"])
+            refreshToken: json["refresh_token"] as String?)
         : AuthResponse();
   }
 

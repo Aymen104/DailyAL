@@ -168,7 +168,7 @@ class _UserUpdatesPageState extends State<UserUpdatesPage>
           );
   }
 
-  Widget _scoreWidget(score) {
+  Widget _scoreWidget(dynamic score) {
     return Padding(
         padding: EdgeInsets.only(right: 10),
         child: Row(
@@ -182,7 +182,7 @@ class _UserUpdatesPageState extends State<UserUpdatesPage>
             const SizedBox(
               width: 5,
             ),
-            title(score ?? "--", opacity: 1, fontSize: 14),
+            title(score as String? ?? "--", opacity: 1, fontSize: 14),
           ],
         ));
   }

@@ -52,11 +52,11 @@ class AniListAuth {
     // Check fragment first
     if (uri.fragment.isNotEmpty) {
       final fragmentParams = Uri.splitQueryString(uri.fragment);
-      token = fragmentParams['access_token'];
+      token = fragmentParams['access_token'] as String?;
     }
 
     // Some platforms may deliver via query params instead
-    token ??= uri.queryParameters['access_token'];
+    token ??= uri.queryParameters['access_token'] as String?;
 
     if (token != null && token.isNotEmpty) {
       await onTokenReceived(token);
@@ -107,7 +107,7 @@ class AniListAuth {
     final userJson = await ss.read(key: _storageKeyUser);
     if (userJson != null) {
       try {
-        user.anilistUser = AniListUser.fromJson(jsonDecode(userJson));
+        user.anilistUser = AniListUser.fromJson(jsonDecode(userJson) as Map<String, dynamic>);
       } catch (e) {
         logDal('AniList loadFromStorage error: $e');
       }

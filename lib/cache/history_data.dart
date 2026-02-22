@@ -39,14 +39,14 @@ class HistoryData with ToJson {
         recentManga: [],
       );
     return HistoryData(
-      queryHistory: (map['queryHistory'] ?? <String>[])
-          .map<String>((e) => e.toString())
+      queryHistory: (map['queryHistory'] as List<dynamic>? ?? <String>[])
+          .map<String>((dynamic e) => e.toString())
           .toList(),
-      recentAnime: (map['recentAnime'] ?? <Node>[])
-          .map<AnimeDetailed>((e) => AnimeDetailed.fromJson(e))
+      recentAnime: (map['recentAnime'] as List<dynamic>? ?? <Node>[])
+          .map<AnimeDetailed>((dynamic e) => AnimeDetailed.fromJson(e as Map<String, dynamic>))
           .toList(),
-      recentManga: (map['recentManga'] ?? <Node>[])
-          .map<MangaDetailed>((e) => MangaDetailed.fromJson(e))
+      recentManga: (map['recentManga'] as List<dynamic>? ?? <Node>[])
+          .map<MangaDetailed>((dynamic e) => MangaDetailed.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }

@@ -33,7 +33,7 @@ class CacheManager {
       if (!(await checkIfExists(url))) {
         return null;
       }
-      Map<String, dynamic> _map = jsonDecode(pref?.getString(url) ?? "{}");
+      Map<String, dynamic> _map = jsonDecode(pref?.getString(url) ?? "{}") as Map<String, dynamic>;
       return _map.isEmpty ? null : _map;
     } catch (e) {
       logDal(e);
@@ -76,14 +76,14 @@ class CacheManager {
   ]) async {
     final value = await getValue("$serviceName - $key");
     if (value != null) {
-      final map = jsonDecode(value);
-      if (map is Map) {
+      final map = jsonDecode(value) as Map<String, dynamic>?;
+      if (map != null && map is Map) {
         final time = map["time"];
         if (time is int) {
           final now = DateTime.now().millisecondsSinceEpoch;
           expiresIn *= 1000;
           if ((now - time) < expiresIn) {
-            return map['value'];
+            return map['value'] as String?;
           }
         }
       }
@@ -164,11 +164,11 @@ class CacheManager {
   Future<bool> restoreData(String data) async {
     try {
       final pref = await _pref;
-      final map = jsonDecode(data);
+      final map = jsonDecode(data) as Map<String, dynamic>;
       if (map is Map) {
         final keys = map.keys;
         for (var key in keys) {
-          final value = map[key];
+          final value = map[key] as String?;
           if (value != null) {
             pref.setString(key, value);
           }

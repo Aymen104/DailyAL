@@ -559,7 +559,7 @@ class InterestStackDetailedWidget extends StatelessWidget {
     return child;
   }
 
-  _bodyWidget(InterestStackDetailed? detailed) {
+  Widget _bodyWidget(InterestStackDetailed? detailed) {
     if (!showTabs(detailed)) return SB.z;
     return TabBarView(
       children: [
@@ -583,7 +583,7 @@ class InterestStackDetailedWidget extends StatelessWidget {
     );
   }
 
-  _buildContentScrollView(List<AnimeDetailed> contentDetailedList) {
+  Widget _buildContentScrollView(List<AnimeDetailed> contentDetailedList) {
     return ListView.builder(
       itemCount: contentDetailedList.length,
       padding: const EdgeInsets.only(top: 10.0, bottom: 60.0),
@@ -631,7 +631,7 @@ class SpaciousContentWidget extends StatelessWidget {
     String? additional;
     try {
       additional = additonalText ??
-          item.additonalInfo
+          (item.additonalInfo as String?)
               ?.toString()
               .replaceAll('\n', '')
               .replaceAll(' ', '')
@@ -648,7 +648,7 @@ class SpaciousContentWidget extends StatelessWidget {
               context: context,
               newPage: ContentDetailedScreen(
                 category: category,
-                id: item.id,
+                id: item.id as int?,
               )),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -673,9 +673,9 @@ class SpaciousContentWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _starMemberWidget(item, context, category),
+            _starMemberWidget(item as Node?, context, category),
             SB.h15,
-            title(nodeTitle ?? getNodeTitle(item), fontSize: 18, opacity: 1),
+            title(nodeTitle ?? getNodeTitle(item as Node?), fontSize: 18, opacity: 1),
             SB.h15,
             if (item.status != null ||
                 item.additonalInfo != null ||
@@ -701,15 +701,15 @@ class SpaciousContentWidget extends StatelessWidget {
     return Container(
       height: 27,
       child: ListView.builder(
-        itemCount: item.genres!.length,
+        itemCount: (item.genres as List?)?.length ?? 0,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, i) => Padding(
           padding: const EdgeInsets.only(right: 5, bottom: 3),
           child: ShadowButton(
-            onPressed: () => onGenrePress(item.genres![i], category, context),
+            onPressed: () => onGenrePress(item.genres![i] as MalGenre, category, context),
             padding: EdgeInsets.symmetric(horizontal: 5),
             child: title(
-              convertGenre(item.genres![i], category).replaceAll("_", " "),
+              convertGenre(item.genres![i] as MalGenre, category).replaceAll("_", " "),
               opacity: 1,
               fontSize: 11,
             ),
@@ -724,7 +724,7 @@ class SpaciousContentWidget extends StatelessWidget {
       padding: const EdgeInsets.only(left: 10),
       child: AvatarWidget(
         height: 150.0,
-        url: item.mainPicture?.large ?? item.mainPicture?.medium,
+        url: (item.mainPicture?.large as String?) ?? (item.mainPicture?.medium as String?),
         userRoundBorderforLoading: false,
         useUserImageOnError: false,
         radius: BorderRadius.circular(6.0),
@@ -744,7 +744,7 @@ class SpaciousContentWidget extends StatelessWidget {
   }
 
   Widget _starMemberWidget(
-    dynamic detailed,
+    Node? detailed,
     BuildContext context,
     String category,
   ) {
@@ -754,11 +754,11 @@ class SpaciousContentWidget extends StatelessWidget {
     } else {
       String? numListUsersFormatted;
       try {
-        numListUsersFormatted = detailed.numListUsersFormatted;
+        numListUsersFormatted = (detailed as AnimeDetailed?)?.numListUsersFormatted as String?;
       } catch (e) {}
-      if (detailed.numListUsers != null) {
+      if ((detailed as AnimeDetailed?)?.numListUsers != null) {
         numListUsersFormatted ??=
-            NumberFormat.compact().format(detailed.numListUsers);
+            NumberFormat.compact().format(detailed!.numListUsers as num);
       }
       leading = Row(
         children: [
@@ -768,7 +768,7 @@ class SpaciousContentWidget extends StatelessWidget {
           ),
           SB.w5,
           title(
-            detailed.mean?.toStringAsFixed(1) ?? '-',
+            ((detailed as AnimeDetailed?)?.mean as num?)?.toStringAsFixed(1) ?? '-',
             fontSize: 15,
             opacity: 1,
           ),
@@ -790,7 +790,7 @@ class SpaciousContentWidget extends StatelessWidget {
         leading,
         Spacer(),
         SB.w10,
-        if (detailed.synopsis != null) _synopsisWidget(context, detailed),
+        if ((detailed as AnimeDetailed?)?.synopsis != null) _synopsisWidget(context, detailed as AnimeDetailed),
         SB.w10,
         SizedBox(
           height: 35,

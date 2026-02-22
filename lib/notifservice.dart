@@ -100,7 +100,7 @@ class NotificationService {
       if (details?.didNotificationLaunchApp ?? false) {
         logDal('Notif launched dal');
         Node _node = Node.fromJson(
-            jsonDecode(details?.notificationResponse?.payload ?? '{}'));
+            jsonDecode(details?.notificationResponse?.payload ?? '{}') as Map<String, dynamic>);
         logDal(_node.toJson());
         if (_node.id != null) {
           return _node;
@@ -117,7 +117,7 @@ class NotificationService {
 
   static void selectNotification(String? payload) async {
     try {
-      Node _node = Node.fromJson(jsonDecode(payload ?? '{}'));
+      Node _node = Node.fromJson(jsonDecode(payload ?? '{}') as Map<String, dynamic>);
 
       if (_node != null) {
         logDal("--> payload works");
@@ -125,7 +125,7 @@ class NotificationService {
           await windowManager.show();
           await windowManager.focus();
         }
-        gotoPage(
+        gotoPage<void>(
             context: MyApp.navigatorKey.currentContext!,
             newPage: OpenScreen(notifNode: _node));
       } else {

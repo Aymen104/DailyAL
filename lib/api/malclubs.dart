@@ -12,7 +12,7 @@ class MalClub {
     var url = "${CredMal.htmlEnd}clubs.php?p=$page";
     if (fromCache) {
       Map<String, dynamic>? _map =
-          await CacheManager.instance.getCachedContent(url);
+          await CacheManager.instance.getCachedContent(url) as Map<String, dynamic>?;
       var _result = _map == null ? null : ClubListHtml.fromJson(_map);
       if (_result != null) return _result;
     }

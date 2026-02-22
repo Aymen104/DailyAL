@@ -103,7 +103,7 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
       return _gridView;
     } else {
       if (_graph is AnimeGraph) {
-        return _graphWidget(_graph);
+        return _graphWidget(_graph as AnimeGraph);
       } else {
         return _noContentView(isLoading: _graph == null);
       }

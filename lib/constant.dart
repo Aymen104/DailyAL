@@ -180,7 +180,7 @@ class StatusMap {
 }
 
 void navigateTo(BuildContext context, Widget screen) {
-  gotoPage(context: context, newPage: screen);
+  gotoPage<void>(context: context, newPage: screen);
 }
 
 String convertGenre(MalGenre g, [String category = "anime"]) {
@@ -198,7 +198,7 @@ void onGenrePress(MalGenre e, String category, BuildContext context) {
       ? CustomFilters.genresAnimeFilter
       : CustomFilters.genresMangaFilter)
     ..includedOptions = [genre];
-  gotoPage(
+  gotoPage<void>(
       context: context,
       newPage: GeneralSearchScreen(
         category: category,
@@ -388,7 +388,7 @@ void showInfo(String message) {
 
 void showPopup(
     {required BuildContext context, required Widget child, Color? color}) {
-  showCupertinoModalPopup(
+  showCupertinoModalPopup<void>(
       context: context,
       builder: (context) => Material(color: color, child: child));
 }
@@ -402,7 +402,7 @@ void showCustomSheet({
   bool enableDrag = true,
   BoxConstraints? constraints,
 }) {
-  showModalBottomSheet(
+  showModalBottomSheet<void>(
     context: context,
     enableDrag: enableDrag,
     isScrollControlled: isScrollControlled,
@@ -417,7 +417,7 @@ String enumToString(Object o) => o.toString().split('.')[1];
 List<String> enumList(List<Object> os) =>
     os.map((e) => enumToString(e)).toList();
 
-IconData getFilterIcon(Iterable? list) {
+IconData getFilterIcon(Iterable<Object>? list) {
   if (list == null || list.isEmpty) return LineIcons.filter;
   return filterLengthIcon(list.length);
 }
@@ -505,11 +505,12 @@ Widget loadingError() {
 bool shouldUpdateContent(
     {@required dynamic result, double timeinHoursD = 0, int timeinHours = 0}) {
   try {
-    var lastUpdated = result is String
+    DateTime? lastUpdated = result is String
         ? DateTime.parse(result)
         : result is Map
-            ? DateTime.parse(result['lastUpdated'])
-            : result?.lastUpdated;
+            ? DateTime.parse(result['lastUpdated'] as String)
+            : result?.lastUpdated as DateTime?;
+    if (lastUpdated == null) return false;
     return ((DateTime.now().difference(lastUpdated).inMinutes / 60.0) >=
         (timeinHoursD + timeinHours));
   } catch (e) {
@@ -556,7 +557,7 @@ void _showDesktopToast(String message) {
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white)))))));
   overlay.insert(entry);
-  Future.delayed(const Duration(seconds: 3)).then((_) {
+  Future<void>.delayed(const Duration(seconds: 3)).then((_) {
     if (entry.mounted) entry.remove();
   });
 }
@@ -631,7 +632,7 @@ void launchURLWithConfirmation(
     } else {
       final widget = await DalPathUtils.handleUri(uri, context);
       if (widget != null) {
-        gotoPage(context: context, newPage: widget);
+        gotoPage<void>(context: context, newPage: widget);
       }
     }
   }
@@ -683,7 +684,7 @@ void reportWithConfirmation({
 }) async {
   final url = optionalUrl ??
       '${CredMal.htmlEnd}modules.php?go=report&type=${type.name}&${buildQueryParams(queryParams ?? {})}';
-  var result = await showDialog(
+  var result = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       title: Text(S.current.Report_Confirmation),
@@ -717,7 +718,7 @@ void reportWithConfirmation({
       ],
     ),
   );
-  if (result) {
+  if (result ?? false) {
     launchURL(url);
   }
 }
@@ -770,7 +771,7 @@ Future<bool> openAlertDialog({
   EdgeInsets? insetPadding,
   String? noText,
 }) async {
-  return await showDialog(
+  return (await showDialog<bool>(
     context: context,
     builder: (_) => AlertDialog(
       title: Text(title),
@@ -790,7 +791,7 @@ Future<bool> openAlertDialog({
           alertButton(context, S.current.Close)
       ],
     ),
-  );
+  )) ?? false;
 }
 
 Widget backdropFilter(Widget child) {
@@ -1143,9 +1144,9 @@ Future<T?> gotoPage<T>(
   );
 }
 
-gotoAuthPage() {
+void gotoAuthPage() {
   MyApp.navigatorKey.currentState!.push(
-    MaterialPageRoute(
+    MaterialPageRoute<void>(
       builder: (_) => Directionality(
         textDirection:
             user.pref.isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
@@ -1158,7 +1159,7 @@ gotoAuthPage() {
 }
 
 void showUserPage({required BuildContext context, required String username}) {
-  showModalBottomSheet(
+  showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     builder: (context) {
@@ -1263,7 +1264,7 @@ Widget _spoilerWidget(ExtensionContext c, BuildContext context) {
           textAlign: TextAlign.center,
         ),
         onPressed: () {
-          showModalBottomSheet(
+          showModalBottomSheet<void>(
               context: context,
               isScrollControlled: true,
               builder: (context) => ConstrainedBox(
@@ -1332,8 +1333,8 @@ extension DateTimeExtension on DateTime {
   }
 }
 
-extension MapExtension on Map {
-  bool equals(Map other) {
+extension MapExtension on Map<Object?, Object?> {
+  bool equals(Map<Object?, Object?> other) {
     if (this.length != other.length) return false;
     for (var key in this.keys) {
       if (this[key] != other[key]) return false;
@@ -1377,7 +1378,7 @@ String displayTimeAgo(DateTime date, {bool numericDates = true}) {
   }
 }
 
-Future<ColorResult> colorPickerDialog(context, dialogSelectColor) async {
+Future<ColorResult> colorPickerDialog(BuildContext context, Color dialogSelectColor) async {
   Color selectedColor = dialogSelectColor;
   var _result = await ColorPicker(
     color: dialogSelectColor,
@@ -1409,7 +1410,7 @@ Future<ColorResult> colorPickerDialog(context, dialogSelectColor) async {
     constraints:
         const BoxConstraints(minHeight: 220, minWidth: 250, maxWidth: 320),
   );
-  return ColorResult(selectedColor, _result);
+  return ColorResult(selectedColor, _result ?? false);
 }
 
 class ColorResult {
@@ -1434,7 +1435,7 @@ Future<void> openFutureAndNavigate<T>({
   String? customError,
   bool isPopup = false,
 }) async {
-  showModalBottomSheet(
+  showModalBottomSheet<void>(
     context: context,
     builder: (_) => loadingBelowText(text: text),
   );
@@ -1446,9 +1447,9 @@ Future<void> openFutureAndNavigate<T>({
     Navigator.pop(context);
     if (newPage != null) {
       if (isPopup) {
-        showDialog(context: context, builder: (_) => newPage);
+        showDialog<void>(context: context, builder: (_) => newPage);
       } else {
-        gotoPage(context: context, newPage: newPage);
+        gotoPage<void>(context: context, newPage: newPage);
       }
     }
   } catch (e) {

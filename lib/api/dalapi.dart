@@ -65,7 +65,7 @@ class DalApi {
     final refUrl =
         '${CredMal.appConfigUrl}/${CredMal.buildVariant.name}/serverConfigV3${_debugMode ? 'Dev' : ''}.json';
     return Servers.fromJson(
-      jsonDecode(await _getConfig(refUrl)),
+      jsonDecode(await _getConfig(refUrl)) as Map<String, dynamic>,
     );
   }
 
@@ -102,15 +102,15 @@ class DalApi {
     return preferredServer ?? 'http://0.0.0.0:8080/';
   }
 
-  Future<dynamic> httpGet(String endpoint,
-      [fromCache = true, int? timeInhours]) async {
+  Future<Map<String, dynamic>> httpGet(String endpoint,
+      [bool fromCache = true, int? timeInhours]) async {
     return MalConnect.getContent(
       '${await _preferredServer}$endpoint',
       fromCache: fromCache,
       retryOnFail: false,
       withNoHeaders: true,
       timeinHours: timeInhours,
-    );
+    ) as Map<String, dynamic>;
   }
 
   Future<DalRenderContent> getContent(String category, int id,
@@ -125,7 +125,7 @@ class DalApi {
     final Map<String, dynamic>? chara = await httpGet('$category/$id/pics');
     return chara != null
         ? ((chara['pictures'] ?? <String>[]) as List<dynamic>)
-            .map<String>((e) => e)
+            .map<String>((dynamic e) => e as String)
             .toList()
         : [];
   }
@@ -176,7 +176,7 @@ class DalApi {
     );
 
     if (result != null && result is Map && result.containsKey('data')) {
-      return result['data']['mal_id'];
+      return (result['data']['mal_id'] as num?)?.toInt();
     } else {
       return null;
     }
@@ -297,8 +297,8 @@ class DalApi {
     final result = await _getIntrestStacks(
         InterestStackType.search, id, category, categoryId, page, type, query);
     return ListData.fromJson(
-          result,
-          ((p0) => InterestStack.fromJson(p0)),
+          result as Map<String, dynamic>,
+          ((dynamic p0) => InterestStack.fromJson(p0 as Map<String, dynamic>)),
         ).data ??
         [];
   }
@@ -333,8 +333,8 @@ class DalApi {
     final result = await _getIntrestStacks(
         InterestStackType.content, id, category, categoryId, page, type, null);
     return ListData.fromJson(
-          result,
-          ((p0) => InterestStack.fromJson(p0)),
+          result as Map<String, dynamic>,
+          ((dynamic p0) => InterestStack.fromJson(p0 as Map<String, dynamic>)),
         ).data ??
         [];
   }
@@ -342,7 +342,7 @@ class DalApi {
   Future<InterestStackDetailed> getInterestStackDetailed(int id) async {
     final result = await _getIntrestStacks(
         InterestStackType.detailed, id, null, null, null, null, null);
-    return InterestStackDetailed.fromMap(result);
+    return InterestStackDetailed.fromMap(result as Map<String, dynamic>);
   }
 
   Future<UserAbout?> getUserAbout(String username) async {
@@ -355,7 +355,7 @@ class DalApi {
       if (data is Map) {
         var about = data['about']?.toString();
         if (about != null) {
-          return UserAbout(about, data['modern'] ?? false);
+          return UserAbout(about, data['modern'] as bool? ?? false);
         }
       }
     }
@@ -448,9 +448,9 @@ class DalApi {
 
   Future<AnimeGraph> getAnimeGraph(int id) async {
     return AnimeGraph.fromJson(
-      await _apiGET(
+      (await _apiGET(
         'anime/$id/related',
-      ),
+      )) as Map<String, dynamic>,
     );
   }
 
@@ -470,7 +470,7 @@ class DalApi {
         body: jsonEncode(reviews),
       );
       final body = response.body;
-      return ContentReviewSummary.fromJson(jsonDecode(body));
+      return ContentReviewSummary.fromJson(jsonDecode(body) as Map<String, dynamic>);
     } catch (e) {
       logDal(e);
       return null;
@@ -479,7 +479,7 @@ class DalApi {
 
   Future<String> getSignedImageUrl(String type, String id) async {
     final response = await _apiGET('types/$type/images/$id');
-    return response['signedURL'];
+    return (response as Map<String, dynamic>)['signedURL'] as String;
   }
 
   Future<void> saveImage(
@@ -548,7 +548,7 @@ class DalApi {
               'autocomplete', 'anime', 60 * 60 * 24 * 7);
       if (cachedData != null) {
         logDal('Using cached data for autocomplete');
-        return AnimeAutoComplete.fromList(jsonDecode(cachedData));
+        return AnimeAutoComplete.fromList(jsonDecode(cachedData) as List<dynamic>);
       }
       final apiURL = await _getAPIBaseUrl();
       logDal('Sending request to $apiURL for autocomplete');
@@ -558,7 +558,7 @@ class DalApi {
       final decodedBody = utf8.decode(response.bodyBytes);
       CacheManager.instance
           .setValueForServiceAutoExpireIn('autocomplete', 'anime', decodedBody);
-      return AnimeAutoComplete.fromList(jsonDecode(decodedBody));
+      return AnimeAutoComplete.fromList(jsonDecode(decodedBody) as List<dynamic>);
     } catch (e) {
       logDal(e);
       return null;
@@ -572,20 +572,20 @@ class UserAbout {
   const UserAbout(this.about, this.modern);
 }
 
-List<T> _mapAsList<T>(data, T Function(Map<String, dynamic>) mapper) {
+List<T> _mapAsList<T>(dynamic data, T Function(Map<String, dynamic>) mapper) {
   if (data is Map) {
-    final list = data['data'];
+    final List<dynamic>? list = data['data'] as List<dynamic>?;
     if (list is List) {
       return list
-          .map((e) {
+          .map((dynamic e) {
             if (e == null) {
               return null;
             } else {
-              return mapper(e);
+              return mapper(e as Map<String, dynamic>);
             }
           })
-          .where((e) => e != null)
-          .map((e) => e!)
+          .where((dynamic e) => e != null)
+          .map((dynamic e) => e! as T)
           .toList();
     }
   }

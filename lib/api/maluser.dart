@@ -84,7 +84,7 @@ class MalUser {
     try {
       var response = await MalConnect.httpPutAsync(url, body: body);
       if (response.statusCode == 200 && response.body != null) {
-        return MyAnimeListStatus.fromJson(jsonDecode(response.body));
+        return MyAnimeListStatus.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
       }
     } catch (e) {
       logDal(e);
@@ -127,7 +127,7 @@ class MalUser {
 
     var response = await MalConnect.httpPutAsync(url, body: body);
     if (response.statusCode == 200 && response.body != null) {
-      return MyMangaListStatus.fromJson(jsonDecode(response.body));
+      return MyMangaListStatus.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
     } else {
       logDal(response.body);
     }
@@ -153,7 +153,7 @@ class MalUser {
     }
 
     return SearchResult.fromJson(
-        await MalConnect.getContent(url, fromCache: fromCache));
+        await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?);
   }
 
   /// Get User Anime Status
@@ -184,12 +184,12 @@ class MalUser {
     }
 
     return SearchResult.fromJson(
-      await MalConnect.getContent(url, fromCache: fromCache),
+      await MalConnect.getContent(url, fromCache: fromCache) as Map<String, dynamic>?,
       category: category,
     );
   }
 
-  static Future<MyAnimeListStatus?> updateEpisodeCount(content,
+  static Future<MyAnimeListStatus?> updateEpisodeCount(dynamic content,
       {int? episodes, int? add}) async {
     int _episodes = (episodes ?? 0) + (add ?? 0);
     String? watchStatus;
@@ -213,7 +213,7 @@ class MalUser {
     if (content is BaseNode) {
       _content = content?.content;
     }
-    var status = await MalUser.updateMyAnimeListStatus(_content.id,
+    var status = await MalUser.updateMyAnimeListStatus((_content as Node).id!,
         numEpisodesWatched: _episodes, status: watchStatus);
     if (status == null) {
       showToast("Couldn't Update!");
@@ -263,7 +263,7 @@ class MalUser {
     }
     List<BaseNode> allNodes = [];
     final firstResult = SearchResult.fromJson(await MalConnect.getContent(url,
-        retryOnFail: false, fromCache: fromCache));
+        retryOnFail: false, fromCache: fromCache) as Map<String, dynamic>?);
     if (!nullOrEmpty(firstResult.data)) {
       allNodes.addAll(firstResult.data?.toList() ?? []);
     }
@@ -273,7 +273,7 @@ class MalUser {
       final nextResult = SearchResult.fromJson(await MalConnect.getContent(
           nextUrl,
           retryOnFail: false,
-          fromCache: fromCache));
+          fromCache: fromCache) as Map<String, dynamic>?);
       nextUrl = nextResult.paging?.next;
       final list = nextResult.data?.toList() ?? [];
       allNodes.addAll(list);

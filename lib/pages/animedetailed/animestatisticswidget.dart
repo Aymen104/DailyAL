@@ -142,7 +142,7 @@ class _AnimeStatisticsWidgetState extends State<AnimeStatisticsWidget> {
     );
   }
 
-  formatZeroAsOne(int? number) {
+  int formatZeroAsOne(int? number) {
     if (number == null || number == 0 || number == double.infinity) return 1;
     return number;
   }

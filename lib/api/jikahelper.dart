@@ -18,7 +18,7 @@ class JikanHelper {
     String category = "anime",
     bool fromCache = true,
     int page = 1,
-    Function(dynamic)? onError,
+    void Function(dynamic)? onError,
   }) async {
     final genre = convertGenre(MalGenre(id: id), category);
     final filter = (category.equals("anime")
@@ -37,11 +37,11 @@ class JikanHelper {
   static Future<JikanV4Result<UserProfileV4>> getUserInfo(
       {bool fromCache = false,
       String? username,
-      Function(dynamic)? onError}) async {
+      void Function(dynamic)? onError}) async {
     return JikanV4Result.fromJson(
       DataUnionType.user,
       (await MalConnect.getContent('${CredMal.jikanV4}users/$username/full',
-          withNoHeaders: true)),
+          withNoHeaders: true)) as Map<String, dynamic>?,
     );
   }
 
@@ -49,7 +49,7 @@ class JikanHelper {
     return JikanV4Result.fromJson(
         DataUnionType.about,
         (await MalConnect.getContent('${CredMal.jikanV4}users/$username/about',
-            withNoHeaders: true)));
+            withNoHeaders: true)) as Map<String, dynamic>?);
   }
 
   static Future<ClubV4List> getUserClubs(String username) async {
@@ -57,7 +57,7 @@ class JikanHelper {
             DataUnionType.club,
             (await MalConnect.getContent(
                 '${CredMal.jikanV4}users/$username/clubs',
-                withNoHeaders: true)))
+                withNoHeaders: true)) as Map<String, dynamic>?)
         .data as ClubV4List;
   }
 
@@ -66,7 +66,7 @@ class JikanHelper {
             DataUnionType.favorites,
             (await MalConnect.getContent(
                 '${CredMal.jikanV4}users/$username/favorites',
-                withNoHeaders: true)))
+                withNoHeaders: true)) as Map<String, dynamic>?)
         .data as UserFavV4;
   }
 
@@ -75,7 +75,7 @@ class JikanHelper {
             DataUnionType.userupdates,
             (await MalConnect.getContent(
                 '${CredMal.jikanV4}$category/$id/userupdates',
-                withNoHeaders: true)))
+                withNoHeaders: true)) as Map<String, dynamic>?)
         .data as UserUpdateList;
   }
 
@@ -83,7 +83,7 @@ class JikanHelper {
     return JikanV4Result.fromJson(
             DataUnionType.clubinfo,
             (await MalConnect.getContent('${CredMal.jikanV4}clubs/$id',
-                withNoHeaders: true)))
+                withNoHeaders: true)) as Map<String, dynamic>?)
         .data as Club?;
   }
 
@@ -96,7 +96,7 @@ class JikanHelper {
               useTimeout: true,
               retryOnFail: false,
               timeoutDuration: const Duration(seconds: 2),
-            )))
+            )) as Map<String, dynamic>?)
         .data as AnimeVideoV4?;
   }
 
@@ -116,7 +116,7 @@ class JikanHelper {
       if (response != null && response is Map<String, dynamic>) {
         logDal('Score statistics response received, parsing...');
         // MalConnect.getContent already returns decoded JSON, no need to jsonDecode
-        final stats = JikanAnimeStatistics.fromJson(response['data']);
+        final stats = JikanAnimeStatistics.fromJson(response['data'] as Map<String, dynamic>);
         logDal('Score statistics parsed successfully: ${stats.scores?.length ?? 0} scores');
         return stats;
       } else {
@@ -136,13 +136,13 @@ class JikanHelper {
       bool fromCache = false,
       int pageNumber = 1,
       required Map<String, FilterOption> filters,
-      Function(dynamic)? onError}) async {
+      void Function(dynamic)? onError}) async {
     String custom = filterUrlBuilder(filters, category: category) ?? '';
     String url =
         "get-jikan-search-$category-for-$query-$pageNumber-${custom ?? ""}";
     if (fromCache) {
       var _result = SearchResult.fromJson(
-          await CacheManager.instance.getCachedContent(url));
+          await CacheManager.instance.getCachedContent(url) as Map<String, dynamic>?);
       if (_result?.data != null &&
           !shouldUpdateContent(
               result: _result,
@@ -158,10 +158,10 @@ class JikanHelper {
       logDal(v4Url);
       var response = await MalConnect.retryGet(v4Url, Map());
       if (response != null && response.statusCode == 200) {
-        Map<String, dynamic> result = jsonDecode(response.body) ?? {};
+        Map<String, dynamic> result = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
         return SearchResult(
-            data: (result["data"] ?? <BaseNode>[])
-                .map<BaseNode>((e) => _fromMap(e, category))
+            data: (result["data"] as List<dynamic>? ?? <BaseNode>[])
+                .map<BaseNode>((dynamic e) => _fromMap(e, category))
                 .toList(),
             paging: pageNumber == null
                 ? Paging()
@@ -181,7 +181,7 @@ class JikanHelper {
     if (images != null) {
       var jpg = images["jpg"];
       if (jpg != null) {
-        url = jpg["image_url"];
+        url = jpg["image_url"] as String?;
       }
     }
     final Node node;
@@ -191,8 +191,8 @@ class JikanHelper {
       node = AnimeDetailed.fromJikanJson(jikanAnime);
     } else {
       node = Node(
-        id: e["mal_id"],
-        title: e["title"] ?? e['name'],
+        id: e["mal_id"] as int?,
+        title: (e["title"] ?? e['name']) as String?,
         mainPicture: Picture(
           large: url,
           medium: url,
@@ -248,9 +248,9 @@ class JikanHelper {
     return url;
   }
 
-  static String getApiValue(apiValues, values, value) {
+  static String getApiValue(List<dynamic>? apiValues, List<dynamic>? values, dynamic value) {
     try {
-      return apiValues.elementAt(values.indexOf(value)).toString();
+      return apiValues!.elementAt(values!.indexOf(value)).toString();
     } catch (e) {}
     return '';
   }

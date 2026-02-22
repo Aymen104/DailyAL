@@ -231,7 +231,7 @@ final _axisTileSizeMap = {
 Widget _baseBaseNode(
   String category,
   BaseNode node,
-  index,
+  int index,
   DisplayType displayType, {
   bool showEdit = true,
   HomePageTileSize? homePageTileSize,
@@ -566,7 +566,7 @@ onNodeTap(dynamic content, String category, BuildContext context,
         newPage: ContentDetailedScreen(
           category: category,
           node: content,
-          id: content?.id,
+          id: content?.id as int?,
           onUpdateList: () {
             if (onUpdateContent != null) onUpdateContent();
           },
@@ -590,9 +590,9 @@ onNodeTap(dynamic content, String category, BuildContext context,
           context: context,
           newPage: ClubScreen(
             clubHtml: ClubHtml(
-              clubId: content?.id,
-              clubName: content?.title,
-              imgUrl: content?.mainPicture?.large,
+              clubId: content?.id as int?,
+              clubName: content?.title as String?,
+              imgUrl: content?.mainPicture?.large as String?,
             ),
           ));
     } else if (["featured", "news"].contains(category)) {
@@ -625,13 +625,13 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
     myListStatus = widget.myListStatus;
   }
 
-  get id => widget.dynContent?.content?.id;
+  int? get id => widget.dynContent?.content?.id as int?;
 
   @override
   Widget build(BuildContext context) {
-    final String nodeTitle = getNodeTitle(widget.dynContent?.content);
+    final String nodeTitle = getNodeTitle(widget.dynContent?.content as Node?);
     NodeStatusValue nsv = NodeStatusValue.fromListStatus(myListStatus,
-        category: widget.category, id: widget.dynContent?.content?.id);
+        category: widget.category, id: widget.dynContent?.content?.id as int?);
     return ((widget.displayType == DisplayType.grid ||
                 widget.displayType == DisplayType.list_horiz) &&
             (contentTypes.contains(widget.category) ||
@@ -645,17 +645,21 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
         : _buildListTile(nsv, nodeTitle);
   }
 
-  AnimeGridCard _buildAnimeGridCard(
+  Widget _buildAnimeGridCard(
     Map<int, ScheduleData>? data,
     NodeStatusValue nsv,
     BuildContext context,
   ) {
+    final node = widget.dynContent?.content as Node?;
+    if (node == null) {
+      return const SizedBox.shrink();
+    }
     return AnimeGridCard(
       scheduleData: data?[id],
-      node: widget.dynContent?.content,
+      node: node,
       category: widget.category,
       showEdit: widget.showEdit,
-      myListStatus: myListStatus,
+      myListStatus: myListStatus as MyListStatus?,
       showCardBar: true,
       showRecommendations: widget.showRecommendations,
       updateCache: false,
@@ -820,7 +824,7 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
                                       TagsWidget(
                                           category: widget.category,
                                           tags: widget
-                                                  .dynContent?.content?.tags ??
+                                                  .dynContent?.content?.tags as List<String>? ??
                                               []),
                                     _timeWidget(),
                                     genreWidget,
@@ -933,7 +937,7 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
 
   String get _imageUrl {
     final content2 = widget.dynContent?.content;
-    return content2?.mainPicture?.large ?? '';
+    return (content2?.mainPicture?.large as String?) ?? '';
   }
 
   Widget leadingImage(BuildContext context) {
@@ -969,12 +973,16 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
         myListStatus?.numEpisodesWatched != null &&
         !user.pref.showDubStatus) {
       final alreadyAired = "finished_airing".equalsIgnoreCase(content2.status);
-      var episodesWatched = myListStatus?.numEpisodesWatched as int;
+      var episodesWatched = myListStatus?.numEpisodesWatched ?? 0;
       if (alreadyAired && content2.numEpisodes != null) {
         return _episodeUnseenWidget(content2.numEpisodes!, episodesWatched);
       } else {
+        final idValue = id;
+        if (idValue == null) {
+          return SB.z;
+        }
         return usingScheduler(
-            id,
+            idValue,
             (data) =>
                 unseenUsingScheduleData(
                   data: data,
@@ -1080,9 +1088,9 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
     if (contentDetailed != null &&
         (contentDetailed is AnimeDetailed ||
             contentDetailed is MangaDetailed)) {
-      return (contentDetailed?.mediaType == null
+      return ((contentDetailed?.mediaType as String?) == null
               ? ""
-              : contentDetailed.mediaType.toUpperCase()) +
+              : (contentDetailed.mediaType as String).toUpperCase()) +
           " " +
           (contentDetailed is AnimeDetailed
               ? (((contentDetailed.numEpisodes == null ||
@@ -1091,7 +1099,7 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
                   : ("(" +
                       (contentDetailed?.numEpisodes == null
                           ? "?"
-                          : contentDetailed.numEpisodes.toString()) +
+                          : (contentDetailed.numEpisodes as int).toString()) +
                       " eps)")))
               : contentDetailed is MangaDetailed
                   ? (((contentDetailed?.numVolumes == null ||
@@ -1100,7 +1108,7 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
                       : ("(" +
                           (contentDetailed?.numVolumes == null
                               ? "?"
-                              : contentDetailed.numVolumes.toString()) +
+                              : (contentDetailed.numVolumes as int).toString()) +
                           " vols)")))
                   : '');
     } else {
@@ -1111,8 +1119,8 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
   Widget get airingBadge {
     String? airingDetails;
     try {
-      airingDetails =
-          MalApi.getFormattedAiringDate(widget.dynContent?.content?.broadcast);
+      final broadcast = widget.dynContent?.content?.broadcast as Broadcast?;
+      airingDetails = broadcast != null ? MalApi.getFormattedAiringDate(broadcast) : null;
     } catch (e) {}
     return airingDetails == null || airingDetails.isBlank
         ? SB.z
@@ -1255,7 +1263,7 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
                 context,
                 index,
                 () => updateEpisode(
-                    widget.dynContent, myListStatus?.numEpisodesWatched,
+                    widget.dynContent, myListStatus?.numEpisodesWatched ?? 0,
                     add: 1),
                 IBType.left,
                 Icons.add),
@@ -1266,7 +1274,7 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
                 context,
                 index,
                 () => updateEpisode(
-                    widget.dynContent, myListStatus?.numEpisodesWatched,
+                    widget.dynContent, myListStatus?.numEpisodesWatched ?? 0,
                     add: -1),
                 IBType.right,
                 Icons.remove),
@@ -1291,9 +1299,9 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
   showEditSheet(context) {
     dynamic _dynContent = widget.dynContent;
     if (_dynContent is BaseNode) {
-      _dynContent?.myListStatus = myListStatus;
+      _dynContent?.myListStatus = myListStatus as MyListStatus?;
     } else {
-      _dynContent?.content?.myListStatus = myListStatus;
+      _dynContent?.content?.myListStatus = myListStatus as MyListStatus?;
     }
 
     showContentEditSheet(context, widget.category, _dynContent,
@@ -1420,8 +1428,12 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
     EdgeInsetsGeometry? padding,
     Widget Function(Widget child)? wrapper,
   }) {
+    final idValue = id;
+    if (idValue == null) {
+      return SB.z;
+    }
     return countdownWidget(
-      id: id,
+      id: idValue,
       category: widget.category,
       context: context,
       padding: padding,

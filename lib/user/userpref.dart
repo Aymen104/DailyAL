@@ -117,95 +117,95 @@ class UserPreferences {
     AnimeMangaPagePreferences? _animeMangaPagePreferences;
     if (json != null) {
       if (_cacheUpdateFrequency == null) {
-        _cacheUpdateFrequency = List.from(json["cacheUpdateFrequency"] ?? [])
+        _cacheUpdateFrequency = List.from(json["cacheUpdateFrequency"] as Iterable<dynamic> ?? [])
             .map((e) => int.parse(e.toString()))
             .toList();
       }
 
       if (json.containsKey("show_bg")) {
-        _showBg = json["show_bg"] ?? true;
+        _showBg = json["show_bg"] as bool ?? true;
       }
 
       if (json.containsKey("notifPref")) {
-        _notifPref = NotifPref.fromJson(json["notifPref"]);
+        _notifPref = NotifPref.fromJson(json["notifPref"] as Map<String, dynamic>?);
       }
 
       if (json.containsKey("detailsExpanded")) {
-        _detailsExpanded = json["detailsExpanded"] ?? true;
+        _detailsExpanded = json["detailsExpanded"] as bool ?? true;
       }
 
       if (json.containsKey("nsfw")) {
-        _nsfw = json["nsfw"] ?? false;
+        _nsfw = json["nsfw"] as bool ?? false;
       }
 
       if (json.containsKey("keepPagesInMemory")) {
-        _keepPagesInMemory = json["keepPagesInMemory"] ?? true;
+        _keepPagesInMemory = json["keepPagesInMemory"] as bool ?? true;
       }
 
       if (json.containsKey("hpApiPrefList_v6")) {
-        _hpApiPrefList = List.from(json["hpApiPrefList_v6"])
-            .map((e) => HomePageApiPref.fromJson(e))
+        _hpApiPrefList = List.from(json["hpApiPrefList_v6"] as Iterable<dynamic>)
+            .map((e) => HomePageApiPref.fromJson(e as Map<String, dynamic>))
             .toList();
       }
 
       if (json.containsKey("userChart")) {
         _userchart = json["userChart"] != null
-            ? List<int>.from(json["userChart"])
+            ? List<int>.from(json["userChart"] as Iterable<dynamic>)
             : [-1, -1, -1, -1, -1];
       }
 
       if (json.containsKey("homePageItemsPerCategory")) {
-        _homePageItemsPerCategory = json["homePageItemsPerCategory"] ?? 14;
+        _homePageItemsPerCategory = json["homePageItemsPerCategory"] as int? ?? 14;
       }
 
       if (json.containsKey("showPriority")) {
-        _showPriority = json["showPriority"] ?? false;
+        _showPriority = json["showPriority"] as bool ?? false;
       }
       if (json.containsKey("userLanguage")) {
         _userLanguage = json["userLanguage"] as String?;
       }
 
       if (json.containsKey("autoTranslateSynopsis")) {
-        _autoTranslateSynopsis = json["autoTranslateSynopsis"] ?? false;
+        _autoTranslateSynopsis = json["autoTranslateSynopsis"] as bool ?? false;
       }
       if (json.containsKey("isRtl")) {
-        _isRtl = json["isRtl"] ?? false;
+        _isRtl = json["isRtl"] as bool ?? false;
       }
       if (json.containsKey("showOnlyLastQuote")) {
-        _showOnlyLastQuote = json["showOnlyLastQuote"] ?? true;
+        _showOnlyLastQuote = json["showOnlyLastQuote"] as bool ?? true;
       }
       if (json.containsKey("brightness")) {
         _brightness =
-            (json["brightness"] ?? false) ? Brightness.light : Brightness.dark;
+            (json["brightness"] as bool ?? false) ? Brightness.light : Brightness.dark;
       }
       if (json.containsKey("bgPath")) {
         _bgPath = json["bgPath"] as String?;
       }
       if (json.containsKey("autoAddStartEndDate")) {
-        _autoAddStartEndDate = json["autoAddStartEndDate"] ?? true;
+        _autoAddStartEndDate = json["autoAddStartEndDate"] as bool ?? true;
       }
       if (json.containsKey("showAiringInfo_v2")) {
-        _showAiringInfo = json["showAiringInfo_v2"] ?? false;
+        _showAiringInfo = json["showAiringInfo_v2"] as bool ?? false;
       }
       if (json.containsKey("showDubStatus")) {
-        _showDubStatus = json["showDubStatus"] ?? false;
+        _showDubStatus = json["showDubStatus"] as bool ?? false;
       }
       if (json.containsKey("dubLanguage")) {
-        _dubLanguage = json["dubLanguage"] ?? false;
+        _dubLanguage = json["dubLanguage"] as String ?? 'english';
       }
       if (json.containsKey("dubIconStyle")) {
-        _dubIconStyle = json["dubIconStyle"] ?? false;
+        _dubIconStyle = json["dubIconStyle"] as String ?? '0';
       }
       if (json.containsKey("dubMinSourceCount")) {
-        _dubMinSourceCount = json["dubMinSourceCount"] ?? false;
+        _dubMinSourceCount = json["dubMinSourceCount"] as String ?? '1';
       }
       if (json.containsKey("showAnimeMangaBg")) {
-        showAnimeMangaBg = json['showAnimeMangaBg'] ?? showAnimeMangaBg;
+        showAnimeMangaBg = json['showAnimeMangaBg'] as bool ?? showAnimeMangaBg;
       }
       if (json.containsKey('animeMangaPagePreferences')) {
         try {
           _animeMangaPagePreferences = AnimeMangaPagePreferences.fromJson(
-              json['animeMangaPagePreferences']);
+              json['animeMangaPagePreferences'] as Map<String, dynamic>);
         } catch (e) {
           logDal(e);
         }
@@ -213,8 +213,8 @@ class UserPreferences {
     }
     return json != null
         ? UserPreferences(
-            showCountDownInDetailed: json['showCountDownInDetailed'] ?? true,
-            firstTime: json["first_time"] ?? true,
+            showCountDownInDetailed: json['showCountDownInDetailed'] as bool? ?? true,
+            firstTime: json["first_time"] as bool? ?? true,
             cacheUpdateFrequency: _cacheUpdateFrequency ?? [8, 2, 1],
             showBg: _showBg,
             detailsExpanded: _detailsExpanded,
@@ -239,32 +239,32 @@ class UserPreferences {
             dubMinSourceCount: _dubMinSourceCount,
             showAnimeMangaBg: showAnimeMangaBg,
             userPageAnimeSortType:
-                json['userPageAnimeSortType'] ?? 'list_updated_at',
+                json['userPageAnimeSortType'] as String? ?? 'list_updated_at',
             userPageMangaSortType:
-                json['userPageMangaSortType'] ?? 'list_updated_at',
+                json['userPageMangaSortType'] as String? ?? 'list_updated_at',
             defaultDisplayType:
-                DisplayType.values.elementAt(json['defaultDisplayType'] ?? 0),
+                DisplayType.values.elementAt(json['defaultDisplayType'] as int? ?? 0),
             homePageTileSize: json['homePageTileSize'] != null
-                ? HomePageTileSize.values.elementAt(json['homePageTileSize'])
+                ? HomePageTileSize.values.elementAt(json['homePageTileSize'] as int)
                 : HomePageTileSize.l,
-            firstTimePref: FirstTimePref.fromJson(json['firstTimePref']),
+            firstTimePref: FirstTimePref.fromJson(json['firstTimePref'] as Map<String, dynamic>?),
             preferredAnimeTitle: TitleLang.values
-                .elementAt(json['preferredAnimeTitle'] ?? TitleLang.ro.index),
-            startUpPage: min(json['startUpPage'] ?? 0, 7),
+                .elementAt(json['preferredAnimeTitle'] as int? ?? TitleLang.ro.index),
+            startUpPage: min(json['startUpPage'] as int? ?? 0, 7),
             // Migrate from old startUpPage if new fields don't exist
             startUpPageMobile: min(
-                json['startUpPageMobile'] ?? (min(json['startUpPage'] ?? 0, 4)),
+                json['startUpPageMobile'] as int? ?? (min(json['startUpPage'] as int? ?? 0, 4)),
                 4),
             startUpPageTablet:
-                min(json['startUpPageTablet'] ?? (json['startUpPage'] ?? 0), 7),
+                min(json['startUpPageTablet'] as int? ?? (json['startUpPage'] as int? ?? 0), 7),
             preferredLinkType: LinkType.values.firstWhere(
-              (e) => e.name == json['preferredLinkType'],
+              (e) => e.name == json['preferredLinkType'] as String?,
               orElse: () => LinkType.streaming,
             ),
-            allowYoutubePlayer: json['allowYoutubePlayer'] ?? false,
-            showAnimeMangaCard: json['showAnimeMangaCard'] ?? false,
-            preferredFont: json['preferredFont'] ?? 'Poppins',
-            preferAniList: json['preferAniList'] ?? false,
+            allowYoutubePlayer: json['allowYoutubePlayer'] as bool ?? false,
+            showAnimeMangaCard: json['showAnimeMangaCard'] as bool ?? false,
+            preferredFont: json['preferredFont'] as String ?? 'Poppins',
+            preferAniList: json['preferAniList'] as bool ?? false,
             animeMangaPagePreferences: _animeMangaPagePreferences ??
                 AnimeMangaPagePreferences.defaultObject())
         : UserPreferences(
@@ -372,30 +372,30 @@ class NotifPref {
       this.preferLargeImage = true});
 
   factory NotifPref.fromJson(Map<String, dynamic>? json) {
-    dynamic _daySubscribed,
-        _onDailyAnimeReleases,
+    DateTime? _daySubscribed;
+    bool? _onDailyAnimeReleases,
         _onWatchingListUpdated,
         _onPTWGoesToWatching,
         _preferLargeImage;
 
     if (json != null) {
       if (json.containsKey("day_subscribed")) {
-        _daySubscribed = DateTime.tryParse(json["day_subscribed"] ?? "");
+        _daySubscribed = DateTime.tryParse(json["day_subscribed"] as String? ?? "");
       }
 
       if (json.containsKey("onDailyAnimeReleases")) {
-        _onDailyAnimeReleases = (json["onDailyAnimeReleases"]) ?? true;
+        _onDailyAnimeReleases = json["onDailyAnimeReleases"] as bool? ?? true;
       }
 
       if (json.containsKey("onPTWGoesToWatching")) {
-        _onPTWGoesToWatching = (json["onPTWGoesToWatching"]) ?? true;
+        _onPTWGoesToWatching = json["onPTWGoesToWatching"] as bool? ?? true;
       }
 
       if (json.containsKey("onWatchingListUpdated")) {
-        _onWatchingListUpdated = (json["onWatchingListUpdated"]) ?? true;
+        _onWatchingListUpdated = json["onWatchingListUpdated"] as bool? ?? true;
       }
       if (json.containsKey("preferLargeImage")) {
-        _preferLargeImage = (json["preferLargeImage"]) ?? true;
+        _preferLargeImage = json["preferLargeImage"] as bool? ?? true;
       }
     }
 
@@ -440,12 +440,12 @@ class FirstTimePref {
     return json == null
         ? FirstTimePref()
         : FirstTimePref(
-            bg: json['bg'] ?? true,
-            news: json['news'] ?? true,
-            homePageSize: json['homePageSize'] ?? true,
-            prefferedTitle: json['prefferedTitle'] ?? true,
-            themeV3: json['themeV3'] ?? true,
-            startUpPage: json['startUpPage'] ?? true,
+            bg: json['bg'] as bool? ?? true,
+            news: json['news'] as bool? ?? true,
+            homePageSize: json['homePageSize'] as bool? ?? true,
+            prefferedTitle: json['prefferedTitle'] as bool? ?? true,
+            themeV3: json['themeV3'] as bool? ?? true,
+            startUpPage: json['startUpPage'] as bool? ?? true,
           );
   }
 

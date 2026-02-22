@@ -60,22 +60,22 @@ class BookMarks {
       );
     }
     return BookMarks(
-      anime: fromTJson(map['anime'], (e) => Node.fromJson(e)),
-      manga: fromTJson(map['manga'], (e) => Node.fromJson(e)),
-      news: fromTJson(map['news'], (e) => Featured.fromJson(e)),
-      featured: fromTJson(map['featured'], (e) => Featured.fromJson(e)),
+      anime: fromTJson(map['anime'] as Map<String, dynamic>?, (e) => Node.fromJson(e as Map<String, dynamic>)),
+      manga: fromTJson(map['manga'] as Map<String, dynamic>?, (e) => Node.fromJson(e as Map<String, dynamic>)),
+      news: fromTJson(map['news'] as Map<String, dynamic>?, (e) => Featured.fromJson(e as Map<String, dynamic>)),
+      featured: fromTJson(map['featured'] as Map<String, dynamic>?, (e) => Featured.fromJson(e as Map<String, dynamic>)),
       character:
-          fromTJson(map['character'], (e) => CharacterV4Data.fromJson(e)),
-      person: fromTJson(map['person'], (e) => PeopleV4Data.fromJson(e)),
-      clubs: fromTJson(map['clubs'], (e) => ClubHtml.fromJson(e)),
+          fromTJson(map['character'] as Map<String, dynamic>?, (e) => CharacterV4Data.fromJson(e as Map<String, dynamic>)),
+      person: fromTJson(map['person'] as Map<String, dynamic>?, (e) => PeopleV4Data.fromJson(e as Map<String, dynamic>)),
+      clubs: fromTJson(map['clubs'] as Map<String, dynamic>?, (e) => ClubHtml.fromJson(e as Map<String, dynamic>)),
       forumTopics: fromTJson(
-          map['forumTopics'],
-          (e) => e.containsKey('topic_id')
+          map['forumTopics'] as Map<String, dynamic>?,
+          (dynamic e) => (e as Map<String, dynamic>).containsKey('topic_id')
               ? ForumHtml.fromJson(e)
               : ForumTopicsData.fromJson(e)),
       interestStacks:
-          fromTJson(map['interestStacks'], (e) => InterestStack.fromJson(e)),
-      malUser: fromTJson(map['malUser'], (e) => UserProf.fromJson(e)),
+          fromTJson(map['interestStacks'] as Map<String, dynamic>?, (e) => InterestStack.fromJson(e as Map<String, dynamic>)),
+      malUser: fromTJson(map['malUser'] as Map<String, dynamic>?, (e) => UserProf.fromJson(e as Map<String, dynamic>)),
     );
   }
 

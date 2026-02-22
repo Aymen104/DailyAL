@@ -15,10 +15,10 @@ class AniListUser {
   });
 
   factory AniListUser.fromJson(Map<String, dynamic> json) => AniListUser(
-        id: json['id'],
-        name: json['name'],
-        avatarLarge: json['avatar']?['large'],
-        avatarMedium: json['avatar']?['medium'],
+        id: json['id'] as int,
+        name: json['name'] as String,
+        avatarLarge: json['avatar']?['large'] as String?,
+        avatarMedium: json['avatar']?['medium'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -110,19 +110,19 @@ class AniListMediaEntry {
 
   factory AniListMediaEntry.fromJson(
       Map<String, dynamic> json, String category) {
-    final entry = json['mediaListEntry'];
+    final entry = json['mediaListEntry'] as Map<String, dynamic>?;
     return AniListMediaEntry(
-      mediaId: json['id'],
-      entryId: entry?['id'],
-      status: entry?['status'],
+      mediaId: json['id'] as int,
+      entryId: entry?['id'] as int?,
+      status: entry?['status'] as String?,
       score: (entry?['score'] as num?)?.toDouble(),
-      progress: entry?['progress'],
-      progressVolumes: entry?['progressVolumes'],
-      startedAt: _fuzzyDateToString(entry?['startedAt']),
-      completedAt: _fuzzyDateToString(entry?['completedAt']),
-      repeat: entry?['repeat'],
-      notes: entry?['notes'],
-      private_: entry?['private'],
+      progress: entry?['progress'] as int?,
+      progressVolumes: entry?['progressVolumes'] as int?,
+      startedAt: _fuzzyDateToString(entry?['startedAt'] as Map<String, dynamic>?),
+      completedAt: _fuzzyDateToString(entry?['completedAt'] as Map<String, dynamic>?),
+      repeat: entry?['repeat'] as int?,
+      notes: entry?['notes'] as String?,
+      private_: entry?['private'] as bool?,
     );
   }
 
@@ -137,9 +137,9 @@ class AniListMediaEntry {
 /// Convert AniList FuzzyDate {year, month, day} to "yyyy-MM-dd" or null.
 String? _fuzzyDateToString(Map<String, dynamic>? fuzzyDate) {
   if (fuzzyDate == null) return null;
-  final y = fuzzyDate['year'];
-  final m = fuzzyDate['month'];
-  final d = fuzzyDate['day'];
+  final y = fuzzyDate['year'] as int?;
+  final m = fuzzyDate['month'] as int?;
+  final d = fuzzyDate['day'] as int?;
   if (y == null) return null;
   return '${y.toString().padLeft(4, '0')}-'
       '${(m ?? 1).toString().padLeft(2, '0')}-'
@@ -193,16 +193,16 @@ class AniListSaveResult {
   factory AniListSaveResult.fromJson(
       Map<String, dynamic> json, String category) {
     return AniListSaveResult(
-      id: json['id'],
-      status: json['status'],
+      id: json['id'] as int,
+      status: json['status'] as String?,
       score: (json['score'] as num?)?.toDouble(),
-      progress: json['progress'],
-      progressVolumes: json['progressVolumes'],
-      startedAt: _fuzzyDateToString(json['startedAt']),
-      completedAt: _fuzzyDateToString(json['completedAt']),
-      repeat: json['repeat'],
-      notes: json['notes'],
-      private_: json['private'],
+      progress: json['progress'] as int?,
+      progressVolumes: json['progressVolumes'] as int?,
+      startedAt: _fuzzyDateToString(json['startedAt'] as Map<String, dynamic>?),
+      completedAt: _fuzzyDateToString(json['completedAt'] as Map<String, dynamic>?),
+      repeat: json['repeat'] as int?,
+      notes: json['notes'] as String?,
+      private_: json['private'] as bool?,
     );
   }
 }

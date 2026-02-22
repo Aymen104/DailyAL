@@ -42,7 +42,7 @@ class AniListService {
 
     final body = await _post(query, token: token);
     if (body == null) return null;
-    final viewer = body['data']?['Viewer'];
+    final viewer = body['data']?['Viewer'] as Map<String, dynamic>?;
     if (viewer == null) return null;
     return AniListUser.fromJson(viewer);
   }
@@ -74,7 +74,7 @@ class AniListService {
     });
     if (body == null) return null;
 
-    final media = body['data']?['Media'];
+    final media = body['data']?['Media'] as Map<String, dynamic>?;
     if (media == null) return null;
     return AniListMediaEntry.fromJson(media, category);
   }
@@ -148,7 +148,7 @@ class AniListService {
     final body = await _post(mutation, variables: variables);
     if (body == null) return null;
 
-    final entry = body['data']?['SaveMediaListEntry'];
+    final entry = body['data']?['SaveMediaListEntry'] as Map<String, dynamic>?;
     if (entry == null) return null;
     return AniListSaveResult.fromJson(entry, category);
   }
@@ -362,8 +362,8 @@ class AniListService {
               'num_chapters': media['chapters'],
               'num_volumes': media['volumes'],
               'mean':
-                  media['meanScore'] != null ? media['meanScore'] / 10.0 : null,
-              'genres': media['genres']?.map((g) => {'name': g}).toList(),
+                  media['meanScore'] != null ? (media['meanScore'] as num) / 10.0 : null,
+              'genres': media['genres']?.map((dynamic g) => {'name': g}).toList(),
               'start_date': media['startDate'] != null
                   ? '${media['startDate']['year']}-${media['startDate']['month']?.toString().padLeft(2, '0')}-${media['startDate']['day']?.toString().padLeft(2, '0')}'
                   : null,
@@ -372,23 +372,23 @@ class AniListService {
               'status': malStatus,
               'score':
                   entry['score'] != null ? (entry['score'] as num).toInt() : 0,
-              'num_episodes_watched': entry['progress'],
-              'num_chapters_read': entry['progress'],
-              'num_volumes_read': entry['progressVolumes'],
+              'num_episodes_watched': entry['progress'] as int?,
+              'num_chapters_read': entry['progress'] as int?,
+              'num_volumes_read': entry['progressVolumes'] as int?,
               'is_rewatching': aniStatus == 'REPEATING',
               'is_rereading': aniStatus == 'REPEATING',
-              'num_times_rewatched': entry['repeat'] ?? 0,
-              'num_times_reread': entry['repeat'] ?? 0,
+              'num_times_rewatched': entry['repeat'] as int? ?? 0,
+              'num_times_reread': entry['repeat'] as int? ?? 0,
               'start_date': entry['startedAt'] != null
                   ? '${entry['startedAt']['year']}-${entry['startedAt']['month']?.toString().padLeft(2, '0')}-${entry['startedAt']['day']?.toString().padLeft(2, '0')}'
                   : null,
               'finish_date': entry['completedAt'] != null
                   ? '${entry['completedAt']['year']}-${entry['completedAt']['month']?.toString().padLeft(2, '0')}-${entry['completedAt']['day']?.toString().padLeft(2, '0')}'
                   : null,
-              'comments': entry['notes'],
+              'comments': entry['notes'] as String?,
               'updated_at': entry['updatedAt'] != null
                   ? DateTime.fromMillisecondsSinceEpoch(
-                          entry['updatedAt'] * 1000)
+                          (entry['updatedAt'] as int) * 1000)
                       .toIso8601String()
                   : null,
             },

@@ -100,7 +100,7 @@ class MalConnect {
     if (fromCache) {
       logDal("Cache ->> $url");
       Map<String, dynamic>? _result =
-          await CacheManager.instance.getCachedContent(url);
+          await CacheManager.instance.getCachedContent(url) as Map<String, dynamic>?;
       if (_result != null) {
         cachedResult = _result;
         if (!shouldUpdateContent(
@@ -151,7 +151,7 @@ class MalConnect {
           return cachedResult;
         } else {
           Map<String, dynamic> result =
-              timeoutCache ? cachedResult : jsonDecode(response.body) ?? {};
+              timeoutCache ? cachedResult as Map<String, dynamic> : jsonDecode(response.body) as Map<String, dynamic>? ?? {};
           result["url"] = url;
           result["fromCache"] = false;
           CacheManager.instance.setCachedJson(url, result);
@@ -173,7 +173,7 @@ class MalConnect {
     required bool retryOnFail,
     required bool useTimeout,
     Duration? timeoutDuration,
-    required Function() onTimeout,
+    required void Function() onTimeout,
   }) async {
     final isDalLocal = url.startsWith('http://0.0.0.0:8080');
     if (retryOnFail) {
@@ -247,7 +247,7 @@ class MalConnect {
   static Future<SearchResult?> htmlListPage(
     String url,
     String nextUrl,
-    Function(Document) fromHtml, {
+    SearchResult? Function(Document) fromHtml, {
     bool fromCache = false,
     List<int> validCodes = const [200],
   }) async {
@@ -257,7 +257,7 @@ class MalConnect {
     if (response == null || !validCodes.contains(response.statusCode)) {
       logDal(response.body);
     } else {
-      result = fromHtml(parse(response.body));
+      result = fromHtml(parse(response.body)) as SearchResult?;
       result!.fromCache = false;
       if (result.data != null && result.data!.isNotEmpty) {
         result.paging = Paging(next: nextUrl, previous: url);
@@ -270,7 +270,7 @@ class MalConnect {
   }
 
   static Future<commons.Node?> htmlPage(
-      String url, commons.Node Function(Document) fromHtml,
+      String url, commons.Node? Function(Document) fromHtml,
       {bool fromCache = false}) async {
     commons.Node? result;
     logDal(url);
@@ -279,7 +279,7 @@ class MalConnect {
       logDal(response.body);
     } else {
       result = fromHtml(parse(response.body));
-      result.fromCache = false;
+      result?.fromCache = false;
     }
 
     return result;
@@ -295,7 +295,7 @@ class MalConnect {
     T? result;
     if (fromCache) {
       Map<String, dynamic> _result =
-          await CacheManager.instance.getCachedContent(url);
+          await CacheManager.instance.getCachedContent(url) as Map<String, dynamic>? ?? {};
       if (_result != null) {
         if (!shouldUpdateContent(
           result: _result,

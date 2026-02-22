@@ -24,7 +24,7 @@ class CachedUserProf {
       if (!(await checkIfExists(url))) {
         return null;
       }
-      var userProf = UserProf.fromJson(jsonDecode(pref.getString(url) ?? "{}"));
+      var userProf = UserProf.fromJson(jsonDecode(pref.getString(url) ?? "{}") as Map<String, dynamic>);
       userProf.fromCache = true;
       return userProf;
     } catch (e) {

@@ -188,7 +188,7 @@ class MyApp extends StatelessWidget {
                 var fromExistingScreen = false;
                 try {
                   fromExistingScreen =
-                      ((route.arguments as List?)?.firstOrNull) ?? false;
+                      (((route.arguments as List?)?.firstOrNull) ?? false) as bool;
                 } catch (e) {}
                 return MaterialPageRoute(
                   builder: (context) => CFutureBuilder(

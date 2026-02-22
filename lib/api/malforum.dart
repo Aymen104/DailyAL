@@ -21,9 +21,9 @@ import 'package:timezone/timezone.dart' as tz;
 class MalForum {
   /// Get Forum Boards
   static Future<Categories> getForumBoards({bool fromCache = false}) async {
-    return Categories.fromJson(await MalConnect.getContent(
+    return Categories.fromJson((await MalConnect.getContent(
         "${CredMal.endPoint}forum/boards",
-        fromCache: fromCache));
+        fromCache: fromCache)) as Map<String, dynamic>?);
   }
 
   static String getEndPoint(int? boardId, int? subBoardId,
@@ -108,8 +108,7 @@ class MalForum {
     if (fromHtml) {
       return getForumTopicsPage(url, nextUrl: nextUrl, fromCache: fromCache);
     } else {
-      return ForumTopics.fromJson(
-          await MalConnect.getContent(url, fromCache: fromCache));
+      return ForumTopics.fromJson((await MalConnect.getContent(url, fromCache: fromCache)) as Map<String, dynamic>?);
     }
   }
 
@@ -119,9 +118,9 @@ class MalForum {
     required Paging page,
     PageDirection pageDirection = PageDirection.NEXT,
   }) async {
-    return ForumTopics.fromJson(await MalConnect.getContent(
+    return ForumTopics.fromJson((await MalConnect.getContent(
         (pageDirection == PageDirection.NEXT ? page.next : page.previous) ?? '',
-        fromCache: fromCache));
+        fromCache: fromCache)) as Map<String, dynamic>?);
   }
 
   // loadMoreForumPosts
@@ -130,9 +129,9 @@ class MalForum {
     required Paging page,
     PageDirection pageDirection = PageDirection.NEXT,
   }) async {
-    return ForumTopicData.fromJson(await MalConnect.getContent(
+    return ForumTopicData.fromJson((await MalConnect.getContent(
         (pageDirection == PageDirection.NEXT ? page.next : page.previous) ?? '',
-        fromCache: fromCache));
+        fromCache: fromCache)) as Map<String, dynamic>?);
   }
 
   ///Get forum topic detail
@@ -143,9 +142,9 @@ class MalForum {
     int offset = 0,
   }) async {
     logDal("${CredMal.endPoint}forum/topic/$id?limit=$limit&offset=$offset");
-    return ForumTopicData.fromJson(await MalConnect.getContent(
+    return ForumTopicData.fromJson((await MalConnect.getContent(
         "${CredMal.endPoint}forum/topic/$id?limit=$limit&offset=$offset",
-        fromCache: fromCache));
+        fromCache: fromCache)) as Map<String, dynamic>?);
   }
 
   static Future<ForumTopicsHtml?> getForumTopicsPage(String url,
@@ -153,7 +152,7 @@ class MalForum {
     ForumTopicsHtml? result;
     if (fromCache) {
       Map<String, dynamic>? _map =
-          await CacheManager.instance.getCachedContent(url);
+          await CacheManager.instance.getCachedContent(url) as Map<String, dynamic>?;
       ForumTopicsHtml? _result =
           _map == null ? null : ForumTopicsHtml.fromJson(_map);
       if (_result != null) return _result;
@@ -182,7 +181,7 @@ class MalForum {
     try {
       if (fromCache) {
         Map<String, dynamic>? _map =
-            await CacheManager.instance.getCachedContent(url);
+            await CacheManager.instance.getCachedContent(url) as Map<String, dynamic>?;
         var _result = _map == null ? null : SearchResult.fromJson(_map);
         if (_result != null &&
             !shouldUpdateContent(
