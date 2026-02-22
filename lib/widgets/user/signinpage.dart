@@ -110,6 +110,16 @@ class _SigninWidgetState extends State<SigninWidget> {
                   child: CircleAvatar(
                     backgroundImage: AssetImage("assets/images/mal-icon.png"),
                   ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                Container(
+                  width: 80,
+                  height: 80,
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage("assets/images/anilist.png"),
+                  ),
                 )
               ],
             )),
