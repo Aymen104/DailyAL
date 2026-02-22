@@ -3,6 +3,7 @@ import 'package:dailyanimelist/api/malapi.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
+import 'package:dailyanimelist/screens/characterscreen.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/screens/seasonal_screen.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
@@ -76,6 +77,19 @@ void onMediaTypeTap(
           category: category,
           showBackButton: true,
         ));
+  }
+}
+
+void onAuthorTap(MangaAuthors author, BuildContext context) {
+  // Navigate to author/people profile screen
+  if (author.author?.id != null) {
+    gotoPage(
+      context: context,
+      newPage: CharacterScreen(
+        id: author.author!.id!,
+        charaCategory: 'people',
+      ),
+    );
   }
 }
 
@@ -324,7 +338,7 @@ class MoreInfoAnime extends StatelessWidget {
             _fieldList<MangaAuthors>(
               S.current.Studios,
               contentDetailed.authors,
-              (_) {},
+              (author) => onAuthorTap(author, context),
               (e) =>
                   (e.author?.firstName ?? "?") +
                   " " +

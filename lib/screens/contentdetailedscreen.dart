@@ -1651,23 +1651,46 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
           const SizedBox(
             height: 3,
           ),
-          Text(
-            widget.category.equals("anime")
-                ? ((contentDetailed?.studios == null ||
-                        contentDetailed.studios.length == 0)
-                    ? "?"
-                    : contentDetailed.studios
-                        .map((e) => e.name)
-                        .reduce((value, element) => value + "," + element))
-                : ((contentDetailed?.authors == null ||
-                        contentDetailed.authors.length == 0)
-                    ? "?"
-                    : contentDetailed.authors
-                        .map((e) => e.author.firstName)
-                        .reduce((value, element) => value + "," + element)),
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
+          widget.category.equals("anime")
+              ? Text(
+                  ((contentDetailed?.studios == null ||
+                          contentDetailed.studios.length == 0)
+                      ? "?"
+                      : contentDetailed.studios
+                          .map((e) => e.name)
+                          .reduce((value, element) => value + "," + element)),
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall,
+                )
+              : ((contentDetailed?.authors == null ||
+                      contentDetailed.authors.length == 0)
+                  ? Text(
+                      "?",
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    )
+                  : Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: contentDetailed.authors
+                          .map<Widget>((author) => GestureDetector(
+                                onTap: () => onAuthorTap(author, context),
+                                child: Text(
+                                  author.author?.firstName ?? "?",
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        decoration: TextDecoration.underline,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                ),
+                              ))
+                          .toList(),
+                    )),
           SB.h10,
           Text(
             S.current.Members,
@@ -1812,7 +1835,33 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
             title: widget.category.equals("anime")
                 ? S.current.Studios
                 : S.current.Authors,
-            content: _getStudiosString(),
+            child: widget.category.equals("anime")
+                ? Text(_getStudiosString(),
+                    style: Theme.of(context).textTheme.labelMedium)
+                : ((contentDetailed?.authors == null ||
+                        contentDetailed.authors.length == 0)
+                    ? Text("?", style: Theme.of(context).textTheme.labelMedium)
+                    : Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: contentDetailed.authors
+                            .map<Widget>((author) => GestureDetector(
+                                  onTap: () => onAuthorTap(author, context),
+                                  child: Text(
+                                    author.author?.firstName ?? "?",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelMedium
+                                        ?.copyWith(
+                                          decoration: TextDecoration.underline,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                  ),
+                                ))
+                            .toList(),
+                      )),
           ),
           _buildDetailSection(
             title: "Media",
