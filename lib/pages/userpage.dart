@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dailyanimelist/api/anilist/anilist_service.dart';
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/jikahelper.dart';
@@ -11,19 +12,16 @@ import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
-import 'package:dailyanimelist/screens/plainscreen.dart';
-import 'package:dailyanimelist/screens/user_profile.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/util/streamutils.dart';
-import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
-import 'package:dailyanimelist/widgets/home/bookmarks_widget.dart';
 import 'package:dailyanimelist/widgets/homeappbar.dart';
 import 'package:dailyanimelist/widgets/listsortfilter.dart';
 import 'package:dailyanimelist/widgets/loading/expandedwidget.dart';
 import 'package:dailyanimelist/widgets/slivers.dart';
 import 'package:dailyanimelist/widgets/togglebutton.dart';
 import 'package:dailyanimelist/widgets/user/contentbuilder.dart';
+import 'package:dailyanimelist/widgets/user/contenteditwidget.dart';
 import 'package:dailyanimelist/widgets/user/signinpage.dart';
 import 'package:dailyanimelist/widgets/user/userchart.dart';
 import 'package:dailyanimelist/user/userlistcache.dart';
@@ -33,19 +31,23 @@ import 'package:flutter/material.dart';
 class _UserPagePref {
   int? tabIndex;
   String? category;
+  String? activeListSource; // 'mal' or 'anilist'
 
   _UserPagePref({
     this.tabIndex,
     this.category,
+    this.activeListSource,
   });
 
   _UserPagePref.fromJson(Map<String, dynamic> json)
       : tabIndex = json['tabIndex'],
-        category = json['category'];
+        category = json['category'],
+        activeListSource = json['activeListSource'];
 
   Map<String, dynamic> toJson() => {
         'tabIndex': tabIndex,
         'category': category,
+        'activeListSource': activeListSource,
       };
 }
 
@@ -180,7 +182,11 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
-  _UserPagePref _userPagePref = _UserPagePref(tabIndex: 0, category: "anime");
+  _UserPagePref _userPagePref = _UserPagePref(
+    tabIndex: 0,
+    category: "anime",
+    activeListSource: null,
+  );
   bool hasOpened = false;
   bool listUpdated = false;
   UserProf? userProf;
@@ -208,6 +214,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   late StreamListener<Map<String, int?>> mangaCountListener;
 
   var pageSize = 300;
+
+  // Active account for list display (MAL or AniList)
+  ActiveAccount _activeListSource = ActiveAccount.mal;
 
   void setRefKey() {
     refKey = MalAuth.codeChallenge(10);
@@ -255,6 +264,22 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
     _initCountMap();
     _initRefreshMap();
+
+    // Restore active list source from cache
+    _userPrefFromCache.then((_) {
+      if (_userPagePref.activeListSource != null) {
+        final savedSource = _userPagePref.activeListSource;
+        if (savedSource == 'anilist' && user.isAniListConnected) {
+          setState(() {
+            _activeListSource = ActiveAccount.anilist;
+          });
+        } else {
+          setState(() {
+            _activeListSource = ActiveAccount.mal;
+          });
+        }
+      }
+    });
   }
 
   String get category => _userPagePref.category ?? 'anime';
@@ -312,7 +337,10 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     }
 
     _userPagePref = _UserPagePref(
-        tabIndex: _tabIndex == -1 ? 0 : _tabIndex, category: _category);
+      tabIndex: _tabIndex == -1 ? 0 : _tabIndex,
+      category: _category,
+      activeListSource: _userPagePref.activeListSource,
+    );
   }
 
   void _setTabIndexInCache(int index) {
@@ -534,12 +562,16 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   }
 
   TabBarView _tabBarView() {
+    // Use a key that includes the active list source to force rebuild when switching accounts
     return TabBarView(
+      key: ValueKey('${_activeListSource.name}-$category'),
       controller: controller,
       children: allListHeaders
           .map(
             (e) => UserContentBuilder(
-              key: PageStorageKey('$category-$e-${username}'),
+              // Use different keys for MAL and AniList to prevent cache sharing
+              key: PageStorageKey(
+                  '${_activeListSource.name}-$category-$e-${username}'),
               category: category,
               username: username,
               refreshKey: refreshKeyMap[e],
@@ -573,41 +605,58 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     final status = "all".equals(e) ? null : e;
     final sortFilterDisplay = input.sortFilterDisplay;
     Future<SearchResult> future;
-    bool _canBeFetchedFromAPI =
-        canBeFetchedFromAPI(category, sortFilterDisplay);
-    if (_canBeFetchedFromAPI) {
-      logDal('Using mal api');
-      future = MalUser.getMyContentList(
-        limit: pageSize,
-        fromCache: input.fromCache,
+
+    // Check if we should use AniList API
+    if (_shouldUseAniList()) {
+      logDal('Using AniList API');
+      final page = (input.offset ~/ pageSize) + 1;
+      future = AniListService.getUserMediaList(
         category: category,
-        sortType: input.sortFilterDisplay.sort.value,
-        offset: input.offset,
-        username: widget.username,
         status: status,
-        fields: [],
+        limit: pageSize,
+        page: page,
+        sort: sortFilterDisplay.sort.value,
       );
     } else {
-      logDal('using whole pagination output');
-      final orderMap = category.equals('anime')
-          ? animeListDefaultOrderMap
-          : mangaListDefaultOrderMap;
-      var orderMapContains = orderMap.containsKey(sortFilterDisplay.sort.value);
-      List<String> fieldList = getFieldsFromSortFilter(
-          orderMapContains, sortFilterDisplay, category);
-      bool fromCache = shouldGetFromCacheBasedOnPrevInput(input);
-      future = MalUser.getAllUserList(
-        widget.username,
-        category,
-        status: status,
-        sortType: orderMapContains ? sortFilterDisplay.sort.value : null,
-        fromCache: fromCache,
-        fields: fieldList.isEmpty ? null : fieldList.join(','),
-      );
+      // Use MAL API (existing logic)
+      bool _canBeFetchedFromAPI =
+          canBeFetchedFromAPI(category, sortFilterDisplay);
+      if (_canBeFetchedFromAPI) {
+        logDal('Using mal api');
+        future = MalUser.getMyContentList(
+          limit: pageSize,
+          fromCache: input.fromCache,
+          category: category,
+          sortType: input.sortFilterDisplay.sort.value,
+          offset: input.offset,
+          username: widget.username,
+          status: status,
+          fields: [],
+        );
+      } else {
+        logDal('using whole pagination output');
+        final orderMap = category.equals('anime')
+            ? animeListDefaultOrderMap
+            : mangaListDefaultOrderMap;
+        var orderMapContains =
+            orderMap.containsKey(sortFilterDisplay.sort.value);
+        List<String> fieldList = getFieldsFromSortFilter(
+            orderMapContains, sortFilterDisplay, category);
+        bool fromCache = shouldGetFromCacheBasedOnPrevInput(input);
+        future = MalUser.getAllUserList(
+          widget.username,
+          category,
+          status: status,
+          sortType: orderMapContains ? sortFilterDisplay.sort.value : null,
+          fromCache: fromCache,
+          fields: fieldList.isEmpty ? null : fieldList.join(','),
+        );
+      }
     }
+
     final contentResult = await future;
     var list = contentResult.data ?? [];
-    if (widget.isSelf) {
+    if (widget.isSelf && !_shouldUseAniList()) {
       UserListCache.updateCache(list, category);
     }
     bool isSorted = false;
@@ -627,11 +676,25 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     }
     return await getSortedFilteredData(
       list,
-      _canBeFetchedFromAPI,
+      _shouldUseAniList()
+          ? true
+          : canBeFetchedFromAPI(category, sortFilterDisplay),
       sortFilterDisplay,
       category,
       isSorted: isSorted,
     );
+  }
+
+  bool _shouldUseAniList() {
+    return _activeListSource == ActiveAccount.anilist &&
+        user.isAniListConnected &&
+        widget.username.equals("@me");
+  }
+
+  bool get _showListSourceToggle {
+    return widget.username.equals("@me") &&
+        user.status == AuthStatus.AUTHENTICATED &&
+        user.isAniListConnected;
   }
 
   StreamListener<Map<String, int?>> get _listener =>
@@ -642,21 +705,100 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       automaticallyImplyLeading: false,
       toolbarHeight: kToolbarHeight,
       forceElevated: innerBoxIsScrolled,
-      actions: <Widget>[SB.z],
+      actions: _showListSourceToggle
+          ? <Widget>[SB.z] // No search/bookmarks when both accounts connected
+          : <Widget>[
+              // Show search icon when only one account
+              IconButton(
+                icon: Icon(Icons.search),
+                onPressed: () => navigateTo(
+                  context,
+                  GeneralSearchScreen(category: category),
+                ),
+              ),
+            ],
       pinned: true,
       floating: true,
       title: widget.isSelf
-          ? AppBarHome(titleWidget: _categoryChangeWidget())
+          ? (_showListSourceToggle
+              ? _buildTopBarWidget() // Direct widget without AppBarHome
+              : AppBarHome(titleWidget: _categoryChangeWidget()))
           : SB.z,
       titleSpacing: 0.0,
       bottom: animeBodyHeader(),
     );
   }
 
-  AnimeMangaChangeWidget _categoryChangeWidget() {
-    return AnimeMangaChangeWidget(
-      category: category,
-      onCategoryChange: (value) => changeCategory(value),
+  Widget _buildTopBarWidget() {
+    // Show MAL/AniList toggle and Anime/Manga toggle
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _listSourceToggle(),
+          _categoryChangeWidget(),
+        ],
+      ),
+    );
+  }
+
+  Widget _listSourceToggle() {
+    return SegmentedButton<ActiveAccount>(
+      segments: <ButtonSegment<ActiveAccount>>[
+        ButtonSegment<ActiveAccount>(
+          value: ActiveAccount.mal,
+          icon: Image.asset(
+            'assets/images/mal-icon.png',
+            width: 20,
+            height: 20,
+          ),
+        ),
+        ButtonSegment<ActiveAccount>(
+          value: ActiveAccount.anilist,
+          icon: Image.asset(
+            'assets/images/anilist.png',
+            width: 20,
+            height: 20,
+          ),
+        ),
+      ],
+      selected: {_activeListSource},
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      onSelectionChanged: (Set<ActiveAccount> selection) {
+        if (mounted) {
+          setState(() {
+            _activeListSource = selection.first;
+          });
+          // Persist preference
+          user.pref.preferAniList = _activeListSource == ActiveAccount.anilist;
+          user.setIntance(updateAuth: false);
+          // Save to user page preference cache
+          _userPagePref.activeListSource = _activeListSource.name;
+          _updateUserPrefCache();
+          // Reset count map to clear old counts
+          _resetCountMap();
+          // Refresh all tabs
+          allListHeaders.forEach((status) {
+            refreshKeyMap[status] = MalAuth().getRandomString(26);
+          });
+        }
+      },
+    );
+  }
+
+  Widget _categoryChangeWidget() {
+    return ButtonSwitch(
+      isLeftSelected: category.equals('anime'),
+      leftText: 'Anime',
+      rightText: 'Manga',
+      onLeft: () => changeCategory('anime'),
+      onRight: () => changeCategory('manga'),
     );
   }
 
@@ -956,23 +1098,5 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
   void jumpToContent({required ContentDetailedScreen page}) {
     navigateTo(context, page);
-  }
-}
-
-class AnimeMangaChangeWidget extends StatelessWidget {
-  final String category;
-  final ValueChanged<String> onCategoryChange;
-  const AnimeMangaChangeWidget(
-      {super.key, required this.category, required this.onCategoryChange});
-
-  @override
-  Widget build(BuildContext context) {
-    return ButtonSwitch(
-      isLeftSelected: category.equals('anime'),
-      leftText: 'Anime',
-      rightText: 'Manga',
-      onLeft: () => onCategoryChange('anime'),
-      onRight: () => onCategoryChange('manga'),
-    );
   }
 }

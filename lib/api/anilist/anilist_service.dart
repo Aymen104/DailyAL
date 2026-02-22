@@ -217,6 +217,197 @@ class AniListService {
     return deleteMediaListEntry(entry!.entryId!);
   }
 
+  // ─── User List ───────────────────────────────────────────────────
+
+  /// Fetch the authenticated user's media list collection.
+  static Future<SearchResult> getUserMediaList({
+    required String category,
+    String? status,
+    int limit = 100,
+    int page = 1,
+    String? sort,
+  }) async {
+    if (user.anilistToken == null) return SearchResult();
+
+    final type = category == 'anime' ? 'ANIME' : 'MANGA';
+    final statusEnum = status != null
+        ? (malStatusToAniList[transformStatusKey(status)] ?? status)
+        : null;
+
+    // Map sort options
+    String? anilistSort;
+    if (sort != null) {
+      switch (sort) {
+        case 'list_score':
+          anilistSort = 'SCORE_DESC';
+          break;
+        case 'list_updated_at':
+          anilistSort = 'UPDATED_TIME_DESC';
+          break;
+        case 'anime_title':
+        case 'manga_title':
+          anilistSort = 'MEDIA_TITLE_ROMAJI';
+          break;
+        case 'anime_start_date':
+        case 'manga_start_date':
+          anilistSort = 'STARTED_ON_DESC';
+          break;
+        default:
+          anilistSort = 'UPDATED_TIME_DESC';
+      }
+    }
+
+    final query = '''
+    query (\$userId: Int, \$type: MediaType, \$status: MediaListStatus, \$page: Int, \$perPage: Int, \$sort: [MediaListSort]) {
+      Page(page: \$page, perPage: \$perPage) {
+        pageInfo {
+          total
+          currentPage
+          lastPage
+          hasNextPage
+          perPage
+        }
+        mediaList(userId: \$userId, type: \$type, status: \$status, sort: \$sort) {
+          id
+          status
+          score(format: POINT_10_DECIMAL)
+          progress
+          progressVolumes
+          startedAt { year month day }
+          completedAt { year month day }
+          repeat
+          notes
+          private
+          updatedAt
+          media {
+            id
+            idMal
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+              medium
+            }
+            format
+            status
+            episodes
+            chapters
+            volumes
+            averageScore
+            meanScore
+            genres
+            startDate { year month day }
+          }
+        }
+      }
+    }
+    ''';
+
+    final viewer = await getViewer();
+    if (viewer == null) return SearchResult();
+
+    final body = await _post(query, variables: {
+      'userId': viewer.id,
+      'type': type,
+      if (statusEnum != null) 'status': statusEnum,
+      'page': page,
+      'perPage': limit,
+      if (anilistSort != null) 'sort': [anilistSort],
+    });
+
+    if (body == null) return SearchResult();
+
+    final pageData = body['data']?['Page'];
+    if (pageData == null) return SearchResult();
+
+    final mediaList = pageData['mediaList'] as List?;
+    if (mediaList == null) return SearchResult();
+
+    // Convert AniList entries to BaseNode format
+    final nodes = mediaList
+        .map((entry) {
+          final media = entry['media'];
+          final malId = media['idMal'];
+
+          if (malId == null) return null;
+
+          // Convert AniList status to MAL status
+          final aniStatus = entry['status'] as String?;
+          final malStatus = category == 'anime'
+              ? aniListStatusToMalAnime[aniStatus]
+              : aniListStatusToMalManga[aniStatus];
+
+          // Create a BaseNode-compatible structure
+          return BaseNode.fromJson({
+            'node': {
+              'id': malId,
+              'title': media['title']?['english'] ??
+                  media['title']?['romaji'] ??
+                  media['title']?['native'] ??
+                  'Unknown',
+              'main_picture': {
+                'medium': media['coverImage']?['medium'],
+                'large': media['coverImage']?['large'],
+              },
+              'alternative_titles': {
+                'en': media['title']?['english'],
+                'ja': media['title']?['native'],
+              },
+              'media_type': media['format'],
+              'status': media['status'],
+              'num_episodes': media['episodes'],
+              'num_chapters': media['chapters'],
+              'num_volumes': media['volumes'],
+              'mean':
+                  media['meanScore'] != null ? media['meanScore'] / 10.0 : null,
+              'genres': media['genres']?.map((g) => {'name': g}).toList(),
+              'start_date': media['startDate'] != null
+                  ? '${media['startDate']['year']}-${media['startDate']['month']?.toString().padLeft(2, '0')}-${media['startDate']['day']?.toString().padLeft(2, '0')}'
+                  : null,
+            },
+            'list_status': {
+              'status': malStatus,
+              'score':
+                  entry['score'] != null ? (entry['score'] as num).toInt() : 0,
+              'num_episodes_watched': entry['progress'],
+              'num_chapters_read': entry['progress'],
+              'num_volumes_read': entry['progressVolumes'],
+              'is_rewatching': aniStatus == 'REPEATING',
+              'is_rereading': aniStatus == 'REPEATING',
+              'num_times_rewatched': entry['repeat'] ?? 0,
+              'num_times_reread': entry['repeat'] ?? 0,
+              'start_date': entry['startedAt'] != null
+                  ? '${entry['startedAt']['year']}-${entry['startedAt']['month']?.toString().padLeft(2, '0')}-${entry['startedAt']['day']?.toString().padLeft(2, '0')}'
+                  : null,
+              'finish_date': entry['completedAt'] != null
+                  ? '${entry['completedAt']['year']}-${entry['completedAt']['month']?.toString().padLeft(2, '0')}-${entry['completedAt']['day']?.toString().padLeft(2, '0')}'
+                  : null,
+              'comments': entry['notes'],
+              'updated_at': entry['updatedAt'] != null
+                  ? DateTime.fromMillisecondsSinceEpoch(
+                          entry['updatedAt'] * 1000)
+                      .toIso8601String()
+                  : null,
+            },
+          });
+        })
+        .whereType<BaseNode>()
+        .toList();
+
+    final pageInfo = pageData['pageInfo'];
+    return SearchResult(
+      data: nodes,
+      paging: Paging(
+        next: pageInfo['hasNextPage'] == true
+            ? '?page=${pageInfo['currentPage'] + 1}'
+            : null,
+      ),
+    );
+  }
+
   // ─── Internal ────────────────────────────────────────────────────
 
   static Future<Map<String, dynamic>?> _post(
