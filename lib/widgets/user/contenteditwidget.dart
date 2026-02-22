@@ -290,6 +290,8 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     int _episodes = episodes ?? (int.tryParse(episodeController.text) ?? 0);
     _episodes += add ?? 0;
     String? watchStatus;
+    String? _endDate;
+    String? _startDate;
     if (_episodes < 0) {
       showToast(S.current.Negative_episode_not_allowed);
       return;
@@ -309,7 +311,19 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         }
         if (_episodes == content.numEpisodes) {
           watchStatus = "completed";
+          // Auto-populate finish date when auto-completing via episode count
+          if (user.pref.autoAddStartEndDate &&
+              content.myListStatus?.finishDate == null) {
+            _endDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+          }
         }
+      }
+      // Auto-populate start date when first episode is watched
+      if ((content is AnimeDetailed) &&
+          user.pref.autoAddStartEndDate &&
+          _episodes > 0 &&
+          content.myListStatus?.startDate == null) {
+        _startDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
       }
     } catch (e) {}
 
@@ -319,7 +333,10 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
       });
 
     var status = await MalUser.updateMyAnimeListStatus(content.id,
-        numEpisodesWatched: _episodes, status: watchStatus);
+        numEpisodesWatched: _episodes,
+        status: watchStatus,
+        endDate: _endDate,
+        startDate: _startDate);
     if (status != null) {
       result = true;
       updateListStatus(status);
