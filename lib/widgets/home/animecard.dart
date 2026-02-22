@@ -526,7 +526,7 @@ class AnimeGridCard extends StatelessWidget {
     double? watchProgress;
     double? releaseProgress;
     final episodes = scheduleData?.episode;
-    if (node is AnimeDetailed) {
+    if (node is AnimeDetailed && myListStatus is MyAnimeListStatus) {
       final listStatus = myListStatus as MyAnimeListStatus?;
       final watched = listStatus?.numEpisodesWatched;
       int? numEpisodes = node.numEpisodes;
