@@ -210,8 +210,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   ScrollController? scrollController;
   ScrollController? pageController;
   String? refKey;
-  late StreamListener<Map<String, int?>> animeCountListener;
-  late StreamListener<Map<String, int?>> mangaCountListener;
+
+  // Unified count map with composite keys: "mal-anime", "anilist-anime", "mal-manga", "anilist-manga"
+  late StreamListener<Map<String, int?>> countListener;
 
   var pageSize = 300;
 
@@ -354,17 +355,35 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   }
 
   void _initCountMap() {
-    animeCountListener = StreamListener(_setCountMap(allAnimeStatusMap));
-    mangaCountListener = StreamListener(_setCountMap(allMangaStatusMap));
+    // Initialize unified count map with composite keys
+    final initialMap = <String, int?>{};
+
+    // Add entries for all combinations: mal-anime, mal-manga, anilist-anime, anilist-manga
+    for (final account in ['mal', 'anilist']) {
+      for (final cat in ['anime', 'manga']) {
+        final statusMap =
+            cat == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
+        for (final status in statusMap.keys) {
+          initialMap['$account-$cat-$status'] = 0;
+        }
+      }
+    }
+
+    countListener = StreamListener(initialMap);
   }
 
   void _resetCountMap() {
-    animeCountListener.update(_setCountMap(allAnimeStatusMap));
-    mangaCountListener.update(_setCountMap(allMangaStatusMap));
-  }
+    // Reset counts for current account and category
+    final currentMap = countListener.currentValue ?? {};
+    final prefix = '${_activeListSource.name}-$category-';
 
-  Map<String, int> _setCountMap(Map<String, String> map) {
-    return Map.fromEntries(map.keys.map((e) => MapEntry(e, 0)));
+    final statusMap =
+        category == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
+    for (final status in statusMap.keys) {
+      currentMap['$prefix$status'] = 0;
+    }
+
+    countListener.update(currentMap);
   }
 
   _initRefreshMap() {
@@ -462,8 +481,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     super.dispose();
     controller?.dispose();
     scrollController?.dispose();
-    animeCountListener.dispose();
-    mangaCountListener.dispose();
+    countListener.dispose();
   }
 
   @override
@@ -589,8 +607,10 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   void _updateChange(String e, int count) {
     try {
       final userContentCountMap = _listener.currentValue;
-      if (userContentCountMap != null && userContentCountMap.containsKey(e)) {
-        userContentCountMap[e] = count;
+      if (userContentCountMap != null) {
+        // Use composite key: account-category-status
+        final key = '${_activeListSource.name}-$category-$e';
+        userContentCountMap[key] = count;
         _listener.update(userContentCountMap);
       }
     } catch (e) {
@@ -697,8 +717,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
         user.isAniListConnected;
   }
 
-  StreamListener<Map<String, int?>> get _listener =>
-      category.equals('anime') ? animeCountListener : mangaCountListener;
+  StreamListener<Map<String, int?>> get _listener => countListener;
 
   SliverAppBar _appBar(bool innerBoxIsScrolled) {
     return SliverAppBar(
@@ -1031,13 +1050,18 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
               ...statusData
             ];
             if (userContentCountMap != null) {
-              userContentCountMap.entries.indexed.forEach((entry) {
-                final index = entry.$1;
-                final value = entry.$2;
-                final count = value.value;
+              // Use composite keys to get counts for current account and category
+              final prefix = '${_activeListSource.name}-$category-';
+              final statusMap =
+                  category == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
+
+              statusMap.keys.toList().asMap().forEach((index, status) {
+                final key = '$prefix$status';
+                final count = userContentCountMap[key];
                 if (count != null && count > 0 && count < 300) {
                   try {
-                    statusData[index] = count;
+                    // index + 1 because statusData[0] is the total
+                    statusData[index + 1] = count;
                   } catch (e) {
                     logDal(e);
                   }
