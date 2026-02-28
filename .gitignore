@@ -57,5 +57,3 @@ CLAUDE.md
 linux/packaging/AppDir/
 linux/packaging/*.AppImage
 linux/packaging/.DirIcon
-
-.kiro/
