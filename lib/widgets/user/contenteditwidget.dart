@@ -81,10 +81,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   String? statusValue;
   int? starValue;
   dynamic contentDetailed;
-  late TextEditingController episodeController,
-      chapterController,
-      volumesController,
-      privateNoteController;
+  late TextEditingController episodeController, chapterController, volumesController, privateNoteController;
 
   bool modifyStartDate = false;
 
@@ -143,8 +140,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
       cacheUpdated = true;
     }
 
-    accordions[(widget.category.equals('anime') ? 'Rewatch' : 'Reread') +
-        ' Status'] = true;
+    accordions[(widget.category.equals('anime') ? 'Rewatch' : 'Reread') + ' Status'] = true;
 
     _setScheduleData();
 
@@ -161,11 +157,9 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   }
 
   void _setScheduleData() async {
-    final preferred = await CacheManager.instance
-        .getValueForService('edit', 'episodeSelectPref');
+    final preferred = await CacheManager.instance.getValueForService('edit', 'episodeSelectPref');
     if (preferred != null) {
-      _episodeSelectMode =
-          preferred == 'text' ? EpisodeSelectMode.text : EpisodeSelectMode.bar;
+      _episodeSelectMode = preferred == 'text' ? EpisodeSelectMode.text : EpisodeSelectMode.bar;
     }
     if (widget.category.equals('anime') && _id != null) {
       _scheduleData = DalApi.i.scheduleForMalIdsSync[_id];
@@ -192,17 +186,14 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
 
   void _loadPrivateNote() async {
     // Try loading with category-specific key first
-    String? note = await CacheManager.instance
-        .getValueForService('private_note', "${widget.category} - $_id");
+    String? note = await CacheManager.instance.getValueForService('private_note', "${widget.category} - $_id");
 
     // Fallback: try loading legacy key (without category) if specific one doesn't exist
     if (note == null) {
-      note = await CacheManager.instance
-          .getValueForService('private_note', "$_id");
+      note = await CacheManager.instance.getValueForService('private_note', "$_id");
       // If legacy note exists, save it with new key format for future
       if (note != null) {
-        CacheManager.instance.setValueForService(
-            'private_note', "${widget.category} - $_id", note);
+        CacheManager.instance.setValueForService('private_note', "${widget.category} - $_id", note);
       }
     }
 
@@ -214,8 +205,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   void _savePrivateNote() {
     if (_id != null) {
       // Save with category to avoid ID collisions between Anime and Manga
-      CacheManager.instance.setValueForService('private_note',
-          "${widget.category} - $_id", privateNoteController.text);
+      CacheManager.instance.setValueForService('private_note', "${widget.category} - $_id", privateNoteController.text);
     }
   }
 
@@ -302,9 +292,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     }
 
     try {
-      if ((content is AnimeDetailed) &&
-          content?.numEpisodes != null &&
-          (content.numEpisodes != 0)) {
+      if ((content is AnimeDetailed) && content?.numEpisodes != null && (content.numEpisodes != 0)) {
         if (_episodes > content.numEpisodes!) {
           showToast(S.current.Maximum_reached);
           return;
@@ -312,8 +300,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         if (_episodes == content.numEpisodes) {
           watchStatus = "completed";
           // Auto-populate finish date when auto-completing via episode count
-          if (user.pref.autoAddStartEndDate &&
-              content.myListStatus?.finishDate == null) {
+          if (user.pref.autoAddStartEndDate && content.myListStatus?.finishDate == null) {
             _endDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
           }
         }
@@ -333,10 +320,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
       });
 
     var status = await MalUser.updateMyAnimeListStatus(content.id,
-        numEpisodesWatched: _episodes,
-        status: watchStatus,
-        endDate: _endDate,
-        startDate: _startDate);
+        numEpisodesWatched: _episodes, status: watchStatus, endDate: _endDate, startDate: _startDate);
     if (status != null) {
       result = true;
       updateListStatus(status);
@@ -381,8 +365,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     if (contentDetailed is BaseNode) {
       content = contentDetailed?.content;
     }
-    var status = await MalUser.updateMyMangaListStatus(content.id,
-        numVolumesRead: _volumes);
+    var status = await MalUser.updateMyMangaListStatus(content.id, numVolumesRead: _volumes);
     if (status != null) {
       result = true;
       updateListStatus(status);
@@ -426,8 +409,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     if (contentDetailed is BaseNode) {
       content = contentDetailed?.content;
     }
-    var status = await MalUser.updateMyMangaListStatus(content.id,
-        numChaptersRead: _chapters);
+    var status = await MalUser.updateMyMangaListStatus(content.id, numChaptersRead: _chapters);
     if (status != null) {
       result = true;
       updateListStatus(status);
@@ -468,9 +450,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     }
 
     if ((content is AnimeDetailedMixin)) {
-      if (content?.numEpisodes != null &&
-          (content.numEpisodes != 0) &&
-          value.equals("completed")) {
+      if (content?.numEpisodes != null && (content.numEpisodes != 0) && value.equals("completed")) {
         _episodes = content.numEpisodes;
       }
     }
@@ -478,8 +458,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
       if (value.equals("watching") && content.myListStatus?.startDate == null) {
         _startDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
       }
-      if (value.equals("completed") &&
-          content.myListStatus?.finishDate == null) {
+      if (value.equals("completed") && content.myListStatus?.finishDate == null) {
         _endDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
       }
     }
@@ -576,30 +555,24 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         if (_activeAccount == ActiveAccount.anilist) {
           episodeController.text = _alProgress?.toString() ?? "0";
         } else {
-          episodeController.text =
-              (contentDetailed?.myListStatus?.numEpisodesWatched == null
-                      ? "0"
-                      : contentDetailed?.myListStatus?.numEpisodesWatched
-                          ?.toString()) ??
-                  '';
+          episodeController.text = (contentDetailed?.myListStatus?.numEpisodesWatched == null
+                  ? "0"
+                  : contentDetailed?.myListStatus?.numEpisodesWatched?.toString()) ??
+              '';
         }
       } else {
         if (_activeAccount == ActiveAccount.anilist) {
           chapterController.text = _alProgress?.toString() ?? "0";
           volumesController.text = _alProgressVolumes?.toString() ?? "0";
         } else {
-          chapterController.text =
-              (contentDetailed?.myListStatus?.numChaptersRead == null
-                      ? "0"
-                      : contentDetailed?.myListStatus?.numChaptersRead
-                          ?.toString()) ??
-                  '';
-          volumesController.text =
-              (contentDetailed?.myListStatus?.numVolumesRead == null
-                      ? "0"
-                      : contentDetailed?.myListStatus?.numVolumesRead
-                          ?.toString()) ??
-                  '';
+          chapterController.text = (contentDetailed?.myListStatus?.numChaptersRead == null
+                  ? "0"
+                  : contentDetailed?.myListStatus?.numChaptersRead?.toString()) ??
+              '';
+          volumesController.text = (contentDetailed?.myListStatus?.numVolumesRead == null
+                  ? "0"
+                  : contentDetailed?.myListStatus?.numVolumesRead?.toString()) ??
+              '';
         }
       }
     } catch (e) {
@@ -746,9 +719,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   Widget get animatedContainer => AnimatedContainer(
         duration: Duration(milliseconds: 400),
         curve: Curves.easeIn,
-        padding: EdgeInsets.symmetric(
-            horizontal: isFloating && widget.category.equals("anime") ? 7 : 2,
-            vertical: 0),
+        padding: EdgeInsets.symmetric(horizontal: isFloating && widget.category.equals("anime") ? 7 : 2, vertical: 0),
         constraints: BoxConstraints(minHeight: isFloating ? 120 : 100),
         child: Card(
           elevation: 4,
@@ -760,40 +731,34 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         ),
       );
 
-  Widget get editChild =>
-      ((contentDetailed == null || !widget.isCacheRefreshed) ||
-              !cacheUpdated ||
-              _loading)
-          ? Center(child: loadingCenter())
-          : (!showAddOptions && contentDetailed.myListStatus?.status == null)
-              ? Container(
-                  width: double.infinity,
-                  height: 60,
-                  child: Center(
-                      child: PlainButton(
-                    onPressed: () {
-                      if (user.status != AuthStatus.AUTHENTICATED) {
-                        gotoPage(
-                            context: context,
-                            newPage: HomeScreen(
-                              pageIndex: 2,
-                            ));
-                      } else if (mounted) {
-                        _addToList();
-                      }
-                    },
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(13)),
-                    child: Text(
-                      user.status != AuthStatus.AUTHENTICATED
-                          ? S.current.Login_Add_to_List
-                          : S.current.Add_to_List,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  )),
-                )
-              : contentStatusWidget();
+  Widget get editChild => ((contentDetailed == null || !widget.isCacheRefreshed) || !cacheUpdated || _loading)
+      ? Center(child: loadingCenter())
+      : (!showAddOptions && contentDetailed.myListStatus?.status == null)
+          ? Container(
+              width: double.infinity,
+              height: 60,
+              child: Center(
+                  child: PlainButton(
+                onPressed: () {
+                  if (user.status != AuthStatus.AUTHENTICATED) {
+                    gotoPage(
+                        context: context,
+                        newPage: HomeScreen(
+                          pageIndex: 2,
+                        ));
+                  } else if (mounted) {
+                    _addToList();
+                  }
+                },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                child: Text(
+                  user.status != AuthStatus.AUTHENTICATED ? S.current.Login_Add_to_List : S.current.Add_to_List,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 16),
+                ),
+              )),
+            )
+          : contentStatusWidget();
 
   void _addToList() async {
     if (mounted) {
@@ -803,9 +768,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
     }
     bool isAnime = widget.category.equals('anime');
     var pref = user.pref.animeMangaPagePreferences;
-    String status = isAnime
-        ? pref.defaultAnimeAddToListSelected
-        : pref.defaultMangaAddToListSelected;
+    String status = isAnime ? pref.defaultAnimeAddToListSelected : pref.defaultMangaAddToListSelected;
     await updateWatchingStatus(status);
     showAddOptions = true;
     _loading = false;
@@ -822,9 +785,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
             },
             padding: EdgeInsets.zero,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(14),
-                    topLeft: Radius.circular(14))),
+                borderRadius: BorderRadius.only(topRight: Radius.circular(14), topLeft: Radius.circular(14))),
             child: Icon(
               Icons.keyboard_arrow_down,
               size: 24,
@@ -845,8 +806,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
               return;
             }
             animationPending = true;
-            Future.delayed(const Duration(milliseconds: 300))
-                .then((value) => animationPending = false);
+            Future.delayed(const Duration(milliseconds: 300)).then((value) => animationPending = false);
             if (mounted)
               setState(() {
                 if (details.delta.dy < 0) {
@@ -874,9 +834,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 1, horizontal: 10),
                 child: Icon(
-                  (!showAdvancedEdit
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down),
+                  (!showAdvancedEdit ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
                   size: 20,
                 ),
               ),
@@ -890,14 +848,12 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                 child: title(
                     ((contentDetailed is Node)
                         ? (contentDetailed?.title ?? "Title ?")
-                        : (widget?.contentDetailed?.content?.title ??
-                            "Title ?")),
+                        : (widget?.contentDetailed?.content?.title ?? "Title ?")),
                     align: TextAlign.center),
               ),
         ExpandedSection(
             expand: showAdvancedEdit,
-            child: sectionHeading(S.current.Your_List_Status,
-                isOpen: showAdvancedEdit, onChange: () {
+            child: sectionHeading(S.current.Your_List_Status, isOpen: showAdvancedEdit, onChange: () {
               if (mounted)
                 setState(() {
                   showAdvancedEdit = !showAdvancedEdit;
@@ -906,9 +862,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
             })),
         _activeAccount == ActiveAccount.anilist
             ? _anilistEditView()
-            : (widget.category.equals("anime")
-                ? animeStatusWidget()
-                : mangaStatusWidget()),
+            : (widget.category.equals("anime") ? animeStatusWidget() : mangaStatusWidget()),
         if (_activeAccount == ActiveAccount.mal)
           ExpandedSection(
             expand: showAdvancedEdit,
@@ -1108,16 +1062,14 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                 onChange: () {
                   if (mounted)
                     setState(() {
-                      accordions[S.current.Dates_Priority] =
-                          !(accordions[S.current.Dates_Priority] ?? false);
+                      accordions[S.current.Dates_Priority] = !(accordions[S.current.Dates_Priority] ?? false);
                     });
                 },
               ),
               ExpandedSection(
                 expand: accordions[S.current.Dates_Priority] ?? false,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -1153,16 +1105,14 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                 onChange: () {
                   if (mounted)
                     setState(() {
-                      accordions[S.current.Others] =
-                          !(accordions[S.current.Others] ?? false);
+                      accordions[S.current.Others] = !(accordions[S.current.Others] ?? false);
                     });
                 },
               ),
               ExpandedSection(
                 expand: accordions[S.current.Others] ?? false,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1173,9 +1123,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             field(
-                              isAnime
-                                  ? S.current.Times_Rewatched
-                                  : S.current.Times_Reread,
+                              isAnime ? S.current.Times_Rewatched : S.current.Times_Reread,
                               _buildAlNumberField(
                                 value: _alRepeat ?? 0,
                                 onChanged: (v) {
@@ -1187,8 +1135,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                             field(
                               'Private',
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5),
+                                padding: const EdgeInsets.symmetric(horizontal: 5),
                                 child: SizedBox(
                                   height: 45.0,
                                   child: ShadowButton(
@@ -1198,13 +1145,10 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                                       if (mounted) setState(() {});
                                     },
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Icon(
-                                          _alPrivate
-                                              ? Icons.lock
-                                              : Icons.public,
+                                          _alPrivate ? Icons.lock : Icons.public,
                                           size: 16,
                                         ),
                                         SB.w10,
@@ -1228,9 +1172,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                             _saveAniListEntry(notes: v);
                           },
                           option: FilterOption(
-                            value: unescape
-                                .convert(_alNotes ?? '')
-                                .replaceAll("<br />", ""),
+                            value: unescape.convert(_alNotes ?? '').replaceAll("<br />", ""),
                             fieldName: "Notes",
                             openTextFormAsModal: true,
                           ),
@@ -1282,8 +1224,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   scrollDirection: Axis.horizontal,
                   physics: const ClampingScrollPhysics(),
                   initialAlignment: 0.5,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 160.0, vertical: 2.0), // match mal padding
+                  padding: const EdgeInsets.symmetric(horizontal: 160.0, vertical: 2.0), // match mal padding
                   initialScrollIndex: initIndex,
                   itemCount: keys.length,
                   itemBuilder: (context, i) {
@@ -1300,20 +1241,13 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                           _alScore = v;
                           _saveAniListEntry(score: _alScore);
                         },
-                        child: Text(v == 0.0
-                            ? S.current.Select
-                            : (v % 1 == 0
-                                ? v.toInt().toString()
-                                : v.toString())),
+                        child: Text(v == 0.0 ? S.current.Select : (v % 1 == 0 ? v.toInt().toString() : v.toString())),
                         padding: EdgeInsets.zero,
                         shape: ((_alScore ?? 0.0) - v).abs() < 0.1
                             ? RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(32),
-                                side: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                    width: 1.0))
-                            : RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(32)),
+                                side: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))
+                            : RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
                       ),
                     );
                   },
@@ -1391,17 +1325,13 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   }
 
   Widget sectionHeading(String heading,
-      {bool isOpen = true,
-      VoidCallback? onChange,
-      MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start}) {
+      {bool isOpen = true, VoidCallback? onChange, MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start}) {
     return InkWell(
       onTap: () {
         if (onChange != null) onChange();
       },
       child: Container(
-        padding: EdgeInsets.symmetric(
-            horizontal: mainAxisAlignment == MainAxisAlignment.start ? 10 : 0,
-            vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: mainAxisAlignment == MainAxisAlignment.start ? 10 : 0, vertical: 10),
         child: Row(
           mainAxisAlignment: mainAxisAlignment,
           children: [
@@ -1410,9 +1340,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   onPressed: () {
                     onChange();
                   },
-                  icon: Icon(isOpen
-                      ? Icons.keyboard_arrow_down
-                      : Icons.keyboard_arrow_right)),
+                  icon: Icon(isOpen ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right)),
             title(
               heading,
               align: TextAlign.center,
@@ -1430,9 +1358,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              sectionHeading(
-                  (widget.category.equals('anime') ? 'Rewatch' : 'Reread') +
-                      ' Status',
+              sectionHeading((widget.category.equals('anime') ? 'Rewatch' : 'Reread') + ' Status',
                   isOpen: isReStatusOpen, onChange: () {
                 if (mounted)
                   setState(() {
@@ -1448,8 +1374,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
               ),
               if (user.pref.animeMangaPagePreferences.showPrivateNotes)
                 Padding(
-                  padding:
-                      EdgeInsets.only(top: 10, bottom: 20, right: 15, left: 15),
+                  padding: EdgeInsets.only(top: 10, bottom: 20, right: 15, left: 15),
                   child: field(
                       S.current.Private_Note,
                       TextFormField(
@@ -1471,8 +1396,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                       CrossAxisAlignment.start,
                       EdgeInsets.only(left: 20, bottom: 8)),
                 ),
-              sectionHeading(S.current.Dates_Priority, isOpen: isDatesOpen,
-                  onChange: () {
+              sectionHeading(S.current.Dates_Priority, isOpen: isDatesOpen, onChange: () {
                 if (mounted)
                   setState(() {
                     isDatesOpen = !isDatesOpen;
@@ -1485,8 +1409,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   child: dateStatusWidget,
                 ),
               ),
-              sectionHeading(S.current.Others, isOpen: isOthersOpen,
-                  onChange: () {
+              sectionHeading(S.current.Others, isOpen: isOthersOpen, onChange: () {
                 if (mounted)
                   setState(() {
                     isOthersOpen = !isOthersOpen;
@@ -1525,9 +1448,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                       });
                 },
                 option: FilterOption(
-                    value: unescape
-                        .convert(contentDetailed?.myListStatus?.comments ?? '')
-                        .replaceAll("<br />", ""),
+                    value: unescape.convert(contentDetailed?.myListStatus?.comments ?? '').replaceAll("<br />", ""),
                     fieldName: "Comments",
                     openTextFormAsModal: true),
               ),
@@ -1554,8 +1475,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                       option: FilterOption(
                           value: unescape.convert(
                             (contentDetailed?.myListStatus?.tags != null &&
-                                    contentDetailed
-                                        .myListStatus.tags.isNotEmpty)
+                                    contentDetailed.myListStatus.tags.isNotEmpty)
                                 ? contentDetailed?.myListStatus?.tags[0]
                                 : '',
                           ),
@@ -1570,8 +1490,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   }
 
   Widget get _bottomBar {
-    final showToggle =
-        user.isAniListConnected && user.status == AuthStatus.AUTHENTICATED;
+    final showToggle = user.isAniListConnected && user.status == AuthStatus.AUTHENTICATED;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
@@ -1594,18 +1513,11 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   anilistCompletedDate: _alCompletedDate,
                   anilistRepeat: _alRepeat,
                   anilistNotes: _alNotes,
-                  onSyncedToAniList: (newStatus,
-                      newScore,
-                      newProgress,
-                      newProgressVolumes,
-                      newStartDate,
-                      newCompletedDate,
-                      newRepeat,
-                      newNotes) {
+                  onSyncedToAniList: (newStatus, newScore, newProgress, newProgressVolumes, newStartDate,
+                      newCompletedDate, newRepeat, newNotes) {
                     setState(() {
                       _alStatus = newStatus;
-                      _alScore =
-                          newScore ?? _alScore; // Keep current score if null
+                      _alScore = newScore ?? _alScore; // Keep current score if null
                       _alProgress = newProgress;
                       _alProgressVolumes = newProgressVolumes;
                       _alStartDate = newStartDate;
@@ -1677,13 +1589,26 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   Widget get _accountToggleChip => Padding(
         padding: const EdgeInsets.only(left: 6),
         child: SegmentedButton<ActiveAccount>(
-          segments: const <ButtonSegment<ActiveAccount>>[
+          segments: <ButtonSegment<ActiveAccount>>[
             ButtonSegment<ActiveAccount>(
-                value: ActiveAccount.mal, label: Text('MAL')),
+              value: ActiveAccount.mal,
+              icon: Image.asset(
+                'assets/images/mal-icon.png',
+                width: 20,
+                height: 20,
+              ),
+            ),
             ButtonSegment<ActiveAccount>(
-                value: ActiveAccount.anilist, label: Text('AniList')),
+              value: ActiveAccount.anilist,
+              icon: Image.asset(
+                'assets/images/anilist.png',
+                width: 20,
+                height: 20,
+              ),
+            ),
           ],
           selected: {_activeAccount},
+          showSelectedIcon: false,
           style: ButtonStyle(
             visualDensity: VisualDensity.compact,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1697,14 +1622,11 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
               user.pref.preferAniList = _activeAccount == ActiveAccount.anilist;
               user.setIntance(updateAuth: false);
               // Fetch AniList data when switching to it
-              if (_activeAccount == ActiveAccount.anilist &&
-                  _anilistEntry == null) {
+              if (_activeAccount == ActiveAccount.anilist && _anilistEntry == null) {
                 _fetchAniListEntry();
               }
               // Fetch MAL data when switching to it if not already loaded
-              if (_activeAccount == ActiveAccount.mal &&
-                  contentDetailed?.myListStatus == null &&
-                  !cacheUpdated) {
+              if (_activeAccount == ActiveAccount.mal && contentDetailed?.myListStatus == null && !cacheUpdated) {
                 updateCache();
               }
             }
@@ -1728,8 +1650,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                         modifyStartDate = false;
                       });
                 },
-                selectDate:
-                    startDate ?? contentDetailed?.myListStatus?.startDate,
+                selectDate: startDate ?? contentDetailed?.myListStatus?.startDate,
               ),
             ),
           ),
@@ -1746,8 +1667,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                         modifyFinishDate = false;
                       });
                 },
-                selectDate:
-                    finishDate ?? contentDetailed?.myListStatus?.finishDate,
+                selectDate: finishDate ?? contentDetailed?.myListStatus?.finishDate,
               ),
             ),
           ),
@@ -1766,13 +1686,8 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                           });
                     },
                     showSelectWhenNull: true,
-                    displayValues: [
-                      S.current.Low,
-                      S.current.Medium,
-                      S.current.High
-                    ],
-                    selectedOption:
-                        contentDetailed?.myListStatus?.priority?.toString(),
+                    displayValues: [S.current.Low, S.current.Medium, S.current.High],
+                    selectedOption: contentDetailed?.myListStatus?.priority?.toString(),
                     options: List.generate(3, (i) => (i).toString()),
                   )),
               S.current.Priority_level_qn)
@@ -1783,9 +1698,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           field(
-              (widget.category.equals('anime')
-                  ? S.current.Rewatching
-                  : S.current.Rereading),
+              (widget.category.equals('anime') ? S.current.Rewatching : S.current.Rereading),
               _modifyWidget(
                   modifyReStatus,
                   ToggleButton(
@@ -1811,9 +1724,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                     },
                   ))),
           field(
-            (widget.category.equals('anime')
-                ? S.current.Times_Rewatched
-                : S.current.Times_Reread),
+            (widget.category.equals('anime') ? S.current.Times_Rewatched : S.current.Times_Reread),
             plusMinusWidget(
               (value) {
                 modifyReStatus = true;
@@ -1832,10 +1743,8 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                 }
               },
               initialValue: widget.category.equals('anime')
-                  ? ((contentDetailed?.myListStatus?.numTimesRewatched ?? 0)
-                      ?.toString())
-                  : ((contentDetailed?.myListStatus?.numTimesReread ?? 0)
-                      ?.toString()),
+                  ? ((contentDetailed?.myListStatus?.numTimesRewatched ?? 0)?.toString())
+                  : ((contentDetailed?.myListStatus?.numTimesReread ?? 0)?.toString()),
               modify: modifyReStatus,
               onSubmit: (value) {
                 modifyReStatus = true;
@@ -1856,10 +1765,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
             ),
           ),
           field(
-            (widget.category.equals('anime')
-                    ? S.current.Rewatch
-                    : S.current.Reread) +
-                S.current.Value,
+            (widget.category.equals('anime') ? S.current.Rewatch : S.current.Reread) + S.current.Value,
             _modifyWidget(
                 modifyReStatus,
                 SelectButton(
@@ -1948,8 +1854,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (_episodeSelectMode == EpisodeSelectMode.bar) SB.w20,
-                Expanded(
-                    child: expandedChild(S.current.Status, statusWidget())),
+                Expanded(child: expandedChild(S.current.Status, statusWidget())),
                 SB.w20,
                 if (_episodeSelectMode == EpisodeSelectMode.text)
                   Expanded(
@@ -1958,14 +1863,12 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                       SB.h10,
                       _episodeTextHeader(),
                       SB.h10,
-                      SizedBox(
-                          width: double.infinity, child: _episodesWidget()),
+                      SizedBox(width: double.infinity, child: _episodesWidget()),
                     ],
                   )),
               ],
             ),
-            if (_episodeSelectMode == EpisodeSelectMode.bar)
-              _episodeBarWidget(),
+            if (_episodeSelectMode == EpisodeSelectMode.bar) _episodeBarWidget(),
             _scoreBarWidget(),
             SB.h20,
           ],
@@ -2000,12 +1903,10 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   scrollDirection: Axis.horizontal,
                   physics: ClampingScrollPhysics(),
                   initialAlignment: 0.5,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 160.0, vertical: 2.0),
+                  padding: EdgeInsets.symmetric(horizontal: 160.0, vertical: 2.0),
                   initialScrollIndex: keys.indexOf(starValue ?? 0),
                   itemCount: keys.length,
-                  itemBuilder: (context, e) =>
-                      _buildScoreButton(keys, e, context),
+                  itemBuilder: (context, e) => _buildScoreButton(keys, e, context),
                 ),
         ),
       ],
@@ -2030,8 +1931,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         shape: value == starValue
             ? RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(32),
-                side: BorderSide(
-                    color: Theme.of(context).dividerColor, width: 1.0))
+                side: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))
             : RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
       ),
     );
@@ -2100,8 +2000,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                   physics: ClampingScrollPhysics(),
                   initialAlignment: 0.5,
                   initialScrollIndex: _episodeCount(),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 160.0, vertical: 2.0),
+                  padding: EdgeInsets.symmetric(horizontal: 160.0, vertical: 2.0),
                   itemCount: count,
                   itemBuilder: (context, e) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -2119,9 +2018,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                           shape: (e + 1) == _episodeCount()
                               ? RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(32),
-                                  side: BorderSide(
-                                      color: Theme.of(context).dividerColor,
-                                      width: 1.0))
+                                  side: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))
                               : RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(32),
                                 ),
@@ -2149,8 +2046,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
                 } else {
                   _episodeSelectMode = EpisodeSelectMode.text;
                 }
-                CacheManager.instance.setValueForService(
-                    'edit', 'episodeSelectPref', _episodeSelectMode.name);
+                CacheManager.instance.setValueForService('edit', 'episodeSelectPref', _episodeSelectMode.name);
               });
           },
           child: Icon(Icons.change_circle, size: 18),
@@ -2210,9 +2106,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   }
 
   int _episodeCount() {
-    return episodeController.text.isNotEmpty
-        ? int.tryParse(episodeController.text) ?? 0
-        : 0;
+    return episodeController.text.isNotEmpty ? int.tryParse(episodeController.text) ?? 0 : 0;
   }
 
   Widget _episodesWidget() {
@@ -2398,8 +2292,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   // MAL status widget (unchanged – keeps its own cache/state)
   Widget statusWidget() {
     final Widget child;
-    Map<String, String> myStatusMap =
-        widget.category.equals("anime") ? myAnimeStatusMap : myMangaStatusMap;
+    Map<String, String> myStatusMap = widget.category.equals("anime") ? myAnimeStatusMap : myMangaStatusMap;
     if (modifyStatus)
       child = Center(
         child: loadingCenter(),

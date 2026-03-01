@@ -76,18 +76,12 @@ List<int?> userStatusData(
                 : userProf?.animeStatistics?.numItemsPlanToWatch?.toInt(),
           ]
         : [
-            category.equals("manga")
-                ? jikanUser?.statistics?.manga?.reading
-                : jikanUser?.statistics?.anime?.watching,
+            category.equals("manga") ? jikanUser?.statistics?.manga?.reading : jikanUser?.statistics?.anime?.watching,
             category.equals("manga")
                 ? jikanUser?.statistics?.manga?.completed
                 : jikanUser?.statistics?.anime?.completed,
-            category.equals("manga")
-                ? jikanUser?.statistics?.manga?.onHold
-                : jikanUser?.statistics?.anime?.onHold,
-            category.equals("manga")
-                ? jikanUser?.statistics?.manga?.dropped
-                : jikanUser?.statistics?.anime?.dropped,
+            category.equals("manga") ? jikanUser?.statistics?.manga?.onHold : jikanUser?.statistics?.anime?.onHold,
+            category.equals("manga") ? jikanUser?.statistics?.manga?.dropped : jikanUser?.statistics?.anime?.dropped,
             category.equals("manga")
                 ? jikanUser?.statistics?.manga?.planToRead
                 : jikanUser?.statistics?.anime?.planToWatch,
@@ -129,8 +123,7 @@ class ExpandedIconAndText extends StatelessWidget {
   final String title;
   final IconData iconData;
   final bool expand;
-  const ExpandedIconAndText(this.title, this.iconData, this.expand, {Key? key})
-      : super(key: key);
+  const ExpandedIconAndText(this.title, this.iconData, this.expand, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -239,8 +232,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     if (username.equals("@me")) {
       pageHeadersMap[S.current.WeeklyAnime] = Icons.weekend;
     }
-    scrollController = ScrollController(
-        initialScrollOffset: hasExpanded ? 0.0 : pageHeaderSize);
+    scrollController = ScrollController(initialScrollOffset: hasExpanded ? 0.0 : pageHeaderSize);
     pageController = ScrollController();
     if (widget.initialStatus != null) {
       if (allListHeaders.contains(widget.initialStatus)) {
@@ -254,14 +246,12 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     Future.delayed(Duration.zero).then((value) {
       user.addListener(() {
         if (mounted) setState(() {});
-        if (user.status != previousStatus &&
-            user.status == AuthStatus.AUTHENTICATED) {
+        if (user.status != previousStatus && user.status == AuthStatus.AUTHENTICATED) {
           getUserData();
         }
       });
     });
-    if (username.notEquals("@me") || user.status == AuthStatus.AUTHENTICATED)
-      getUserData();
+    if (username.notEquals("@me") || user.status == AuthStatus.AUTHENTICATED) getUserData();
 
     _initCountMap();
     _initRefreshMap();
@@ -308,15 +298,12 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   }
 
   void _setTabController(int initalIndex) {
-    controller = TabController(
-        length: tabLength, vsync: this, initialIndex: initalIndex);
+    controller = TabController(length: tabLength, vsync: this, initialIndex: initalIndex);
   }
 
   Future<void> get _userPrefFromCache async {
-    _userPagePref = _UserPagePref.fromJson(jsonDecode(await CacheManager
-            .instance
-            .getValueForService('userBuilder', 'preference-$username') ??
-        '{}'));
+    _userPagePref = _UserPagePref.fromJson(
+        jsonDecode(await CacheManager.instance.getValueForService('userBuilder', 'preference-$username') ?? '{}'));
 
     int _tabIndex = _userPagePref.tabIndex ?? 0;
     String _category = _userPagePref.category ?? 'anime';
@@ -326,14 +313,10 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       if (pref.defaultTabSelected.notEquals('none')) {
         _category = pref.defaultTabSelected;
       }
-      if (pref.defaultAnimeTabSelected.notEquals('none') &&
-          _category.equals('anime')) {
-        _tabIndex = _allCategoryHeaders(_category)
-            .indexOf(pref.defaultAnimeTabSelected);
-      } else if (pref.defaultMangaTabSelected.notEquals('none') &&
-          _category.equals('manga')) {
-        _tabIndex = _allCategoryHeaders(_category)
-            .indexOf(pref.defaultMangaTabSelected);
+      if (pref.defaultAnimeTabSelected.notEquals('none') && _category.equals('anime')) {
+        _tabIndex = _allCategoryHeaders(_category).indexOf(pref.defaultAnimeTabSelected);
+      } else if (pref.defaultMangaTabSelected.notEquals('none') && _category.equals('manga')) {
+        _tabIndex = _allCategoryHeaders(_category).indexOf(pref.defaultMangaTabSelected);
       }
     }
 
@@ -350,8 +333,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   }
 
   void _updateUserPrefCache() {
-    CacheManager.instance.setValueForService(
-        'userBuilder', 'preference-$username', jsonEncode(_userPagePref));
+    CacheManager.instance.setValueForService('userBuilder', 'preference-$username', jsonEncode(_userPagePref));
   }
 
   void _initCountMap() {
@@ -361,8 +343,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     // Add entries for all combinations: mal-anime, mal-manga, anilist-anime, anilist-manga
     for (final account in ['mal', 'anilist']) {
       for (final cat in ['anime', 'manga']) {
-        final statusMap =
-            cat == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
+        final statusMap = cat == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
         for (final status in statusMap.keys) {
           initialMap['$account-$cat-$status'] = 0;
         }
@@ -377,8 +358,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     final currentMap = countListener.currentValue ?? {};
     final prefix = '${_activeListSource.name}-$category-';
 
-    final statusMap =
-        category == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
+    final statusMap = category == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
     for (final status in statusMap.keys) {
       currentMap['$prefix$status'] = 0;
     }
@@ -388,10 +368,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
 
   _initRefreshMap() {
     contentTypes.forEach((type) {
-      ([
-        "all",
-        ...(type.equals("anime") ? myAnimeStatusMap : myMangaStatusMap).keys
-      ]).forEach((status) {
+      (["all", ...(type.equals("anime") ? myAnimeStatusMap : myMangaStatusMap).keys]).forEach((status) {
         refreshKeyMap['$status'] = MalAuth().getRandomString(26);
       });
     });
@@ -411,8 +388,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     });
   }
 
-  getUserProfile(
-      {bool fromCache = true, bool refreshJikanFutures = false}) async {
+  getUserProfile({bool fromCache = true, bool refreshJikanFutures = false}) async {
     if (!fromCache & mounted) {
       setState(() {
         userProf = null;
@@ -423,15 +399,11 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       String _username = username;
       if (username.equals("@me")) {
         userProf = await MalUser.getUserInfo(
-            fields: ["anime_statistics", "manga_statistics"],
-            username: username,
-            fromCache: fromCache);
+            fields: ["anime_statistics", "manga_statistics"], username: username, fromCache: fromCache);
         _username = userProf!.name!;
         if (mounted) setState(() {});
       }
-      jikanUser = ((await JikanHelper.getUserInfo(
-              username: _username, fromCache: fromCache))
-          .data);
+      jikanUser = ((await JikanHelper.getUserInfo(username: _username, fromCache: fromCache)).data);
       if (mounted) setState(() {});
     } catch (e) {
       logDal(e);
@@ -461,17 +433,14 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
         pageIndex = index;
       });
     Future.delayed(const Duration(milliseconds: 300)).then((value) {
-      pageController?.animateTo(pageIndex * 160.0,
-          duration: const Duration(milliseconds: 100), curve: Curves.ease);
+      pageController?.animateTo(pageIndex * 160.0, duration: const Duration(milliseconds: 100), curve: Curves.ease);
     });
   }
 
   @override
   void didUpdateWidget(covariant UserPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.category != null &&
-        widget.category != null &&
-        widget.category!.notEquals(oldWidget.category)) {
+    if (oldWidget.category != null && widget.category != null && widget.category!.notEquals(oldWidget.category)) {
       changeCategory(widget.category!);
     }
   }
@@ -489,10 +458,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     return AnimatedOpacity(
       opacity: hasOpened ? 1 : 0,
       duration: Duration(milliseconds: 300),
-      child:
-          (username.notEquals("@me") || user.status == AuthStatus.AUTHENTICATED)
-              ? userPaged()
-              : _notAuthPage(),
+      child: (username.notEquals("@me") || user.status == AuthStatus.AUTHENTICATED) ? userPaged() : _notAuthPage(),
     );
   }
 
@@ -514,16 +480,10 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   bool get isListPage => pageIndex == 1;
   bool get isSocialPage => pageIndex == 3;
   double get pageHeaderSize => isListPage ? 420 : 350;
-  List<String> get allListHeaders => [
-        "all",
-        ...(category.equals("anime") ? myAnimeStatusMap : myMangaStatusMap).keys
-      ];
+  List<String> get allListHeaders => ["all", ...(category.equals("anime") ? myAnimeStatusMap : myMangaStatusMap).keys];
 
   List<String> _allCategoryHeaders(String c) {
-    return [
-      "all",
-      ...(c.equals("anime") ? myAnimeStatusMap : myMangaStatusMap).keys
-    ];
+    return ["all", ...(c.equals("anime") ? myAnimeStatusMap : myMangaStatusMap).keys];
   }
 
   List<String> displayHeaders(List<int?> data) => [
@@ -537,8 +497,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   int get tabLength => isListPage ? allListHeaders.length : 1;
   String get currRefKey => allListHeaders[controller!.index];
 
-  String get actualUsername =>
-      jikanUser?.username ?? userProf?.name ?? username;
+  String get actualUsername => jikanUser?.username ?? userProf?.name ?? username;
 
   int? get userId => userProf?.id ?? jikanUser?.malId;
   bool get callJikanApi => actualUsername.notEquals('@me');
@@ -551,8 +510,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     }
     return NestedScrollView(
       key: PageStorageKey('${widget.username}'),
-      headerSliverBuilder: (context, innerBoxIsScrolled) =>
-          [_appBar(innerBoxIsScrolled)],
+      headerSliverBuilder: (context, innerBoxIsScrolled) => [_appBar(innerBoxIsScrolled)],
       body: _tabBarView(),
     );
   }
@@ -573,8 +531,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   NestedScrollView _otherUserView() {
     return NestedScrollView(
       controller: widget.controller,
-      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) =>
-          [SliverWrapper(animeBodyHeader())],
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => [SliverWrapper(animeBodyHeader())],
       body: _tabBarView(),
     );
   }
@@ -588,13 +545,11 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
           .map(
             (e) => UserContentBuilder(
               // Use different keys for MAL and AniList to prevent cache sharing
-              key: PageStorageKey(
-                  '${_activeListSource.name}-$category-$e-${username}'),
+              key: PageStorageKey('${_activeListSource.name}-$category-$e-${username}'),
               category: category,
               username: username,
               refreshKey: refreshKeyMap[e],
-              listPadding:
-                  widget.isSelf ? null : const EdgeInsets.only(top: 60.0),
+              listPadding: widget.isSelf ? null : const EdgeInsets.only(top: 60.0),
               controller: widget.controller,
               customFuture: (input) => _getContentListFuture(input, e),
               countChange: (count) async => _updateChange(e, count),
@@ -639,8 +594,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       );
     } else {
       // Use MAL API (existing logic)
-      bool _canBeFetchedFromAPI =
-          canBeFetchedFromAPI(category, sortFilterDisplay);
+      bool _canBeFetchedFromAPI = canBeFetchedFromAPI(category, sortFilterDisplay);
       if (_canBeFetchedFromAPI) {
         logDal('Using mal api');
         future = MalUser.getMyContentList(
@@ -655,13 +609,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
         );
       } else {
         logDal('using whole pagination output');
-        final orderMap = category.equals('anime')
-            ? animeListDefaultOrderMap
-            : mangaListDefaultOrderMap;
-        var orderMapContains =
-            orderMap.containsKey(sortFilterDisplay.sort.value);
-        List<String> fieldList = getFieldsFromSortFilter(
-            orderMapContains, sortFilterDisplay, category);
+        final orderMap = category.equals('anime') ? animeListDefaultOrderMap : mangaListDefaultOrderMap;
+        var orderMapContains = orderMap.containsKey(sortFilterDisplay.sort.value);
+        List<String> fieldList = getFieldsFromSortFilter(orderMapContains, sortFilterDisplay, category);
         bool fromCache = shouldGetFromCacheBasedOnPrevInput(input);
         future = MalUser.getAllUserList(
           widget.username,
@@ -681,8 +631,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     }
     bool isSorted = false;
     final _isAnime = category.equals('anime');
-    final orderMap =
-        _isAnime ? animeListDefaultOrderMap : mangaListDefaultOrderMap;
+    final orderMap = _isAnime ? animeListDefaultOrderMap : mangaListDefaultOrderMap;
     var sortValue = sortFilterDisplay.sort.value;
     if (orderMap.containsKey(sortValue)) {
       isSorted = true;
@@ -696,9 +645,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     }
     return await getSortedFilteredData(
       list,
-      _shouldUseAniList()
-          ? true
-          : canBeFetchedFromAPI(category, sortFilterDisplay),
+      _shouldUseAniList() ? true : canBeFetchedFromAPI(category, sortFilterDisplay),
       sortFilterDisplay,
       category,
       isSorted: isSorted,
@@ -706,15 +653,11 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   }
 
   bool _shouldUseAniList() {
-    return _activeListSource == ActiveAccount.anilist &&
-        user.isAniListConnected &&
-        widget.username.equals("@me");
+    return _activeListSource == ActiveAccount.anilist && user.isAniListConnected && widget.username.equals("@me");
   }
 
   bool get _showListSourceToggle {
-    return widget.username.equals("@me") &&
-        user.status == AuthStatus.AUTHENTICATED &&
-        user.isAniListConnected;
+    return widget.username.equals("@me") && user.status == AuthStatus.AUTHENTICATED && user.isAniListConnected;
   }
 
   StreamListener<Map<String, int?>> get _listener => countListener;
@@ -725,7 +668,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       toolbarHeight: kToolbarHeight,
       forceElevated: innerBoxIsScrolled,
       actions: _showListSourceToggle
-          ? <Widget>[SB.z] // No search/bookmarks when both accounts connected
+          ? null // No actions when both accounts connected
           : <Widget>[
               // Show search icon when only one account
               IconButton(
@@ -838,8 +781,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
       top: false,
       bottom: false,
       child: Builder(
-        builder: (_) =>
-            Padding(padding: EdgeInsets.only(top: bodySize), child: child),
+        builder: (_) => Padding(padding: EdgeInsets.only(top: bodySize), child: child),
       ),
     );
   }
@@ -880,8 +822,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if (jikanUser?.location != null &&
-                      jikanUser!.location!.isNotBlank)
+                  if (jikanUser?.location != null && jikanUser!.location!.isNotBlank)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -895,8 +836,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                           child: ToolTipButton(
                             message: "${jikanUser?.location ?? "?"}",
                             padding: EdgeInsets.only(left: 5),
-                            child: title("${jikanUser?.location ?? "?"}",
-                                textOverflow: TextOverflow.ellipsis),
+                            child: title("${jikanUser?.location ?? "?"}", textOverflow: TextOverflow.ellipsis),
                           ),
                         ),
                       ],
@@ -908,10 +848,8 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      title(jikanUser?.username ?? userProf?.name ?? username,
-                          opacity: 1, fontSize: 20),
-                      if (actualUsername.isNotBlank &&
-                          !actualUsername.equals("@me"))
+                      title(jikanUser?.username ?? userProf?.name ?? username, opacity: 1, fontSize: 20),
+                      if (actualUsername.isNotBlank && !actualUsername.equals("@me"))
                         ToolTipButton(
                           message: S.current.Open_In_Browser,
                           onTap: () => launchURLWithConfirmation(
@@ -943,30 +881,20 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                         overflow: TextOverflow.ellipsis,
                         text: TextSpan(
                             text: (category.equals("anime")
-                                    ? (jikanUser?.statistics?.anime?.meanScore
-                                            ?.toStringAsFixed(2) ??
-                                        userProf?.animeStatistics?.meanScore
-                                            ?.toStringAsFixed(2) ??
+                                    ? (jikanUser?.statistics?.anime?.meanScore?.toStringAsFixed(2) ??
+                                        userProf?.animeStatistics?.meanScore?.toStringAsFixed(2) ??
                                         "?")
-                                    : (jikanUser?.statistics?.manga?.meanScore
-                                            ?.toStringAsFixed(2) ??
-                                        "?")) +
+                                    : (jikanUser?.statistics?.manga?.meanScore?.toStringAsFixed(2) ?? "?")) +
                                 " ",
                             style: TextStyle(fontSize: 18),
                             children: [
                               TextSpan(
                                 text: "(" +
                                     (category.equals("anime")
-                                        ? (jikanUser?.statistics?.anime
-                                                ?.totalEntries
-                                                ?.toStringAsFixed(0) ??
-                                            userProf?.animeStatistics?.numItems
-                                                ?.toStringAsFixed(0) ??
+                                        ? (jikanUser?.statistics?.anime?.totalEntries?.toStringAsFixed(0) ??
+                                            userProf?.animeStatistics?.numItems?.toStringAsFixed(0) ??
                                             "?")
-                                        : (jikanUser?.statistics?.manga
-                                                ?.totalEntries
-                                                ?.toStringAsFixed(0) ??
-                                            "?")) +
+                                        : (jikanUser?.statistics?.manga?.totalEntries?.toStringAsFixed(0) ?? "?")) +
                                     " entries)",
                                 style: TextStyle(fontSize: 12),
                               )
@@ -978,33 +906,22 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
                     height: 15,
                   ),
                   title((category.equals("anime")
-                          ? (jikanUser?.statistics?.anime?.daysWatched
-                                  ?.toStringAsFixed(2) ??
-                              userProf?.animeStatistics?.numDaysWatched
-                                  ?.toStringAsFixed(2) ??
+                          ? (jikanUser?.statistics?.anime?.daysWatched?.toStringAsFixed(2) ??
+                              userProf?.animeStatistics?.numDaysWatched?.toStringAsFixed(2) ??
                               "?")
-                          : (jikanUser?.statistics?.manga?.daysRead
-                                  ?.toStringAsFixed(2) ??
-                              "?")) +
+                          : (jikanUser?.statistics?.manga?.daysRead?.toStringAsFixed(2) ?? "?")) +
                       " Days"),
                   const SizedBox(
                     height: 5,
                   ),
                   title(category.equals("anime")
-                      ? ((jikanUser?.statistics?.anime?.episodesWatched
-                                  ?.toString() ??
-                              userProf?.animeStatistics?.numEpisodes
-                                  ?.toStringAsFixed(0) ??
+                      ? ((jikanUser?.statistics?.anime?.episodesWatched?.toString() ??
+                              userProf?.animeStatistics?.numEpisodes?.toStringAsFixed(0) ??
                               "0") +
                           " Eps")
-                      : ((jikanUser?.statistics?.manga?.chaptersRead
-                                      ?.toString() ??
-                                  "0") +
-                              " Chps") +
+                      : ((jikanUser?.statistics?.manga?.chaptersRead?.toString() ?? "0") + " Chps") +
                           " - " +
-                          (jikanUser?.statistics?.manga?.volumesRead
-                                  ?.toString() ??
-                              "0") +
+                          (jikanUser?.statistics?.manga?.volumesRead?.toString() ?? "0") +
                           " Vols"),
                   if (!username.equals('@me') && userId != null) ...[
                     const SizedBox(
@@ -1030,11 +947,9 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
     );
   }
 
-  List<int?> get _userStatusData =>
-      userStatusData(category, jikanUser, userProf, username.equals("@me"));
+  List<int?> get _userStatusData => userStatusData(category, jikanUser, userProf, username.equals("@me"));
 
-  String? get userimageUrl =>
-      userProf?.picture ?? jikanUser?.images?.jpg?.imageUrl;
+  String? get userimageUrl => userProf?.picture ?? jikanUser?.images?.jpg?.imageUrl;
 
   PreferredSizeWidget animeBodyHeader() {
     return PreferredSize(
@@ -1045,15 +960,11 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
           builder: (context, snapshot) {
             final userContentCountMap = snapshot.data;
             var statusData = _userStatusData;
-            statusData = [
-              statusData.reduce((a, b) => (a ?? 0) + (b ?? 0)),
-              ...statusData
-            ];
+            statusData = [statusData.reduce((a, b) => (a ?? 0) + (b ?? 0)), ...statusData];
             if (userContentCountMap != null) {
               // Use composite keys to get counts for current account and category
               final prefix = '${_activeListSource.name}-$category-';
-              final statusMap =
-                  category == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
+              final statusMap = category == 'anime' ? allAnimeStatusMap : allMangaStatusMap;
 
               statusMap.keys.toList().asMap().forEach((index, status) {
                 final key = '$prefix$status';
@@ -1116,8 +1027,7 @@ class _UserPageState extends State<UserPage> with TickerProviderStateMixin {
   }
 
   scrollUp() {
-    scrollController?.animateTo(pageHeaderSize,
-        duration: const Duration(milliseconds: 400), curve: Curves.ease);
+    scrollController?.animateTo(pageHeaderSize, duration: const Duration(milliseconds: 400), curve: Curves.ease);
   }
 
   void jumpToContent({required ContentDetailedScreen page}) {
