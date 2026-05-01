@@ -1,6 +1,7 @@
 import 'package:dailyanimelist/api/anilist/anilist_models.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/constant.dart';
+import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 
@@ -159,6 +160,16 @@ class SyncHelper {
                   ],
                 ),
               ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (!isSyncingMalToAni && !isSyncingAniToMal) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text(S.current.Cancel),
+                ),
+              ],
             );
           },
         );
