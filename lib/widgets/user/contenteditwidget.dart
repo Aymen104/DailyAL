@@ -242,16 +242,20 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   onAdvancedEdit() {}
 
   updateCache() async {
+    if (_id == null) {
+      if (mounted) {
+        setState(() {
+          cacheUpdated = true;
+        });
+      }
+      return;
+    }
     try {
       var field =
           "num_episodes,my_list_status{status,score,num_episodes_watched,num_watched_episodes,num_chapters_read,num_volumes_read,is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}";
-      var content = contentDetailed;
-      if (contentDetailed is BaseNode) {
-        content = contentDetailed?.content;
-      }
       contentDetailed = widget.category.equals("anime")
-          ? await MalApi.getAnimeDetails(content.id, fields: [field])
-          : await MalApi.getMangaDetails(content.id, fields: [field]);
+          ? await MalApi.getAnimeDetails(_id!, fields: [field])
+          : await MalApi.getMangaDetails(_id!, fields: [field]);
       checkForUpdatesDuringBuild();
       if (mounted) {
         setState(() {
@@ -259,6 +263,12 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         });
       }
     } catch (e) {
+      logDal(e);
+      if (mounted) {
+        setState(() {
+          cacheUpdated = true;
+        });
+      }
       showToast(S.current.Couldnt_Update);
     }
   }
