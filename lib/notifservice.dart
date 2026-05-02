@@ -50,10 +50,8 @@ class NotificationChannel {
 }
 
 class NotificationService {
-  static final NotificationService _notificationService =
-      NotificationService._internal();
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  static final NotificationService _notificationService = NotificationService._internal();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   factory NotificationService() {
     return _notificationService;
@@ -72,35 +70,29 @@ class NotificationService {
   };
 
   Future<void> init() async {
-    final AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('ic_stat_name');
+    final AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
 
     tz.initializeTimeZones();
 
-    final InitializationSettings initializationSettings =
-        InitializationSettings(
-            android: initializationSettingsAndroid,
-            iOS: null,
-            macOS: null,
-            linux: LinuxInitializationSettings(defaultActionName: 'Open'));
+    final InitializationSettings initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: null,
+        macOS: null,
+        linux: LinuxInitializationSettings(defaultActionName: 'Open'));
 
     await flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
-      onDidReceiveBackgroundNotificationResponse:
-          onDidReceiveBackgroundNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: onDidReceiveBackgroundNotificationResponse,
       onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
     );
   }
 
   Future<Node?> onSelectWhileAsleep() async {
     try {
-      var details = await NotificationService()
-          .flutterLocalNotificationsPlugin
-          .getNotificationAppLaunchDetails();
+      var details = await NotificationService().flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
       if (details?.didNotificationLaunchApp ?? false) {
         logDal('Notif launched dal');
-        Node _node = Node.fromJson(
-            jsonDecode(details?.notificationResponse?.payload ?? '{}'));
+        Node _node = Node.fromJson(jsonDecode(details?.notificationResponse?.payload ?? '{}'));
         logDal(_node.toJson());
         if (_node.id != null) {
           return _node;
@@ -119,18 +111,12 @@ class NotificationService {
     try {
       Node _node = Node.fromJson(jsonDecode(payload ?? '{}'));
 
-      if (_node != null) {
-        logDal("--> payload works");
-        if (Platform.isLinux) {
-          await windowManager.show();
-          await windowManager.focus();
-        }
-        gotoPage(
-            context: MyApp.navigatorKey.currentContext!,
-            newPage: OpenScreen(notifNode: _node));
-      } else {
-        logDal("--> null payload $_node");
+      logDal("--> payload works");
+      if (Platform.isLinux) {
+        await windowManager.show();
+        await windowManager.focus();
       }
+      gotoPage(context: MyApp.navigatorKey.currentContext!, newPage: OpenScreen(notifNode: _node));
     } catch (e) {
       logDal("--> payload error $e");
     }
@@ -149,12 +135,7 @@ class NotificationService {
     try {
       final results = await Future.wait([
         MalApi.getCurrentSeason(
-          fields: [
-            "my_list_status",
-            "broadcast",
-            "status",
-            'alternative_titles'
-          ],
+          fields: ["my_list_status", "broadcast", "status", 'alternative_titles'],
           sortType: SortType.AnimeScore,
           fromCache: true,
           limit: 500,
@@ -173,47 +154,46 @@ class NotificationService {
     for (var baseNode in seasonResult!.data!) {
       var node = baseNode.content;
       node!.title = getNodeTitle(node);
-      if (node.myListStatus is MyAnimeListStatus) {
-        var myListStatus = node?.myListStatus as MyAnimeListStatus;
-        if (myListStatus?.status == null) {
+      // Only send notifications for anime that are on the user's watchlist
+      if (node.myListStatus == null || node.myListStatus is! MyAnimeListStatus) {
+        continue;
+      }
+      var myListStatus = node.myListStatus as MyAnimeListStatus;
+      if (myListStatus.status == null || !validMyListStatus.contains(myListStatus.status)) {
+        continue;
+      }
+      if (myListStatus.status!.equals("watching")) {
+        if (!user.pref.notifPref.onWatchingListUpdated) {
           continue;
         }
-        if (!validMyListStatus.contains(myListStatus.status)) {
+      }
+
+      if (myListStatus.status!.equals("plan_to_watch")) {
+        if (!user.pref.notifPref.onPTWGoesToWatching) {
           continue;
         }
-        if (myListStatus.status!.equals("watching")) {
-          if (!user.pref.notifPref.onWatchingListUpdated) {
-            continue;
-          }
-        }
+      }
+      String body;
+      NotificationChannel channel;
+      if (myListStatus.status!.equals("watching")) {
+        body = S.current.Notif_Update_watchList;
+        channel = NotificationChannel.watching();
+      } else {
+        body = S.current.Notif_Update_PTW;
+        channel = NotificationChannel.planToWatch();
+      }
 
-        if (myListStatus.status!.equals("plan_to_watch")) {
-          if (!user.pref.notifPref.onPTWGoesToWatching) {
-            continue;
-          }
-        }
-        String body;
-        NotificationChannel channel;
-        if (myListStatus.status!.equals("watching")) {
-          body = S.current.Notif_Update_watchList;
-          channel = NotificationChannel.watching();
-        } else {
-          body = S.current.Notif_Update_PTW;
-          channel = NotificationChannel.planToWatch();
-        }
-
-        if (scheduleData.containsKey(node.id)) {
-          _scheduleUsingLiveChart(
-            scheduleData[node.id]!,
-            myListStatus,
-            node,
-            nowDate,
-            body,
-            channel,
-          );
-        } else {
-          logDal("No schedule data for ${node.title}");
-        }
+      if (scheduleData.containsKey(node.id)) {
+        _scheduleUsingLiveChart(
+          scheduleData[node.id]!,
+          myListStatus,
+          node,
+          nowDate,
+          body,
+          channel,
+        );
+      } else {
+        logDal("No schedule data for ${node.title}");
       }
     }
 
@@ -231,8 +211,7 @@ class NotificationService {
   ) {
     String title = "Ep: ${scheduleData.episode} of ${node.title} is out!";
 
-    var nextDate =
-        DateTime.fromMillisecondsSinceEpoch(scheduleData.timestamp! * 1000);
+    var nextDate = DateTime.fromMillisecondsSinceEpoch(scheduleData.timestamp! * 1000);
 
     showNotification(
       serviceId: 21,
@@ -271,8 +250,7 @@ class NotificationService {
     String? imagePath;
     FilePathAndroidBitmap? largeIconBitmap;
     if (node.mainPicture?.large != null && node.title != null) {
-      imagePath = await _downloadAndSaveFile(node.mainPicture!.large!,
-          node.title!.getFormattedTitleForHtml(true)!);
+      imagePath = await _downloadAndSaveFile(node.mainPicture!.large!, node.title!.getFormattedTitleForHtml(true)!);
     }
 
     StyleInformation? styleInfo;
@@ -295,24 +273,19 @@ class NotificationService {
       if (Platform.isLinux) {
         final delay = exactDate?.difference(DateTime.now()) ?? addTime;
         if (delay.isNegative) {
-          await _showLinuxNotification(
-              serviceId, node, title, body, episode, imagePath);
+          await _showLinuxNotification(serviceId, node, title, body, episode, imagePath);
         } else {
           Timer(delay, () async {
-            await _showLinuxNotification(
-                serviceId, node, title, body, episode, imagePath);
+            await _showLinuxNotification(serviceId, node, title, body, episode, imagePath);
           });
         }
       } else {
         await flutterLocalNotificationsPlugin.zonedSchedule(
           id: serviceId * 100 + node.id!,
-          title: _replaceTags(title) ??
-              "DailyAnimeList - ${S.current.Episode_Reminder}",
-          body: _replaceTags(body) ??
-              "${node.title} - Episode $episode ${S.current.just_got_aired}!!",
-          scheduledDate: exactDate != null
-              ? tz.TZDateTime.from(exactDate, tz.local)
-              : tz.TZDateTime.now(tz.local).add(addTime),
+          title: _replaceTags(title) ?? "DailyAnimeList - ${S.current.Episode_Reminder}",
+          body: _replaceTags(body) ?? "${node.title} - Episode $episode ${S.current.just_got_aired}!!",
+          scheduledDate:
+              exactDate != null ? tz.TZDateTime.from(exactDate, tz.local) : tz.TZDateTime.now(tz.local).add(addTime),
           notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
               channel.channelId,
@@ -335,18 +308,15 @@ class NotificationService {
     }
   }
 
-  Future<void> _showLinuxNotification(int serviceId, Node node, String? title,
-      String? body, int episode, String? imagePath) async {
-    final cleanTitle =
-        _replaceTags(title) ?? "DailyAnimeList - ${S.current.Episode_Reminder}";
-    final cleanBody = _replaceTags(body) ??
-        "${node.title} - Episode $episode ${S.current.just_got_aired}!!";
+  Future<void> _showLinuxNotification(
+      int serviceId, Node node, String? title, String? body, int episode, String? imagePath) async {
+    final cleanTitle = _replaceTags(title) ?? "DailyAnimeList - ${S.current.Episode_Reminder}";
+    final cleanBody = _replaceTags(body) ?? "${node.title} - Episode $episode ${S.current.just_got_aired}!!";
 
     if (LinuxDesktopHelper.hasLibNotify) {
       try {
         final iconPath = LinuxDesktopHelper.appIconPath;
-        final LinuxNotificationIcon? linuxIcon =
-            iconPath != null ? FilePathLinuxIcon(iconPath) : null;
+        final LinuxNotificationIcon? linuxIcon = iconPath != null ? FilePathLinuxIcon(iconPath) : null;
 
         await flutterLocalNotificationsPlugin.show(
           id: serviceId * 100 + node.id!,
@@ -371,11 +341,7 @@ class NotificationService {
 
   String? _replaceTags(String? body) {
     if (body == null) return null;
-    return body
-        .replaceAll('<b>', '')
-        .replaceAll('</b>', '')
-        .replaceAll('<i>', '')
-        .replaceAll('</i>', '');
+    return body.replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('<i>', '').replaceAll('</i>', '');
   }
 
   Future<String?> _downloadAndSaveFile(String url, String fileName) async {
@@ -394,12 +360,10 @@ class NotificationService {
 
   Future<void> askForPermission() async {
     if (Platform.isLinux) return;
-    if (user.pref.notifPref.onPTWGoesToWatching ||
-        user.pref.notifPref.onWatchingListUpdated) {
+    if (user.pref.notifPref.onPTWGoesToWatching || user.pref.notifPref.onWatchingListUpdated) {
       final notifPerm = await Permission.notification.status;
       final alamPerm = await Permission.scheduleExactAlarm.status;
-      if (notifPerm == PermissionStatus.denied ||
-          alamPerm == PermissionStatus.denied) {
+      if (notifPerm == PermissionStatus.denied || alamPerm == PermissionStatus.denied) {
         bool allowed = (await showConfirmationDialog(
               alertTitle: S.current.ConfirmNotifPerm,
               desc: S.current.ConfirmNotifPermDesc,
@@ -419,31 +383,24 @@ class NotificationService {
 
   Future<bool> _askNotifPermissionUsingLocal() async {
     if (Platform.isLinux) return true;
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     return ((await _getAlarmPerm(flutterLocalNotificationsPlugin)) ?? false) &&
-        ((await _getNotificationPerm(flutterLocalNotificationsPlugin)) ??
-            false);
+        ((await _getNotificationPerm(flutterLocalNotificationsPlugin)) ?? false);
   }
 
-  Future<bool?> _getAlarmPerm(
-      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+  Future<bool?> _getAlarmPerm(FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
     return await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestExactAlarmsPermission();
   }
 
-  Future<bool?> _getNotificationPerm(
-      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+  Future<bool?> _getNotificationPerm(FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
     return await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
   }
 
-  static void onDidReceiveBackgroundNotificationResponse(
-      NotificationResponse details) {
+  static void onDidReceiveBackgroundNotificationResponse(NotificationResponse details) {
     logDal(details);
   }
 
