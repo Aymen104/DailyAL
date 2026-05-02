@@ -563,6 +563,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "Hentai": MessageLookupByLibrary.simpleMessage("헨타이"),
     "Hiatus": MessageLookupByLibrary.simpleMessage("틈새"),
     "Hide": MessageLookupByLibrary.simpleMessage("숨다"),
+    "Hide_Score": MessageLookupByLibrary.simpleMessage("애니메이션/만화 점수 숨기기"),
+    "Hide_Score_Desc": MessageLookupByLibrary.simpleMessage(
+      "기본적으로 점수를 숨깁니다. 점수를 확인하려면 카드의 눈 아이콘을 탭하세요.",
+    ),
     "High": MessageLookupByLibrary.simpleMessage("높은"),
     "High_Stakes_Game": MessageLookupByLibrary.simpleMessage(
       "High_Stakes_Game",

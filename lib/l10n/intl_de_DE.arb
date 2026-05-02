@@ -1046,5 +1046,7 @@
     "Manual_Install": "Manuelle Installation",
     "Global_Seasonal_Filter": "Globaler Saisonfilter",
     "Global_Seasonal_Filter_Desc": "Wenden Sie saisonale Filter auf alle Jahreszeiten/Jahre an",
-    "Clear_and_reschedule_all_notifications": "L\u00f6schen Sie alle Benachrichtigungen und planen Sie sie neu"
+    "Clear_and_reschedule_all_notifications": "L\u00f6schen Sie alle Benachrichtigungen und planen Sie sie neu",
+    "Hide_Score": "Anime-/Manga-Score ausblenden",
+    "Hide_Score_Desc": "Versteckt Punktest\u00e4nde standardm\u00e4\u00dfig. Tippen Sie auf das Augensymbol auf einer beliebigen Karte, um den Punktestand anzuzeigen."
 }

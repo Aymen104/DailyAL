@@ -22,6 +22,7 @@ AnimeMangaPagePreferences _$AnimeMangaPagePreferencesFromJson(
               TimezonePref.local,
       showPrivateNotes: json['showPrivateNotes'] as bool? ?? false,
       globalSeasonalFilter: json['globalSeasonalFilter'] as bool? ?? false,
+      hideScore: json['hideScore'] as bool? ?? false,
       defaultTab: json['defaultTab'] as String?,
       defaultAnimeTab: json['defaultAnimeTab'] as String?,
       defaultMangaTab: json['defaultMangaTab'] as String?,
@@ -45,6 +46,7 @@ Map<String, dynamic> _$AnimeMangaPagePreferencesToJson(
       'defaultMangaAddToList': instance.defaultMangaAddToList,
       'showPrivateNotes': instance.showPrivateNotes,
       'globalSeasonalFilter': instance.globalSeasonalFilter,
+      'hideScore': instance.hideScore,
       'contentCardProps': instance.contentCardProps,
     };
 

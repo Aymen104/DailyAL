@@ -122,6 +122,7 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
   ScrollController bodyHeaderController = new ScrollController();
   int episodesPage = 1;
   bool showContentEdit = false;
+  bool _scoreRevealed = false;
   final GlobalKey _listKey = GlobalKey();
   List<GlobalKey> _globalKeys = [];
   ScheduleData? _scheduleData;
@@ -1528,14 +1529,32 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
               const SizedBox(
                 width: 5,
               ),
-              Expanded(
-                child: Text(
-                    (contentDetailed?.mean == null
-                            ? "?"
-                            : ratingFormat.format(contentDetailed.mean)) +
-                        " ",
-                    style: TextStyle(fontSize: 26)),
-              ),
+              if (user.pref.animeMangaPagePreferences.hideScore && !_scoreRevealed)
+                GestureDetector(
+                  onTap: () {
+                    setState(() => _scoreRevealed = true);
+                    Future.delayed(const Duration(seconds: 3), () {
+                      if (mounted) setState(() => _scoreRevealed = false);
+                    });
+                  },
+                  child: Icon(Icons.visibility_off_outlined,
+                      size: 22,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                )
+              else
+                Expanded(
+                  child: GestureDetector(
+                    onTap: user.pref.animeMangaPagePreferences.hideScore
+                        ? () => setState(() => _scoreRevealed = false)
+                        : null,
+                    child: Text(
+                        (contentDetailed?.mean == null
+                                ? "?"
+                                : ratingFormat.format(contentDetailed.mean)) +
+                            " ",
+                        style: TextStyle(fontSize: 26)),
+                  ),
+                ),
             ],
           ),
           SB.h5,
@@ -1897,6 +1916,7 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
   }
 
   Widget _rankScoreRow() {
+    final hideScore = user.pref.animeMangaPagePreferences.hideScore;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(contentDetailed?.rank == null ? "# ?" : "# ${contentDetailed?.rank}",
           style: TextStyle(fontSize: 20)),
@@ -1906,11 +1926,32 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
         children: [
           Container(height: 22, child: Image.asset("assets/images/star.png")),
           const SizedBox(width: 5),
-          Text(
-              (contentDetailed?.mean == null
-                  ? "?"
-                  : ratingFormat.format(contentDetailed!.mean)),
-              style: TextStyle(fontSize: 24)),
+          if (hideScore && !_scoreRevealed)
+            GestureDetector(
+              onTap: () {
+                setState(() => _scoreRevealed = true);
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (mounted) setState(() => _scoreRevealed = false);
+                });
+              },
+              child: Icon(Icons.visibility_off_outlined,
+                  size: 22,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.5)),
+            )
+          else
+            GestureDetector(
+              onTap: hideScore
+                  ? () => setState(() => _scoreRevealed = false)
+                  : null,
+              child: Text(
+                  (contentDetailed?.mean == null
+                      ? "?"
+                      : ratingFormat.format(contentDetailed!.mean)),
+                  style: TextStyle(fontSize: 24)),
+            ),
         ],
       ),
       Text(

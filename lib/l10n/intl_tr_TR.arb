@@ -1043,5 +1043,7 @@
     "Manual_Install": "Manuel Kurulum",
     "Global_Seasonal_Filter": "K\u00fcresel Mevsimsel Filtre",
     "Global_Seasonal_Filter_Desc": "T\u00fcm mevsimlere/y\u0131llara mevsimsel filtreler uygulay\u0131n",
-    "Clear_and_reschedule_all_notifications": "T\u00fcm bildirimleri temizleyin ve yeniden planlay\u0131n"
+    "Clear_and_reschedule_all_notifications": "T\u00fcm bildirimleri temizleyin ve yeniden planlay\u0131n",
+    "Hide_Score": "Anime/Manga Puan\u0131n\u0131 Gizle",
+    "Hide_Score_Desc": "Puanlar\u0131 varsay\u0131lan olarak gizler. Puan\u0131 ortaya \u00e7\u0131karmak i\u00e7in herhangi bir kart\u0131n \u00fczerindeki g\u00f6z simgesine dokunun."
 }

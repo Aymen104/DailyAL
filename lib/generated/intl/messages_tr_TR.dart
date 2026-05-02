@@ -683,6 +683,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Hentai": MessageLookupByLibrary.simpleMessage("hentai"),
     "Hiatus": MessageLookupByLibrary.simpleMessage("Boşluk"),
     "Hide": MessageLookupByLibrary.simpleMessage("Saklamak"),
+    "Hide_Score": MessageLookupByLibrary.simpleMessage(
+      "Anime/Manga Puanını Gizle",
+    ),
+    "Hide_Score_Desc": MessageLookupByLibrary.simpleMessage(
+      "Puanları varsayılan olarak gizler. Puanı ortaya çıkarmak için herhangi bir kartın üzerindeki göz simgesine dokunun.",
+    ),
     "High": MessageLookupByLibrary.simpleMessage("Yüksek"),
     "High_Stakes_Game": MessageLookupByLibrary.simpleMessage(
       "High_Stakes_Game",

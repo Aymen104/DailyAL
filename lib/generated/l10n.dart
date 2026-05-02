@@ -7684,6 +7684,26 @@ class S {
     );
   }
 
+  /// `Hide Anime/Manga Score`
+  String get Hide_Score {
+    return Intl.message(
+      'Hide Anime/Manga Score',
+      name: 'Hide_Score',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides scores by default. Tap the eye icon on any card to reveal the score.`
+  String get Hide_Score_Desc {
+    return Intl.message(
+      'Hides scores by default. Tap the eye icon on any card to reveal the score.',
+      name: 'Hide_Score_Desc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Show Private Review`
   String get Show_Private_Review {
     return Intl.message(

@@ -701,6 +701,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Hentai": MessageLookupByLibrary.simpleMessage("хентай"),
     "Hiatus": MessageLookupByLibrary.simpleMessage("Разрыв"),
     "Hide": MessageLookupByLibrary.simpleMessage("Скрывать"),
+    "Hide_Score": MessageLookupByLibrary.simpleMessage(
+      "Скрыть оценку аниме/манги",
+    ),
+    "Hide_Score_Desc": MessageLookupByLibrary.simpleMessage(
+      "По умолчанию скрывает результаты. Коснитесь значка глаза на любой карточке, чтобы узнать счет.",
+    ),
     "High": MessageLookupByLibrary.simpleMessage("Высокий"),
     "High_Stakes_Game": MessageLookupByLibrary.simpleMessage(
       "High_Stakes_Game",

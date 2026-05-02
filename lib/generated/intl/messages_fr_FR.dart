@@ -731,6 +731,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Hentai": MessageLookupByLibrary.simpleMessage("Hentai"),
     "Hiatus": MessageLookupByLibrary.simpleMessage("Hiatus"),
     "Hide": MessageLookupByLibrary.simpleMessage("Cacher"),
+    "Hide_Score": MessageLookupByLibrary.simpleMessage(
+      "Masquer la partition Anime/Manga",
+    ),
+    "Hide_Score_Desc": MessageLookupByLibrary.simpleMessage(
+      "Masque les scores par défaut. Appuyez sur l\'icône en forme d\'œil sur n\'importe quelle carte pour révéler le score.",
+    ),
     "High": MessageLookupByLibrary.simpleMessage("High"),
     "High_Stakes_Game": MessageLookupByLibrary.simpleMessage(
       "High_Stakes_Game",

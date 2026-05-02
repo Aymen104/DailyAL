@@ -26,6 +26,7 @@ import 'package:dailyanimelist/widgets/background.dart';
 import 'package:dailyanimelist/util/responsive_helper.dart';
 import 'package:dailyanimelist/widgets/shimmecolor.dart';
 import 'package:dailyanimelist/widgets/loading/shimmerwidget.dart';
+import 'package:dailyanimelist/main.dart';
 
 class InterestStackContentList extends StatelessWidget {
   final DisplayType type;
@@ -760,27 +761,34 @@ class SpaciousContentWidget extends StatelessWidget {
         numListUsersFormatted ??=
             NumberFormat.compact().format(detailed.numListUsers);
       }
-      leading = Row(
-        children: [
-          Container(
-            height: 15,
-            child: Image.asset("assets/images/star.png"),
-          ),
-          SB.w5,
-          title(
-            detailed.mean?.toStringAsFixed(1) ?? '-',
-            fontSize: 15,
-            opacity: 1,
-          ),
-          SB.w10,
-          if (numListUsersFormatted != null)
+      if (user.pref.animeMangaPagePreferences.hideScore) {
+        leading = _InterestStackScoreRevealWidget(
+          mean: detailed.mean,
+          numListUsersFormatted: numListUsersFormatted,
+        );
+      } else {
+        leading = Row(
+          children: [
+            Container(
+              height: 15,
+              child: Image.asset("assets/images/star.png"),
+            ),
+            SB.w5,
             title(
-              '($numListUsersFormatted)',
-              textOverflow: TextOverflow.ellipsis,
-              opacity: .7,
-            )
-        ],
-      );
+              detailed.mean?.toStringAsFixed(1) ?? '-',
+              fontSize: 15,
+              opacity: 1,
+            ),
+            SB.w10,
+            if (numListUsersFormatted != null)
+              title(
+                '($numListUsersFormatted)',
+                textOverflow: TextOverflow.ellipsis,
+                opacity: .7,
+              )
+          ],
+        );
+      }
     }
 
     return Row(
@@ -848,6 +856,78 @@ class SpaciousContentWidget extends StatelessWidget {
             done: (p0) => title(p0),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A per-card stateful widget that hides the score behind an eye-off icon
+/// and reveals it for 3 seconds when tapped.
+class _InterestStackScoreRevealWidget extends StatefulWidget {
+  final double? mean;
+  final String? numListUsersFormatted;
+  const _InterestStackScoreRevealWidget({
+    required this.mean,
+    required this.numListUsersFormatted,
+  });
+
+  @override
+  State<_InterestStackScoreRevealWidget> createState() =>
+      _InterestStackScoreRevealWidgetState();
+}
+
+class _InterestStackScoreRevealWidgetState
+    extends State<_InterestStackScoreRevealWidget> {
+  bool _revealed = false;
+
+  void _reveal() {
+    setState(() => _revealed = true);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _revealed = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_revealed) {
+      return GestureDetector(
+        onTap: _reveal,
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          children: [
+            Icon(
+              Icons.visibility_off_outlined,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+            ),
+            SB.w5,
+            title('Score hidden', fontSize: 11, opacity: 0.4),
+          ],
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () => setState(() => _revealed = false),
+      child: Row(
+        children: [
+          Container(
+            height: 15,
+            child: Image.asset("assets/images/star.png"),
+          ),
+          SB.w5,
+          title(
+            widget.mean?.toStringAsFixed(1) ?? '-',
+            fontSize: 15,
+            opacity: 1,
+          ),
+          SB.w10,
+          if (widget.numListUsersFormatted != null)
+            title(
+              '(${widget.numListUsersFormatted})',
+              textOverflow: TextOverflow.ellipsis,
+              opacity: .7,
+            ),
+        ],
       ),
     );
   }

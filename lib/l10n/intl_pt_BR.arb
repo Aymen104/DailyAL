@@ -1046,5 +1046,7 @@
     "Manual_Install": "Instala\u00e7\u00e3o manual",
     "Global_Seasonal_Filter": "Filtro Sazonal Global",
     "Global_Seasonal_Filter_Desc": "Aplique filtros sazonais a todas as esta\u00e7\u00f5es/anos",
-    "Clear_and_reschedule_all_notifications": "Limpar e reprogramar todas as notifica\u00e7\u00f5es"
+    "Clear_and_reschedule_all_notifications": "Limpar e reprogramar todas as notifica\u00e7\u00f5es",
+    "Hide_Score": "Ocultar pontua\u00e7\u00e3o de anime/mang\u00e1",
+    "Hide_Score_Desc": "Oculta pontua\u00e7\u00f5es por padr\u00e3o. Toque no \u00edcone do olho em qualquer carta para revelar a pontua\u00e7\u00e3o."
 }

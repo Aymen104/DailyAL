@@ -1046,5 +1046,7 @@
     "Manual_Install": "Instalaci\u00f3n manual",
     "Global_Seasonal_Filter": "Filtro estacional global",
     "Global_Seasonal_Filter_Desc": "Aplicar filtros estacionales a todas las estaciones/a\u00f1os.",
-    "Clear_and_reschedule_all_notifications": "Borrar y reprogramar todas las notificaciones"
+    "Clear_and_reschedule_all_notifications": "Borrar y reprogramar todas las notificaciones",
+    "Hide_Score": "Ocultar puntuaci\u00f3n de anime/manga",
+    "Hide_Score_Desc": "Oculta puntuaciones de forma predeterminada. Toca el \u00edcono del ojo en cualquier tarjeta para revelar la puntuaci\u00f3n."
 }

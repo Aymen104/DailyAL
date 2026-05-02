@@ -645,6 +645,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "Hentai": MessageLookupByLibrary.simpleMessage("هنتاي"),
     "Hiatus": MessageLookupByLibrary.simpleMessage("التوقف"),
     "Hide": MessageLookupByLibrary.simpleMessage("يخفي"),
+    "Hide_Score": MessageLookupByLibrary.simpleMessage(
+      "إخفاء نقاط الأنمي/المانجا",
+    ),
+    "Hide_Score_Desc": MessageLookupByLibrary.simpleMessage(
+      "يخفي النتائج بشكل افتراضي. اضغط على أيقونة العين على أي بطاقة للكشف عن النتيجة.",
+    ),
     "High": MessageLookupByLibrary.simpleMessage("عالي"),
     "High_Stakes_Game": MessageLookupByLibrary.simpleMessage("هاي_ستيكس_سم"),
     "Historical": MessageLookupByLibrary.simpleMessage("تاريخي"),

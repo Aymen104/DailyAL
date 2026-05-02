@@ -152,6 +152,18 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
                   ),
                 ),
                 OptionTile(
+                  text: S.current.Hide_Score,
+                  iconData: Icons.star_border_rounded,
+                  multiLine: true,
+                  desc: S.current.Hide_Score_Desc,
+                  onPressed: () =>
+                      _changeHideScore(!user.pref.animeMangaPagePreferences.hideScore),
+                  trailing: ToggleButton(
+                    toggleValue: user.pref.animeMangaPagePreferences.hideScore,
+                    onToggled: (value) => _changeHideScore(value),
+                  ),
+                ),
+                OptionTile(
                   text: S.current.Global_Seasonal_Filter,
                   iconData: Icons.filter_alt,
                   multiLine: true,
@@ -275,6 +287,12 @@ class _AnimeMangaSettingsState extends State<AnimeMangaSettings> {
 
   void _changePrivateNotes(bool value) {
     user.pref.animeMangaPagePreferences.showPrivateNotes = value;
+    user.setIntance();
+    setState(() {});
+  }
+
+  void _changeHideScore(bool value) {
+    user.pref.animeMangaPagePreferences.hideScore = value;
     user.setIntance();
     setState(() {});
   }

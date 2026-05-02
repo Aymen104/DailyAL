@@ -4,6 +4,7 @@ import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
 
 import '../../constant.dart';
+import '../../main.dart';
 
 class AnimeCardBar extends StatelessWidget {
   final NodeStatusValue? nsv;
@@ -83,27 +84,61 @@ class AnimeCardBar extends StatelessWidget {
       ),
     );
 
+    final hideScore = user.pref.animeMangaPagePreferences.hideScore;
+
     final starMemberWidget = (detailed) => Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SB.w10,
-            Container(
-              height: 14,
-              child: Image.asset("assets/images/star.png"),
-            ),
-            SB.w5,
-            title(
-                !(detailed is AnimeDetailed || detailed is MangaDetailed)
-                    ? ('-')
-                    : (detailed.mean == null
-                        ? '-'
-                        : ratingFormat.format(detailed.mean)),
-                fontSize: (!userPrefResize ||
-                        homePageTileSize!.index == HomePageTileSize.m.index)
-                    ? 11.5
-                    : 14,
-                opacity: 1),
+            if (hideScore)
+              _CardScoreRevealWidget(
+                builder: (revealed) => revealed
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            height: 14,
+                            child: Image.asset("assets/images/star.png"),
+                          ),
+                          SB.w5,
+                          title(
+                              !(detailed is AnimeDetailed ||
+                                      detailed is MangaDetailed)
+                                  ? ('-')
+                                  : (detailed.mean == null
+                                      ? '-'
+                                      : ratingFormat.format(detailed.mean)),
+                              fontSize: (!userPrefResize ||
+                                      homePageTileSize!.index ==
+                                          HomePageTileSize.m.index)
+                                  ? 11.5
+                                  : 14,
+                              opacity: 1),
+                        ],
+                      )
+                    : Icon(Icons.visibility_off_outlined,
+                        size: 14,
+                        color: Colors.white.withOpacity(0.5)),
+              )
+            else ...[
+              Container(
+                height: 14,
+                child: Image.asset("assets/images/star.png"),
+              ),
+              SB.w5,
+              title(
+                  !(detailed is AnimeDetailed || detailed is MangaDetailed)
+                      ? ('-')
+                      : (detailed.mean == null
+                          ? '-'
+                          : ratingFormat.format(detailed.mean)),
+                  fontSize: (!userPrefResize ||
+                          homePageTileSize!.index == HomePageTileSize.m.index)
+                      ? 11.5
+                      : 14,
+                  opacity: 1),
+            ],
             SB.w5,
             if (showMemberCount &&
                 (detailed is AnimeDetailed || detailed is MangaDetailed) &&
@@ -151,6 +186,35 @@ class AnimeCardBar extends StatelessWidget {
       width: smallWidth,
       height: smallHeight,
       child: materialWidget,
+    );
+  }
+}
+
+/// Stateful reveal widget for score in grid card bars.
+class _CardScoreRevealWidget extends StatefulWidget {
+  final Widget Function(bool revealed) builder;
+  const _CardScoreRevealWidget({required this.builder});
+
+  @override
+  State<_CardScoreRevealWidget> createState() => _CardScoreRevealWidgetState();
+}
+
+class _CardScoreRevealWidgetState extends State<_CardScoreRevealWidget> {
+  bool _revealed = false;
+
+  void _reveal() {
+    setState(() => _revealed = true);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _revealed = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _reveal,
+      behavior: HitTestBehavior.opaque,
+      child: widget.builder(_revealed),
     );
   }
 }

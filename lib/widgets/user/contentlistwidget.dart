@@ -904,6 +904,31 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
   Widget starMemberWidget() {
     final detailed = widget.dynContent?.content;
     if (_hasMeanStars) {
+      if (user.pref.animeMangaPagePreferences.hideScore) {
+        return _ScoreRevealWidget(
+          builder: (revealed) => revealed
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 4, left: 4),
+                  child: Row(
+                    children: [
+                      starWwidget(detailed.mean?.toString() ?? '-',
+                          const EdgeInsets.only(right: 4)),
+                      if (detailed.numListUsers != null)
+                        title(
+                          '(${userCountFormat.format(detailed.numListUsers)})',
+                          fontSize: 9,
+                          opacity: .7,
+                        ),
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(right: 4, left: 4),
+                  child: Icon(Icons.visibility_off_outlined, size: 14,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+                ),
+        );
+      }
       return Padding(
         padding: const EdgeInsets.only(right: 4, left: 4),
         child: Row(
@@ -1557,6 +1582,36 @@ Widget starWwidget(String score,
           title(score, opacity: 1, fontSize: fontSize ?? 14),
         ],
       ));
+}
+
+/// A widget that shows a hidden score state (eye-off icon) by default and
+/// temporarily reveals the score when tapped. Reverts to hidden after 3s.
+class _ScoreRevealWidget extends StatefulWidget {
+  final Widget Function(bool revealed) builder;
+  const _ScoreRevealWidget({required this.builder});
+
+  @override
+  State<_ScoreRevealWidget> createState() => _ScoreRevealWidgetState();
+}
+
+class _ScoreRevealWidgetState extends State<_ScoreRevealWidget> {
+  bool _revealed = false;
+
+  void _reveal() {
+    setState(() => _revealed = true);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _revealed = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _reveal,
+      behavior: HitTestBehavior.opaque,
+      child: widget.builder(_revealed),
+    );
+  }
 }
 
 Widget buildGridResults(var _results, var _category,

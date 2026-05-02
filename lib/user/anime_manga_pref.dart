@@ -19,6 +19,7 @@ class AnimeMangaPagePreferences {
   String? defaultMangaAddToList;
   bool showPrivateNotes;
   bool globalSeasonalFilter;
+  bool hideScore;
   List<ContentCardProps>? contentCardProps;
 
   AnimeMangaPagePreferences({
@@ -27,6 +28,7 @@ class AnimeMangaPagePreferences {
     this.timezonePref = TimezonePref.local,
     this.showPrivateNotes = false,
     this.globalSeasonalFilter = false,
+    this.hideScore = false,
     this.defaultTab,
     this.defaultAnimeTab,
     this.defaultMangaTab,

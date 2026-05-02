@@ -424,6 +424,35 @@ class AnimeGridCard extends StatelessWidget {
       final int? memberCount = content.numListUsers;
       final double? meanScore = content.mean;
       if (memberCount == null && meanScore == null) return SB.z;
+
+      if (user.pref.animeMangaPagePreferences.hideScore) {
+        return Positioned(
+          top: time != null ? 22 : 7,
+          left: 5,
+          child: _CompactScoreRevealWidget(
+            builder: (revealed) => Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(borderRadius),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Center(
+                  child: revealed
+                      ? Text(
+                          "${meanScore == null ? '' : meanScore.toStringAsFixed(2) + ' | '}${memberCount == null ? '' : userCountFormat.format(memberCount)}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white, fontSize: 9),
+                        )
+                      : Icon(Icons.visibility_off_outlined,
+                          size: 11, color: Colors.white.withOpacity(0.7)),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
       return Positioned(
         top: time != null ? 22 : 7,
         left: 5,
@@ -803,4 +832,35 @@ class NodeStatusValue {
 class PriorityBadge {
   String? status;
   Color? color;
+}
+
+/// Stateful reveal widget used on compact overlay score badge.
+class _CompactScoreRevealWidget extends StatefulWidget {
+  final Widget Function(bool revealed) builder;
+  const _CompactScoreRevealWidget({required this.builder});
+
+  @override
+  State<_CompactScoreRevealWidget> createState() =>
+      _CompactScoreRevealWidgetState();
+}
+
+class _CompactScoreRevealWidgetState
+    extends State<_CompactScoreRevealWidget> {
+  bool _revealed = false;
+
+  void _reveal() {
+    setState(() => _revealed = true);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _revealed = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _reveal,
+      behavior: HitTestBehavior.opaque,
+      child: widget.builder(_revealed),
+    );
+  }
 }

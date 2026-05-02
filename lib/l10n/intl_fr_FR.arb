@@ -1045,5 +1045,7 @@
     "Manual_Install": "Installation manuelle",
     "Global_Seasonal_Filter": "Global Seasonal Filter",
     "Global_Seasonal_Filter_Desc": "Appliquer des filtres saisonniers \u00e0 toutes les saisons/ann\u00e9es",
-    "Clear_and_reschedule_all_notifications": "Effacer et reprogrammer toutes les notifications"
+    "Clear_and_reschedule_all_notifications": "Effacer et reprogrammer toutes les notifications",
+    "Hide_Score": "Masquer la partition Anime/Manga",
+    "Hide_Score_Desc": "Masque les scores par d\u00e9faut. Appuyez sur l'ic\u00f4ne en forme d'\u0153il sur n'importe quelle carte pour r\u00e9v\u00e9ler le score."
 }

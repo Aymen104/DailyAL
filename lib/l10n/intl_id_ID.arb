@@ -1045,5 +1045,7 @@
     "Manual_Install": "Instalasi Manual",
     "Global_Seasonal_Filter": "Filter Musiman Global",
     "Global_Seasonal_Filter_Desc": "Terapkan filter musiman ke semua musim/tahun",
-    "Clear_and_reschedule_all_notifications": "Hapus dan jadwalkan ulang semua notifikasi"
+    "Clear_and_reschedule_all_notifications": "Hapus dan jadwalkan ulang semua notifikasi",
+    "Hide_Score": "Sembunyikan Skor Anime/Manga",
+    "Hide_Score_Desc": "Menyembunyikan skor secara default. Ketuk ikon mata pada kartu mana saja untuk melihat skornya."
 }
