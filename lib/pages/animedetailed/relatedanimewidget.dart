@@ -71,7 +71,7 @@ class _RelatedAnimeWidgetState extends State<RelatedAnimeWidget>
   void _setAnimeGraph() async {
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
     try {
-      _graph = await DalApi.i.getAnimeGraph(widget.id);
+      _graph = await DalApi.i.getAnimeGraph(widget.id, widget.category);
       final then = DateTime.now().millisecondsSinceEpoch / 1000;
       if (_graph is AnimeGraph && nullOrEmpty(_graph.edges)) {
         throw Error();

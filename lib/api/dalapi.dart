@@ -446,12 +446,151 @@ class DalApi {
     };
   }
 
-  Future<AnimeGraph> getAnimeGraph(int id) async {
-    return AnimeGraph.fromJson(
-      await _apiGET(
-        'anime/$id/related',
-      ),
+  Future<AnimeGraph> getAnimeGraph(int id, [String category = 'anime']) async {
+    try {
+      final result = await _apiGET(
+        '$category/$id/related',
+      );
+      if (result is Map<String, dynamic> && result.isNotEmpty) {
+        final graph = AnimeGraph.fromJson(result);
+        if (!nullOrEmpty(graph.nodes) && !nullOrEmpty(graph.edges)) {
+          return graph;
+        }
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return _getAnimeGraphFromTenrai(id, category);
+  }
+
+  /// Fallback graph: builds nodes/edges from Tenrai (Jikan v4) relations when
+  /// the dal-api related endpoint fails. Try dal-api first, fall back here.
+  Future<AnimeGraph> _getAnimeGraphFromTenrai(int id, String category) async {
+    try {
+      final relations = await _tenraiGet('${CredMal.jikanV4}$category/$id/relations');
+      final data = relations?['data'] as List?;
+      if (data == null) throw Error.throwWithStackTrace('no relations', StackTrace.current);
+      final entryIds = <int>{};
+      final relationMap = <int, String>{};
+      final entryCategory = <int, String>{};
+      for (final rel in data) {
+        if (rel is! Map<String, dynamic>) continue;
+        final relation = rel['relation']?.toString() ?? 'Other';
+        for (final entry in (rel['entry'] as List? ?? [])) {
+          if (entry is Map<String, dynamic>) {
+            final mid = entry['mal_id'];
+            if (mid is int) {
+              entryIds.add(mid);
+              relationMap[mid] = relation;
+              final entryType = entry['type']?.toString();
+              entryCategory[mid] = entryType == 'manga' ? 'manga' : category;
+            }
+          }
+        }
+      }
+      entryIds.add(id);
+      final details = await Future.wait(
+        entryIds.map(
+          (eid) => _tenraiGet('${CredMal.jikanV4}${entryCategory[eid] ?? category}/$eid'),
+        ),
+      );
+      final nodes = <GraphNode>[];
+      final nodeById = <int, GraphNode>{};
+      for (final j in details) {
+        final node = _graphNodeFromTenrai(j);
+        if (node != null && node.id != null) {
+          nodeById[node.id!] = node;
+          nodes.add(node);
+        }
+      }
+      final edges = <GraphEdge>[];
+      final root = nodeById[id];
+      for (final eid in entryIds) {
+        if (nodeById[eid] == null) continue;
+        final relationType = _toGRelationType(relationMap[eid] ?? 'Other');
+        if (root != null && eid != id) {
+          edges.add(GraphEdge(
+            source: root.id,
+            target: eid,
+            relationType: relationType,
+          ));
+        }
+      }
+      if (nodes.isEmpty || edges.isEmpty) {
+        throw Error.throwWithStackTrace('graph empty', StackTrace.current);
+      }
+      return AnimeGraph(nodes: nodes, edges: edges);
+    } catch (e) {
+      logDal(e);
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _tenraiGet(String url) async {
+    final response = await MalConnect.getContent(
+      url,
+      withNoHeaders: true,
+      retryOnFail: false,
+      includeNsfw: false,
+      useTimeout: true,
+      timeoutDuration: const Duration(seconds: 8),
     );
+    return response is Map<String, dynamic> ? response : null;
+  }
+
+  GraphNode? _graphNodeFromTenrai(Map<String, dynamic>? json) {
+    if (json == null) return null;
+    final seasonKey = json['season']?.toString();
+    final year = json['year'];
+    GStartSeason? startSeason;
+    if (seasonKey != null &&
+        seasonKey.isNotEmpty &&
+        seasonValues.map.containsKey(seasonKey) &&
+        year != null) {
+      startSeason = GStartSeason(
+        year: year,
+        season: seasonValues.map[seasonKey]!,
+      );
+    }
+    return GraphNode(
+      id: json['mal_id'] ?? json['id'],
+      title: json['title']?.toString(),
+      mainPicture: GMainPicture(
+        medium: json['images']?['jpg']?['image_url'],
+        large: json['images']?['jpg']?['large_image_url'],
+      ),
+      mean: (json['score'] as num?)?.toDouble(),
+      mediaType: json['type']?.toString(),
+      status: json['status']?.toString(),
+      startSeason: startSeason,
+    );
+  }
+
+  GRelationType _toGRelationType(String relation) {
+    switch (relation.toLowerCase().replaceAll(' ', '_')) {
+      case 'sequel':
+        return GRelationType.sequel;
+      case 'prequel':
+        return GRelationType.prequel;
+      case 'alternative_setting':
+        return GRelationType.alternative_setting;
+      case 'alternative_version':
+        return GRelationType.alternative_version;
+      case 'side_story':
+        return GRelationType.side_story;
+      case 'parent_story':
+        return GRelationType.parent_story;
+      case 'summary':
+        return GRelationType.summary;
+      case 'full_story':
+        return GRelationType.full_story;
+      case 'spin_off':
+        return GRelationType.spin_off;
+      case 'character':
+        return GRelationType.character;
+      default:
+        return GRelationType.other;
+    }
   }
 
   Future<bool> isFeatureEnabled(FeatureFlag flag) {
@@ -530,15 +669,61 @@ class DalApi {
   ]) async {
     final autoCompleteList = await _autoCompleteFuture;
     if (autoCompleteList == null) {
-      return [];
+      return _searchAnimeFromTenrai(text, limit);
     }
     final lowerCase = text.toLowerCase();
-    return autoCompleteList
+    final results = autoCompleteList
         .where((e) =>
             e.title.toLowerCase().contains(lowerCase) ||
             e.synonyms.contains(lowerCase))
         .take(limit)
         .toList();
+    if (results.isEmpty) {
+      return _searchAnimeFromTenrai(text, limit);
+    }
+    return results;
+  }
+
+  /// Fallback autocomplete: server-side Tenrai (Jikan v4) search as you type,
+  /// used when the dal-api autocomplete list is unreachable. Try dal-api
+  /// first, and only fall back here when the other option fails.
+  Future<List<AnimeAutoComplete>> _searchAnimeFromTenrai(
+      String text, int limit) async {
+    try {
+      final uri = Uri.parse('${CredMal.jikanV4}anime').replace(
+        queryParameters: {
+          'q': text,
+          'limit': '$limit',
+          'sfw': 'false',
+        },
+      );
+      final response = await MalConnect.getContent(
+        uri.toString(),
+        withNoHeaders: true,
+        retryOnFail: true,
+        includeNsfw: false,
+        fromCache: true,
+        timeinHours: 24,
+      );
+      if (response == null) return [];
+      final data = response['data'];
+      if (data is! List) return [];
+      return data
+          .map((e) => e is Map<String, dynamic>
+              ? AnimeAutoComplete.fromJson({
+                  'title': e['title'],
+                  'picture': e['images']?['jpg']?['image_url'],
+                  'year': e['year'],
+                  'malId': e['mal_id']?.toString(),
+                  'synonyms': (e['title_synonyms'] as List?)?.join(',') ?? '',
+                })
+              : null)
+          .whereType<AnimeAutoComplete>()
+          .toList();
+    } catch (e) {
+      logDal(e);
+      return [];
+    }
   }
 
   Future<List<AnimeAutoComplete>?> _getAutoCompleteFuture() async {
