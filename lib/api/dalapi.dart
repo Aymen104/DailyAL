@@ -278,6 +278,13 @@ class DalApi {
     'friday': 5,
     'saturday': 6,
     'sunday': 7,
+    'mondays': 1,
+    'tuesdays': 2,
+    'wednesdays': 3,
+    'thursdays': 4,
+    'fridays': 5,
+    'saturdays': 6,
+    'sundays': 7,
   };
 
   /// Fallback weekly schedule: built from Tenrai (Jikan v4) `/schedules` when
@@ -374,17 +381,16 @@ class DalApi {
       if (broadcast is! Map<String, dynamic>) return null;
       final dayStr = (broadcast['day']?.toString() ?? '').toLowerCase();
       final timeStr = broadcast['time']?.toString();
-      final weekIndex = _weekDays[dayStr];
+      var weekIndex = _weekDays[dayStr];
       if (weekIndex == null || timeStr == null) return null;
       final timeParts = timeStr.split(':');
       if (timeParts.length < 2) return null;
       var hour = int.tryParse(timeParts[0]);
       final minute = int.tryParse(timeParts[1]);
       if (hour == null || minute == null) return null;
-      var dayOffset = 0;
       if (hour >= 24) {
         hour -= 24;
-        dayOffset = 1;
+        weekIndex = weekIndex % 7 + 1;
       }
       final aired = json['aired'];
       final from = (aired is Map<String, dynamic>)
@@ -402,8 +408,7 @@ class DalApi {
       }
 
       DateTime slotForDate(DateTime d) {
-        final base = DateTime.utc(d.year, d.month, d.day, hour, minute)
-            .add(Duration(days: dayOffset));
+        final base = DateTime.utc(d.year, d.month, d.day, hour, minute);
         return base.add(Duration(days: weekIndex - base.weekday));
       }
 
