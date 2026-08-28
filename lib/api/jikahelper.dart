@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/jikan_models.dart';
 import 'package:dailyanimelist/api/malconnect.dart';
+import 'package:dailyanimelist/api/producermodels.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/main.dart';
@@ -258,5 +259,54 @@ class JikanHelper {
   static Future<SearchResult?> getAnimeReviews(int id) async {
     final url = CredMal.htmlEnd + 'anime/$id/_/reviews';
     return MalConnect.htmlListPage(url, '', (p0) => null);
+  }
+
+  /// Get a company (producer/studio/licensor) details from the Jikan-compatible
+  /// (Tenrai) `/producers/{id}/full` endpoint. Mirrors the MAL company page:
+  /// name, established date, favorites, work count, about/biography, official
+  /// links.
+  static Future<ProducerV4> getProducerInfo(int id,
+      {Function(dynamic)? onError}) async {
+    try {
+      final url = '${CredMal.jikanV4}producers/$id/full';
+      logDal('Fetching producer info from: $url');
+      final response = await MalConnect.getContent(url,
+          withNoHeaders: true);
+      if (response != null && response is Map<String, dynamic>) {
+        final data = response['data'];
+        if (data is Map<String, dynamic>) {
+          return ProducerV4.fromJson(data);
+        }
+      }
+      return ProducerV4(malId: id);
+    } catch (e) {
+      logDal('Error fetching producer info: $e');
+      onError?.call(e);
+      return ProducerV4(malId: id);
+    }
+  }
+
+  /// Get all anime a company is credited on (producer/studio/licensor roles),
+  /// paginated. Uses order_by=start_date&sort=desc like MAL's works page.
+  static Future<SearchResult> getProducerWorks(int id, {int page = 1}) async {
+    try {
+      final v4Url =
+          '${CredMal.jikanV4}anime?producers=$id&page=$page&order_by=start_date&sort=desc';
+      logDal(v4Url);
+      var response = await MalConnect.retryGet(v4Url, Map());
+      if (response != null && response.statusCode == 200) {
+        Map<String, dynamic> result = jsonDecode(response.body) ?? {};
+        final items = (result["data"] ?? <BaseNode>[]);
+        return SearchResult(
+          data: (items as List)
+              .map<BaseNode>((e) => _fromMap(e, 'anime'))
+              .toList(),
+          paging: Paging(next: (page + 1).toString()),
+        );
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return SearchResult();
   }
 }

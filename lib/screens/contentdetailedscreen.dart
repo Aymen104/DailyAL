@@ -1651,23 +1651,19 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
           const SizedBox(
             height: 3,
           ),
-          Text(
-            widget.category.equals("anime")
-                ? ((contentDetailed?.studios == null ||
-                        contentDetailed.studios.length == 0)
-                    ? "?"
-                    : contentDetailed.studios
-                        .map((e) => e.name)
-                        .reduce((value, element) => value + "," + element))
-                : ((contentDetailed?.authors == null ||
-                        contentDetailed.authors.length == 0)
-                    ? "?"
-                    : contentDetailed.authors
-                        .map((e) => e.author.firstName)
-                        .reduce((value, element) => value + "," + element)),
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
+          if (widget.category.equals("anime"))
+            _studiosClickable()
+          else
+            Text(
+              ((contentDetailed?.authors == null ||
+                      contentDetailed.authors.length == 0)
+                  ? "?"
+                  : contentDetailed.authors
+                      .map((e) => e.author.firstName)
+                      .reduce((value, element) => value + "," + element)),
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
           SB.h10,
           Text(
             S.current.Members,
@@ -1812,7 +1808,12 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
             title: widget.category.equals("anime")
                 ? S.current.Studios
                 : S.current.Authors,
-            content: _getStudiosString(),
+            child: widget.category.equals("anime")
+                ? _studiosClickable()
+                : null,
+            content: widget.category.equals("anime")
+                ? null
+                : _getStudiosString(),
           ),
           _buildDetailSection(
             title: "Media",
@@ -1889,6 +1890,25 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
               .join(", ") ??
           "?";
     }
+  }
+
+  Widget _studiosClickable() {
+    final studios = contentDetailed?.studios;
+    if (studios == null || studios.isEmpty) return Text("?");
+    return Wrap(
+      spacing: 5,
+      runSpacing: 3,
+      children: studios
+          .map((e) => ShadowButton(
+                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                onPressed: () => onStudioTap(e, context),
+                child: Text(
+                  e.name ?? '?',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ))
+          .toList(),
+    );
   }
 
   String _getMediaString() {

@@ -4,6 +4,7 @@ import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
+import 'package:dailyanimelist/screens/producerscreen.dart';
 import 'package:dailyanimelist/screens/seasonal_screen.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dal_commons/commons.dart';
@@ -12,6 +13,15 @@ import 'package:dal_commons/dal_commons.dart';
 
 void onStudioTap(AnimeStudio e, BuildContext context) {
   final animeStudio = Mal.animeStudios[e.id];
+  if (e.id != null) {
+    gotoPage(
+        context: context,
+        newPage: ProducerScreen(
+          producerId: e.id!,
+          producerName: animeStudio ?? e.name,
+        ));
+    return;
+  }
   gotoPage(
       context: context,
       newPage: GeneralSearchScreen(
