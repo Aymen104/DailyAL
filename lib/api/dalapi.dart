@@ -392,6 +392,9 @@ class DalApi {
         hour -= 24;
         weekIndex = weekIndex % 7 + 1;
       }
+      final slotHour = hour;
+      final slotMinute = minute;
+      final slotWeek = weekIndex;
       final aired = json['aired'];
       final from = (aired is Map<String, dynamic>)
           ? aired['from']?.toString()
@@ -408,8 +411,9 @@ class DalApi {
       }
 
       DateTime slotForDate(DateTime d) {
-        final base = DateTime.utc(d.year, d.month, d.day, hour, minute);
-        return base.add(Duration(days: weekIndex - base.weekday));
+        final base = DateTime.utc(
+            d.year, d.month, d.day, slotHour, slotMinute);
+        return base.add(Duration(days: slotWeek - base.weekday));
       }
 
       final startSlot = slotForDate(start);
