@@ -540,6 +540,9 @@ class DalApi {
 
   GraphNode? _graphNodeFromTenrai(Map<String, dynamic>? json) {
     if (json == null) return null;
+    // Tenrai (Jikan v4) wraps every response in {"data": {...}}.
+    final data = json['data'];
+    if (data is Map<String, dynamic>) json = data;
     final seasonKey = json['season']?.toString();
     final year = json['year'];
     GStartSeason? startSeason;
