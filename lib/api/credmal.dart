@@ -82,7 +82,11 @@ class CredMal {
 
   static final String apiUserAvatar = cdnEndPoint + "images/useravatars/";
 
-  static const String jikanV4 = "https://api.jikan.moe/v4/";
+  // Jikan (api.jikan.moe) is being decommissioned (Oct 1 2026) and has been
+  // returning 504 "failed to connect to MyAnimeList" on most endpoints since
+  // Aug 2026. Tenrai (api.tenrai.org) serves the same Jikan v4 schema for
+  // 95% of endpoints. Uses Tenrai as the public Jikan-compatible root.
+  static const String jikanV4 = "https://api.tenrai.org/v1/";
 
   static const String dalWeb = 'https://dailyanimelist.web.app/';
 

@@ -10,7 +10,9 @@ class Constants {
   ///Client Header
   static final String clientHeader = 'X-MAL-Client-ID';
 
-  static const String jikanV4 = "https://api.jikan.moe/v4/";
+  // Jikan public API decommissioned Oct 1 2026/504s since Aug 2026.
+  // Tenrai serves the same v4 schema.
+  static const String jikanV4 = "https://api.tenrai.org/v1/";
 }
 
 /// LOG-Config
