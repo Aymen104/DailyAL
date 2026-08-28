@@ -24,11 +24,11 @@ jobs:
           flutter config --no-analytics
           flutter pub get
 
-      - name: Prepare Gradle 8.13 wrapper and release signing
+      - name: Prepare Gradle 8.14.3 wrapper and release signing
         run: |
-          curl -fsSL -o /tmp/gradle-8.13-bin.zip \
-            https://services.gradle.org/distributions/gradle-8.13-bin.zip
-          unzip -q /tmp/gradle-8.13-bin.zip -d "$RUNNER_TEMP"
+          curl -fsSL -o /tmp/gradle-8.14.3-bin.zip \
+            https://services.gradle.org/distributions/gradle-8.14.3-bin.zip
+          unzip -q /tmp/gradle-8.14.3-bin.zip -d "$RUNNER_TEMP"
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
           keytool -genkeypair -v -keystore "$RUNNER_TEMP/tenrai_patch.jks" \
             -storepass android -keypass android -alias tenrai \
@@ -41,8 +41,8 @@ jobs:
             echo "storeFile=$RUNNER_TEMP/tenrai_patch.jks"
           } > android/key.properties.file
           cd android
-          "$RUNNER_TEMP/gradle-8.13/bin/gradle" wrapper \
-            --gradle-version 8.13 --distribution-type bin
+          "$RUNNER_TEMP/gradle-8.14.3/bin/gradle" wrapper \
+            --gradle-version 8.14.3 --distribution-type bin
 
       - name: Build release APK
         run: flutter build apk --release --no-pub
