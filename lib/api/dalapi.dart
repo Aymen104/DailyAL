@@ -255,11 +255,185 @@ class DalApi {
     int? year,
     bool fromCache = true,
   }) async {
-    return HashMap.fromEntries((await getSchedules(
-            season: season, type: type, year: year, fromCache: fromCache))
-        .map((e) => MapEntry(PathUtils.getIdUrl(e.relatedLinks?.mal), e))
-        .where((e) => e.key != null)
-        .map((e) => MapEntry(e.key!, e.value)));
+    try {
+      final schedules = await getSchedules(
+          season: season, type: type, year: year, fromCache: fromCache);
+      if (schedules.isNotEmpty) {
+        return HashMap.fromEntries(schedules
+            .map((e) => MapEntry(PathUtils.getIdUrl(e.relatedLinks?.mal), e))
+            .where((e) => e.key != null)
+            .map((e) => MapEntry(e.key!, e.value)));
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return _getScheduleForMalIdsFromTenrai(fromCache: fromCache);
+  }
+
+  static const _weekDays = {
+    'monday': 1,
+    'tuesday': 2,
+    'wednesday': 3,
+    'thursday': 4,
+    'friday': 5,
+    'saturday': 6,
+    'sunday': 7,
+  };
+
+  /// Fallback weekly schedule: built from Tenrai (Jikan v4) `/schedules` when
+  /// the dal-api schedule endpoint is dead or empty. Covers every currently
+  /// airing anime (not just the current season), so the calendar, list sort
+  /// and episode-reminder notifications keep working.
+  Future<Map<int, ScheduleData>> _getScheduleForMalIdsFromTenrai(
+      {bool fromCache = true}) async {
+    const serviceName = 'schedule';
+    const cacheKey = 'all';
+    final map = HashMap<int, ScheduleData>();
+    try {
+      if (fromCache) {
+        final cached = await CacheManager.instance
+            .getValueForServiceAutoExpire(serviceName, cacheKey, 60 * 60 * 24);
+        if (cached != null) {
+          final decoded = jsonDecode(cached);
+          if (decoded is Map) {
+            for (final e in decoded.entries) {
+              final id = int.tryParse(e.key?.toString() ?? '');
+              if (id == null || e.value is! Map) continue;
+              final schedule = ScheduleData.fromJson(
+                  Map<String, dynamic>.from(e.value as Map));
+              if (schedule.timestamp != null) {
+                map[id] = schedule;
+              }
+            }
+            if (map.isNotEmpty) return map;
+          }
+        }
+      }
+      logDal('Fetching Tenrai schedule fallback');
+      final first =
+          await _tenraiGet('${CredMal.jikanV4}schedules?sfw=false&page=1');
+      if (first != null) {
+        _fillTenraiSchedule(map, first);
+        final totalPages =
+            ((first['pagination']?['last_visible_page'] ?? 1) as num).toInt();
+        final pages = [
+          for (var p = 2; p <= totalPages && p <= 20; p++) p
+        ];
+        const concurrency = 3;
+        final outputs =
+            List<Map<String, dynamic>?>.filled(pages.length, null);
+        var next = 0;
+        Future<void> worker() async {
+          while (true) {
+            final i = next++;
+            if (i >= pages.length) return;
+            outputs[i] = await _tenraiGet(
+                '${CredMal.jikanV4}schedules?sfw=false&page=${pages[i]}');
+          }
+        }
+
+        await Future.wait(
+            [for (var i = 0; i < concurrency && i < pages.length; i++) worker()]);
+        for (final r in outputs) {
+          if (r != null) _fillTenraiSchedule(map, r);
+        }
+        await CacheManager.instance.setValueForServiceAutoExpireIn(
+          serviceName,
+          cacheKey,
+          jsonEncode(map.map((k, v) => MapEntry('$k', v.toJson()))),
+        );
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return map;
+  }
+
+  void _fillTenraiSchedule(
+      Map<int, ScheduleData> map, Map<String, dynamic> data) {
+    final list = data['data'];
+    if (list is! List) return;
+    for (final e in list) {
+      if (e is! Map<String, dynamic>) continue;
+      final id = e['mal_id'];
+      if (id is! int) continue;
+      final schedule = _scheduleDataFromTenrai(e);
+      if (schedule != null && schedule.timestamp != null) {
+        map[id] = schedule;
+      }
+    }
+  }
+
+  /// Build a ScheduleData from a Tenrai (Jikan v4) entry using its weekly
+  /// broadcast slot (JST) anchored at the aired-from date. The next episode is
+  /// the next occurrence of that slot; its number is the count of weeks since
+  /// the premiere.
+  ScheduleData? _scheduleDataFromTenrai(Map<String, dynamic> json) {
+    try {
+      final broadcast = json['broadcast'];
+      if (broadcast is! Map<String, dynamic>) return null;
+      final dayStr = (broadcast['day']?.toString() ?? '').toLowerCase();
+      final timeStr = broadcast['time']?.toString();
+      final weekIndex = _weekDays[dayStr];
+      if (weekIndex == null || timeStr == null) return null;
+      final timeParts = timeStr.split(':');
+      if (timeParts.length < 2) return null;
+      var hour = int.tryParse(timeParts[0]);
+      final minute = int.tryParse(timeParts[1]);
+      if (hour == null || minute == null) return null;
+      var dayOffset = 0;
+      if (hour >= 24) {
+        hour -= 24;
+        dayOffset = 1;
+      }
+      final aired = json['aired'];
+      final from = (aired is Map<String, dynamic>)
+          ? aired['from']?.toString()
+          : json['aired_from']?.toString();
+      final to = (aired is Map<String, dynamic>)
+          ? aired['to']?.toString()
+          : null;
+      final start = from == null ? null : DateTime.tryParse(from);
+      if (start == null) return null;
+      final end = to == null ? null : DateTime.tryParse(to);
+      final nowUtc = DateTime.now().toUtc();
+      if (end != null && end.isBefore(nowUtc)) {
+        return null; // already finished airing
+      }
+
+      DateTime slotForDate(DateTime d) {
+        final base = DateTime.utc(d.year, d.month, d.day, hour, minute)
+            .add(Duration(days: dayOffset));
+        return base.add(Duration(days: weekIndex - base.weekday));
+      }
+
+      final startSlot = slotForDate(start);
+      final jstNow = nowUtc.add(const Duration(hours: 9));
+      DateTime next;
+      int episode;
+      if (jstNow.isBefore(startSlot)) {
+        next = startSlot.subtract(const Duration(hours: 9));
+        episode = 1;
+      } else {
+        final weeks = jstNow.difference(startSlot).inDays ~/ 7;
+        var currentSlot = startSlot.add(Duration(days: weeks * 7));
+        if (currentSlot.isAfter(jstNow)) {
+          currentSlot = currentSlot.subtract(const Duration(days: 7));
+        }
+        episode = 1 + weeks;
+        next = currentSlot
+            .add(const Duration(days: 7))
+            .subtract(const Duration(hours: 9));
+      }
+      if (next.isBefore(nowUtc)) return null;
+      return ScheduleData(
+        timestamp: next.millisecondsSinceEpoch ~/ 1000,
+        episode: episode,
+      );
+    } catch (e) {
+      logDal(e);
+      return null;
+    }
   }
 
   Future<SearchResult> searchInterestStacks({
