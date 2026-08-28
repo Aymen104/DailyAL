@@ -30,15 +30,13 @@ jobs:
             https://services.gradle.org/distributions/gradle-8.14.3-bin.zip
           unzip -q /tmp/gradle-8.14.3-bin.zip -d "$RUNNER_TEMP"
           echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-          keytool -genkeypair -v -keystore "$RUNNER_TEMP/tenrai_patch.jks" \
-            -storepass android -keypass android -alias tenrai \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Tenrai Patch,O=DailyAL Patched,C=MA"
+          # Fixed keystore committed with the repo (android/app/tenrai_fixed.p12)
+          # so every build shares the same signing identity.
           {
             echo "storePassword=android"
             echo "keyPassword=android"
             echo "keyAlias=tenrai"
-            echo "storeFile=$RUNNER_TEMP/tenrai_patch.jks"
+            echo "storeFile=tenrai_fixed.p12"
           } > android/key.properties.file
           cd android
           "$RUNNER_TEMP/gradle-8.14.3/bin/gradle" wrapper \
