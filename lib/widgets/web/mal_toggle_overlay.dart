@@ -42,7 +42,7 @@ Future<MalToggleOutcome?> runMalToggle(
   );
 }
 
-enum _Phase { check, favoriting, login, relogin }
+enum _Phase { check, favoriting, login }
 
 class MalToggleOverlay extends StatefulWidget {
   /// `character` or `people`.
@@ -157,7 +157,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   void _onResult(String message) {
     _log('bridge message=$message phase=$_phase');
     if (message == 'PLOGINYES') {
-      _phase = _Phase.relogin;
+      _phase = _Phase.favoriting;
       _status = 'Signed in. Syncing with MyAnimeList\u2026';
       if (mounted) setState(() {});
       _controller.loadRequest(Uri.parse(_baseUrl));
@@ -216,7 +216,7 @@ Padding(
               child: Row(
                 children: [
                   Icon(
-                    _phase == _Phase.login || _phase == _Phase.relogin
+                    _phase == _Phase.login
                         ? Icons.login
                         : Icons.favorite_border,
                     size: 18,
