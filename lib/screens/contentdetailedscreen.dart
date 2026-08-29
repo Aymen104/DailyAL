@@ -1899,7 +1899,7 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
       spacing: 5,
       runSpacing: 3,
       children: studios
-          .map((e) => ShadowButton(
+          .map<Widget>((e) => ShadowButton(
                 padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 onPressed: () => onStudioTap(e, context),
                 child: Text(
