@@ -82,6 +82,7 @@ dependencies:
   path_provider: ^2.1.4
   package_info_plus: ^9.0.0
   webviewtube: ^2.1.1
+  webview_flutter: ^4.9.0
   graphview: ^1.2.0
   flutter_displaymode: ^0.7.0
   add_2_calendar:

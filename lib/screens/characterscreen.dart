@@ -17,6 +17,7 @@ import 'package:dailyanimelist/widgets/home/animecard.dart';
 import 'package:dailyanimelist/widgets/home/bookmarks_widget.dart';
 import 'package:dailyanimelist/widgets/shimmecolor.dart';
 import 'package:dailyanimelist/widgets/translator.dart';
+import 'package:dailyanimelist/widgets/user/malfavorite_button.dart';
 import 'package:dailyanimelist/util/responsive_helper.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/material.dart';
@@ -153,6 +154,11 @@ class _CharacterScreenState extends State<CharacterScreen> {
             )
           : null,
       actions: [
+        if (characterInfo != null || personInfo != null)
+          MalFavoriteButton(
+            type: chara.equals("character") ? "character" : "people",
+            id: id,
+          ),
         PopupMenuBuilder(
           menuItems: [
             shareMenuItem()
