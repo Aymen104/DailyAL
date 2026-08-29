@@ -16,6 +16,9 @@ import 'package:dailyanimelist/screens/characterscreen.dart';
 import 'package:dailyanimelist/screens/contentdetailedscreen.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/screens/plainscreen.dart';
+import 'package:dailyanimelist/screens/producerdirectory_screen.dart';
+import 'package:dailyanimelist/screens/recentadded_screen.dart';
+import 'package:dailyanimelist/screens/topranked_screen.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/util/responsive_helper.dart';
 import 'package:dailyanimelist/widgets/avatarwidget.dart';
@@ -149,12 +152,37 @@ class _ExplorePageState extends State<ExplorePage> {
         )),
         SB.h20,
         _leadingWidget(
-          VisibleSection(S.current.Characters, _characterBuilder),
+          VisibleSection(
+            S.current.Characters,
+            _characterBuilder,
+            onViewAll: () => gotoPage(
+              context: context,
+              newPage: TopRankedScreen(
+                charaCategory: 'character',
+                appbarTitle: S.current.Characters,
+              ),
+            ),
+          ),
         ),
         SB.h20,
         _leadingWidget(
-          VisibleSection(S.current.Seiyuu, _seiyuuBuilder),
+          VisibleSection(
+            S.current.Seiyuu,
+            _seiyuuBuilder,
+            onViewAll: () => gotoPage(
+              context: context,
+              newPage: TopRankedScreen(
+                charaCategory: 'person',
+                appbarTitle: S.current.Seiyuu,
+              ),
+            ),
+          ),
         ),
+        SB.h20,
+        _leadingWidget(VisibleSection(S.current.Producers, _producersEntry())),
+        SB.h20,
+        _leadingWidget(
+            VisibleSection(S.current.Recently_Added, _recentlyAddedEntry())),
       ];
 
   List<Widget> get _mangaSlivers => [
@@ -190,12 +218,37 @@ class _ExplorePageState extends State<ExplorePage> {
         ),
         SB.h20,
         _leadingWidget(
-          VisibleSection(S.current.Characters, _characterBuilder),
+          VisibleSection(
+            S.current.Characters,
+            _characterBuilder,
+            onViewAll: () => gotoPage(
+              context: context,
+              newPage: TopRankedScreen(
+                charaCategory: 'character',
+                appbarTitle: S.current.Characters,
+              ),
+            ),
+          ),
         ),
         SB.h20,
         _leadingWidget(
-          VisibleSection(S.current.Seiyuu, _seiyuuBuilder),
+          VisibleSection(
+            S.current.Seiyuu,
+            _seiyuuBuilder,
+            onViewAll: () => gotoPage(
+              context: context,
+              newPage: TopRankedScreen(
+                charaCategory: 'person',
+                appbarTitle: S.current.Seiyuu,
+              ),
+            ),
+          ),
         ),
+        SB.h20,
+        _leadingWidget(VisibleSection(S.current.Producers, _producersEntry())),
+        SB.h20,
+        _leadingWidget(
+            VisibleSection(S.current.Recently_Added, _recentlyAddedEntry())),
       ];
 
   Widget _reviewsBuilder(String revCat, [Axis axis = Axis.horizontal]) {
@@ -244,6 +297,56 @@ class _ExplorePageState extends State<ExplorePage> {
           data?.data?.data?.map((e) => CharPeopleCommon.fromPerson(e)).toList(),
           'person'),
       loadingChild: _characterPeopleListWidget(null),
+    );
+  }
+
+  Widget _producersEntry() {
+    return _directoryEntryCard(
+      icon: Icons.business,
+      label: S.current.Producers,
+      onTap: () => gotoPage(
+        context: context,
+        newPage: const ProducerDirectoryScreen(),
+      ),
+    );
+  }
+
+  Widget _recentlyAddedEntry() {
+    return _directoryEntryCard(
+      icon: Icons.fiber_new,
+      label: S.current.Recently_Added,
+      onTap: () => gotoPage(
+        context: context,
+        newPage: const RecentAddedScreen(),
+      ),
+    );
+  }
+
+  Widget _directoryEntryCard({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      margin: const EdgeInsets.all(5),
+      child: InkWell(
+        borderRadius: borderRadius,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon),
+              SB.w10,
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

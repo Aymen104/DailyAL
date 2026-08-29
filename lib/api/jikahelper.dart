@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:dailyanimelist/api/credmal.dart';
+import 'package:dailyanimelist/api/episodemodels.dart';
 import 'package:dailyanimelist/api/jikan_models.dart';
 import 'package:dailyanimelist/api/malconnect.dart';
 import 'package:dailyanimelist/api/producermodels.dart';
+import 'package:dailyanimelist/api/topmodels.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/main.dart';
@@ -309,4 +311,114 @@ class JikanHelper {
     }
     return SearchResult();
   }
+
+  /// Get the episode list of an anime from the Jikan-compatible (Tenrai)
+  /// `/anime/{id}/episodes` endpoint.
+  static Future<AnimeEpisodesResult> getAnimeEpisodes(int id,
+      {int page = 1}) async {
+    try {
+      final v4Url = '${CredMal.jikanV4}anime/$id/episodes?page=$page';
+      logDal(v4Url);
+      var response = await MalConnect.retryGet(v4Url, Map());
+      if (response != null && response.statusCode == 200) {
+        return AnimeEpisodesResult.fromJson(jsonDecode(response.body));
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return const AnimeEpisodesResult();
+  }
+
+  /// Get the MAL top characters or top people ranking. Jikan/Tenrai payloads
+  /// have no `rank` field, so it is derived from the page index (25/page).
+  static Future<TopRankedPage> getTopRanked(String charaCategory,
+      {int page = 1}) async {
+    try {
+      final endpoint = charaCategory.equals('person') ? 'people' : 'characters';
+      final v4Url = '${CredMal.jikanV4}top/$endpoint?page=$page';
+      logDal(v4Url);
+      var response = await MalConnect.retryGet(v4Url, Map());
+      if (response != null && response.statusCode == 200) {
+        final body = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
+        final items = body["data"] as List? ?? [];
+        final pagination = body["pagination"] as Map<String, dynamic>?;
+        final baseRank = (page - 1) * 25;
+        return TopRankedPage(
+          items: List.generate(items.length, (i) {
+            final e = items[i];
+            return TopRankedItem.fromJson(
+              e is Map<String, dynamic> ? e : {},
+              rank: baseRank + i + 1,
+            );
+          }),
+          hasNext: pagination?["has_next_page"] == true,
+        );
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return const TopRankedPage();
+  }
+
+  /// Get the most recently added anime. MAL ids are monotonic, so
+  /// `order_by=mal_id&sort=desc` returns the newest additions first.
+  static Future<SearchResult> getRecentlyAdded({int page = 1}) async {
+    try {
+      final v4Url =
+          '${CredMal.jikanV4}anime?order_by=mal_id&sort=desc&page=$page';
+      logDal(v4Url);
+      var response = await MalConnect.retryGet(v4Url, Map());
+      if (response != null && response.statusCode == 200) {
+        final body = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
+        final items = body["data"] as List? ?? [];
+        final pagination = body["pagination"] as Map<String, dynamic>?;
+        return SearchResult(
+          data: (items as List)
+              .map<BaseNode>((e) => _fromMap(e, 'anime'))
+              .toList(),
+          paging: Paging(
+              next: pagination?["has_next_page"] == true
+                  ? (page + 1).toString()
+                  : null),
+        );
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return SearchResult();
+  }
+
+  /// Get the producer/studio directory (list of companies), paginated, with
+  /// optional name search.
+  static Future<ProducersPage> getProducersList(
+      {int page = 1, String query = ''}) async {
+    try {
+      final v4Url = '${CredMal.jikanV4}producers?page=$page&limit=25'
+          '${query.isNotEmpty ? '&q=${Uri.encodeComponent(query)}' : ''}';
+      logDal(v4Url);
+      var response = await MalConnect.retryGet(v4Url, Map());
+      if (response != null && response.statusCode == 200) {
+        final body = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
+        final items = (body["data"] as List? ?? [])
+            .whereType<Map<String, dynamic>>()
+            .map((e) => ProducerV4.fromJson(e))
+            .toList();
+        final pagination = body["pagination"] as Map<String, dynamic>?;
+        return ProducersPage(
+          items: items,
+          hasNext: pagination?["has_next_page"] == true,
+        );
+      }
+    } catch (e) {
+      logDal(e);
+    }
+    return const ProducersPage();
+  }
+}
+
+class ProducersPage {
+  final List<ProducerV4> items;
+  final bool hasNext;
+
+  const ProducersPage({this.items = const [], this.hasNext = false});
 }

@@ -259,7 +259,7 @@ class UserPreferences {
               (e) => e.name == json['preferredLinkType'],
               orElse: () => LinkType.streaming,
             ),
-            allowYoutubePlayer: json['allowYoutubePlayer'] ?? false,
+            allowYoutubePlayer: json['allowYoutubePlayer'] ?? true,
             showAnimeMangaCard: json['showAnimeMangaCard'] ?? false,
             preferredFont: json['preferredFont'] ?? 'Poppins',
             animeMangaPagePreferences: _animeMangaPagePreferences ??
@@ -301,7 +301,7 @@ class UserPreferences {
             startUpPageTablet: 0,
             preferredLinkType: LinkType.streaming,
             showAnimeMangaCard: false,
-            allowYoutubePlayer: false,
+            allowYoutubePlayer: true,
             preferredFont: 'Poppins',
             animeMangaPagePreferences:
                 AnimeMangaPagePreferences.defaultObject(),

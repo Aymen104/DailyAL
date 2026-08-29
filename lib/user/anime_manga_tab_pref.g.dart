@@ -23,6 +23,7 @@ Map<String, dynamic> _$AnimeMangaTabPreferenceToJson(
 const _$TabTypeEnumMap = {
   TabType.Synopsis: 'Synopsis',
   TabType.Media: 'Media',
+  TabType.Episodes: 'Episodes',
   TabType.Related: 'Related',
   TabType.Adaptations: 'Adaptations',
   TabType.Reviews: 'Reviews',

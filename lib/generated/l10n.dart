@@ -294,6 +294,16 @@ class S {
     return Intl.message('Episodes', name: 'Episodes', desc: '', args: []);
   }
 
+  /// `Producers`
+  String get Producers {
+    return Intl.message('Producers', name: 'Producers', desc: '', args: []);
+  }
+
+  /// `Recently Added`
+  String get Recently_Added {
+    return Intl.message('Recently Added', name: 'Recently_Added', desc: '', args: []);
+  }
+
   /// `Reviews`
   String get Reviews {
     return Intl.message('Reviews', name: 'Reviews', desc: '', args: []);

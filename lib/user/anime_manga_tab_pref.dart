@@ -5,6 +5,7 @@ part 'anime_manga_tab_pref.g.dart';
 enum TabType {
   Synopsis,
   Media,
+  Episodes,
   Related,
   Adaptations,
   Reviews,
@@ -36,6 +37,7 @@ class AnimeMangaTabPreference {
 final defaultAnimeTabs = [
   AnimeMangaTabPreference(TabType.Synopsis, true),
   AnimeMangaTabPreference(TabType.Media, true),
+  AnimeMangaTabPreference(TabType.Episodes, true),
   AnimeMangaTabPreference(TabType.Related, true),
   AnimeMangaTabPreference(TabType.Adaptations, true),
   AnimeMangaTabPreference(TabType.Reviews, true),

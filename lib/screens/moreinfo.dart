@@ -3,6 +3,7 @@ import 'package:dailyanimelist/api/malapi.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/enums.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
+import 'package:dailyanimelist/pages/animedetailed/media_platforms.dart';
 import 'package:dailyanimelist/screens/generalsearchscreen.dart';
 import 'package:dailyanimelist/screens/producerscreen.dart';
 import 'package:dailyanimelist/screens/seasonal_screen.dart';
@@ -60,12 +61,16 @@ class MoreInfoAnime extends StatelessWidget {
   final double horizPadding;
   final bool isModal;
   final List<AdditionalTitle>? additionalTitles;
+  final List<AnimeLink>? links;
+  final RelatedLinks? relatedLinks;
   MoreInfoAnime({
     this.contentDetailed,
     this.category = "anime",
     this.horizPadding = 15.0,
     this.isModal = false,
     this.additionalTitles,
+    this.links,
+    this.relatedLinks,
   });
   @override
   Widget build(BuildContext context) {
@@ -318,6 +323,14 @@ class MoreInfoAnime extends StatelessWidget {
                   .map((e) => '${e.language} ${e.title}')
                   .join(', '),
             ),
+          if (_hasLinks())
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 5),
+              child: AddtionalMediaPlatforms(
+                links ?? [],
+                relatedLinks: relatedLinks,
+              ),
+            ),
         ],
       ),
     ));
@@ -334,6 +347,10 @@ class MoreInfoAnime extends StatelessWidget {
   bool _hasValidAlternateTitles() {
     return additionalTitles != null &&
         additionalTitles!.where((e) => e.title.notEquals('N/A')).isNotEmpty;
+  }
+
+  bool _hasLinks() {
+    return !nullOrEmpty(links) || relatedLinks != null;
   }
 
   String _getAiredText() {

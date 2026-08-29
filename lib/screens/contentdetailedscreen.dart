@@ -12,6 +12,7 @@ import 'package:dailyanimelist/pages/animedetailed/animeforums.dart';
 import 'package:dailyanimelist/pages/animedetailed/animepictures.dart';
 import 'package:dailyanimelist/pages/animedetailed/animestatisticswidget.dart';
 import 'package:dailyanimelist/pages/animedetailed/articlepage.dart';
+import 'package:dailyanimelist/pages/animedetailed/episodeswidget.dart';
 import 'package:dailyanimelist/pages/animedetailed/intereststackwidget.dart';
 import 'package:dailyanimelist/pages/animedetailed/media_platforms.dart';
 import 'package:dailyanimelist/pages/animedetailed/recommanimewidget.dart';
@@ -381,6 +382,13 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
                 S.current.Media,
                 _buildMediaWidget,
               )),
+      TabType.Episodes => VisibleSection(
+          S.current.Episodes,
+          EpisodesWidget(
+            animeId: _id,
+            horizPadding: horizPadding,
+          ),
+        ),
       TabType.Related => _nullIf(
           !nullOrEmpty(contentDetailed?.relatedAnime),
           () => VisibleSection(
@@ -490,6 +498,8 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
                   contentDetailed: contentDetailed,
                   horizPadding: horizPadding,
                   additionalTitles: animeDetailedHtml?.additionalTitles,
+                  links: animeDetailedHtml?.links,
+                  relatedLinks: _scheduleData?.relatedLinks,
                 ),
               )),
       TabType.Stats => _nullIf(
@@ -554,6 +564,7 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
                 ),
               )),
       TabType.Media => null,
+      TabType.Episodes => null,
       TabType.Related => _nullIf(
           !nullOrEmpty(contentDetailed?.relatedManga),
           () => VisibleSection(
@@ -677,6 +688,8 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
                   category: "manga",
                   horizPadding: horizPadding,
                   additionalTitles: animeDetailedHtml?.additionalTitles,
+                  links: animeDetailedHtml?.links,
+                  relatedLinks: _scheduleData?.relatedLinks,
                 ),
               )),
       TabType.Stats => null,
@@ -2136,6 +2149,8 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
         horizPadding: 0,
         isModal: true,
         additionalTitles: animeDetailedHtml?.additionalTitles,
+        links: animeDetailedHtml?.links,
+        relatedLinks: _scheduleData?.relatedLinks,
       ),
     );
   }
