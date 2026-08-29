@@ -65,7 +65,16 @@ class MalFavorite {
     if (status == 200 || status == 201) {
       return MalFavResult(ok: true, wasAdded: wasAdded);
     }
-    if (outcome.looksLikeLoginPage || status == 401) {
+    if (outcome.looksLikeLoginPage ||
+        (outcome.body.contains('login') &&
+            outcome.body.contains('recaptcha'))) {
+      return MalFavResult(
+        needsAuth: true,
+        message:
+            "reCAPTCHA couldn't load in the sign-in window. Please try again.",
+      );
+    }
+    if (status == 401) {
       return const MalFavResult(
         needsAuth: true,
         message: 'Sign in to MyAnimeList first.',

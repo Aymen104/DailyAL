@@ -42,7 +42,7 @@ Future<MalToggleOutcome?> runMalToggle(
   );
 }
 
-enum _Phase { check, favoriting, login }
+enum _Phase { check, favoriting, needsLogin }
 
 class MalToggleOverlay extends StatefulWidget {
   /// `character` or `people`.
@@ -104,13 +104,24 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }); }, 400);
 })();''';
 
-  static const _probeJs = '''(function(){
-  fetch('https://myanimelist.net/mymessages.php', {credentials:'include', redirect:'follow'})
-    .then(function(r){ ResultBridge.postMessage(r.url.indexOf('login.php') !== -1 ? 'PLOGINNO' : 'PLOGINYES'); })
-    .catch(function(){ ResultBridge.postMessage('PLOGINNO'); });
-})();''';
-
   void _log(String message) => debugPrint('[MalToggle] $message');
+
+  /// Whether [url] is (any of) MAL's login pages.
+  static bool _isLoginUrl(String url) {
+    final u = url.toLowerCase();
+    return u.contains('login.php') ||
+        u.contains('login-mal-dialog') ||
+        (u.endsWith('myanimelist.net/') || u.endsWith('myanimelist.net'));
+  }
+
+  /// The user completed a real login: the WebView left the login form.
+  void _onLeftLoginPage() {
+    _log('user navigation away from login page -> authenticated, retrying');
+    _phase = _Phase.favoriting;
+    _status = 'Signed in. Syncing with MyAnimeList\u2026';
+    if (mounted) setState(() {});
+    _controller.loadRequest(Uri.parse(_baseUrl));
+  }
 
   @override
   void initState() {
@@ -122,6 +133,12 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     _controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
+        onDidStartNavigation: (url) {
+          _log('didStart url=$url phase=$_phase');
+          if (_phase == _Phase.needsLogin && !_isLoginUrl(url)) {
+            _onLeftLoginPage();
+          }
+        },
         onPageFinished: (url) {
           _log('pageFinished url=$url phase=$_phase');
           if (_phase == _Phase.check || _phase == _Phase.favoriting) {
@@ -129,8 +146,6 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             _status = 'Syncing with MyAnimeList\u2026';
             if (mounted) setState(() {});
             _controller.runJavaScript(_toggleJs);
-          } else if (_phase == _Phase.login) {
-            _controller.runJavaScript(_probeJs);
           }
         },
         onWebResourceError: (error) {
@@ -156,18 +171,6 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
 
   void _onResult(String message) {
     _log('bridge message=$message phase=$_phase');
-    if (message == 'PLOGINYES') {
-      _phase = _Phase.favoriting;
-      _status = 'Signed in. Syncing with MyAnimeList\u2026';
-      if (mounted) setState(() {});
-      _controller.loadRequest(Uri.parse(_baseUrl));
-      return;
-    }
-    if (message == 'PLOGINNO') {
-      _log('still not logged in, going back to login.php');
-      _controller.runJavaScript("window.location.href='https://myanimelist.net/login.php'");
-      return;
-    }
     if (_sent) return;
     // toggle result: T<status>@@<body>
     if (!message.startsWith('T')) return;
@@ -185,19 +188,24 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     _log('toggleResult status=$status bodyLen=${body.length} bodyHead=${body.length > 80 ? body.substring(0, 80) : body}');
     final looksLikeHtmlPage =
         body.trimLeft().startsWith('<') && body.contains('myanimelist.net');
-    final looksLikeLoginHtml =
-        looksLikeHtmlPage &&
-        (body.contains('login') || body.contains('recaptcha'));
-    if (status == 401 || status == 0 ||
-        (status == 200 && looksLikeHtmlPage) || looksLikeLoginHtml) {
-      // Not authenticated (MAL answers the unauthenticated favorite call with
-      // 400/401 + the login page HTML) → inline site login in the same WebView.
-      _sent = false;
-      _phase = _Phase.login;
+    final needsLogin =
+        status == 401 || status == 0 ||
+        (status == 200 && looksLikeHtmlPage) ||
+        (looksLikeHtmlPage && (body.contains('login') || body.contains('recaptcha')));
+    if (needsLogin) {
+      if (_phase == _Phase.needsLogin) {
+        // The user logged in but the toggle still fell back to the login page —
+        // reCAPTCHA is likely unusable in this WebView. Stop looping.
+        if (mounted) {
+          Navigator.of(context).pop(MalToggleOutcome(status, body));
+        }
+        return;
+      }
+      _phase = _Phase.needsLogin;
       _status = 'Sign in to MyAnimeList to sync your favorites.';
       debugPrint('[MalToggle] needs auth, showing login in overlay');
       if (mounted) setState(() {});
-      _controller.runJavaScript("window.location.href='https://myanimelist.net/login.php'");
+      _controller.loadRequest(Uri.parse('https://myanimelist.net/login.php'));
       return;
     }
     if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, body));
@@ -216,7 +224,7 @@ Padding(
               child: Row(
                 children: [
                   Icon(
-                    _phase == _Phase.login
+                    _phase == _Phase.needsLogin
                         ? Icons.login
                         : Icons.favorite_border,
                     size: 18,
