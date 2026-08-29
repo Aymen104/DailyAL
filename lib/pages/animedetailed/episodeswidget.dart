@@ -141,7 +141,7 @@ class _EpisodesWidgetState extends State<EpisodesWidget> {
                       ],
                     ),
                     if (subtitle.isNotBlank) ...[
-                      SB.h4,
+                      SB.h5,
                       Text(
                         subtitle,
                         maxLines: 1,
@@ -150,7 +150,7 @@ class _EpisodesWidgetState extends State<EpisodesWidget> {
                       ),
                     ],
                     if (_airedDate(e.aired) != null) ...[
-                      SB.h2,
+                      SB.h5,
                       Text(
                         DateFormat('MMM d, y').format(_airedDate(e.aired)!),
                         style: textTheme.labelSmall?.copyWith(
@@ -167,9 +167,9 @@ class _EpisodesWidgetState extends State<EpisodesWidget> {
                   child: Row(
                     children: [
                       Icon(Icons.star, size: 16, color: Colors.amber),
-                      SB.w4,
+                      SB.w5,
                       Text(
-                        e.score.toStringAsFixed(1),
+                        e.score!.toStringAsFixed(1),
                         style: textTheme.labelSmall,
                       ),
                     ],
@@ -207,12 +207,12 @@ class _EpisodesWidgetState extends State<EpisodesWidget> {
                 style: Theme.of(context).textTheme.labelMedium,
               ),
             if (_airedDate(e.aired) != null) ...[
-              SB.h8,
+              SB.h10,
               Text('${S.current.Aired}: ' +
                   DateFormat('MMM d, y').format(_airedDate(e.aired)!)),
             ],
             if (e.duration != null && e.duration!.isNotBlank) ...[
-              SB.h8,
+              SB.h10,
               Text(e.duration!),
             ],
             if (e.synopsis != null && e.synopsis!.isNotBlank) ...[
@@ -221,7 +221,7 @@ class _EpisodesWidgetState extends State<EpisodesWidget> {
                 S.current.Synopsis,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              SB.h8,
+              SB.h10,
               Text(
                 e.synopsis!,
                 textAlign: TextAlign.justify,

@@ -27,6 +27,8 @@ class TopRankedScreen extends StatefulWidget {
 }
 
 class _TopRankedScreenState extends State<TopRankedScreen> {
+  static final radius = 12.0;
+  static final borderRadius = BorderRadius.circular(radius);
   final List<TopRankedItem> items = [];
   int page = 1;
   bool hasMore = true;
@@ -162,7 +164,7 @@ class _TopRankedScreenState extends State<TopRankedScreen> {
                     ),
                     if (item.animeTitle != null &&
                         item.animeTitle!.isNotBlank) ...[
-                      SB.h6,
+                      SB.h10,
                       Text(
                         item.animeTitle!,
                         maxLines: 1,
@@ -170,7 +172,7 @@ class _TopRankedScreenState extends State<TopRankedScreen> {
                         style: textTheme.bodySmall,
                       ),
                     ],
-                    SB.h6,
+                    SB.h10,
                     Row(
                       children: [
                         Icon(
@@ -178,7 +180,7 @@ class _TopRankedScreenState extends State<TopRankedScreen> {
                           size: 16,
                           color: Theme.of(context).colorScheme.error,
                         ),
-                        SB.w6,
+                        SB.w5,
                         Text(
                           _rankFavorites.format(item.favorites ?? 0),
                           style: textTheme.bodySmall,

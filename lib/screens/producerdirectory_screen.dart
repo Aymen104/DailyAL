@@ -23,6 +23,8 @@ class ProducerDirectoryScreen extends StatefulWidget {
 }
 
 class _ProducerDirectoryScreenState extends State<ProducerDirectoryScreen> {
+  static final radius = 12.0;
+  static final borderRadius = BorderRadius.circular(radius);
   final List<ProducerV4> producers = [];
   final TextEditingController _queryController = TextEditingController();
   Timer? _debounce;
@@ -174,7 +176,7 @@ class _ProducerDirectoryScreenState extends State<ProducerDirectoryScreen> {
                       style: textTheme.titleSmall,
                     ),
                     if (producer.count != null) ...[
-                      SB.h4,
+                      SB.h5,
                       Text(
                         '${_dirFormat.format(producer.count)} Works',
                         style: textTheme.bodySmall,
