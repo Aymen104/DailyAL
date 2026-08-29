@@ -30,26 +30,6 @@ class MalFavResult {
 /// therefore performed inside a WebView on the myanimelist.net origin (see
 /// [MalToggleOverlay]), reusing the shared cookie jar.
 class MalFavorite {
-  static const String _loginKey = 'mal_site_login';
-
-  /// Whether the user has gone through the MAL site sign-in at least once.
-  /// The WebView cookie jar itself is the real auth; this is only a UI hint to
-  /// skip the login screen when a session is already established.
-  static Future<bool> hasSiteLogin() async {
-    try {
-      final value = await CacheManager.instance.getValue(_loginKey);
-      return value == '1';
-    } catch (_) {
-      return false;
-    }
-  }
-
-  static Future<void> setSiteLogin(bool on) async {
-    try {
-      await CacheManager.instance.setValue(_loginKey, on ? '1' : '');
-    } catch (_) {}
-  }
-
   static Future<String?> currentUsername() async {
     try {
       if (user.status != AuthStatus.AUTHENTICATED) return null;

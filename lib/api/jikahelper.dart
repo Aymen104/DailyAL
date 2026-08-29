@@ -362,20 +362,30 @@ class JikanHelper {
 
   /// Get the most recently added anime. MAL ids are monotonic, so
   /// `order_by=mal_id&sort=desc` returns the newest additions first.
+  static String? lastRecentlyAddedError;
+
   static Future<SearchResult> getRecentlyAdded({int page = 1}) async {
     try {
       final v4Url =
           '${CredMal.jikanV4}anime?order_by=mal_id&sort=desc&page=$page';
       logDal(v4Url);
       var response = await MalConnect.retryGet(v4Url, Map());
+      lastRecentlyAddedError = 'status=${response?.statusCode}';
       if (response != null && response.statusCode == 200) {
         final body = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
         final items = body["data"] as List? ?? [];
         final pagination = body["pagination"] as Map<String, dynamic>?;
+        final result = <BaseNode>[];
+        for (final e in items) {
+          try {
+            result.add(_fromMap(e, 'anime'));
+          } catch (err) {
+            logDal(err);
+            lastRecentlyAddedError = 'parse-error: $err';
+          }
+        }
         return SearchResult(
-          data: (items as List)
-              .map<BaseNode>((e) => _fromMap(e, 'anime'))
-              .toList(),
+          data: result,
           paging: Paging(
               next: pagination?["has_next_page"] == true
                   ? (page + 1).toString()
@@ -384,6 +394,7 @@ class JikanHelper {
       }
     } catch (e) {
       logDal(e);
+      lastRecentlyAddedError = 'exception: $e';
     }
     return SearchResult();
   }

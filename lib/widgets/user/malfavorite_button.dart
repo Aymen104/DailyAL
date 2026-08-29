@@ -1,6 +1,5 @@
 import 'package:dailyanimelist/api/malfavorite.dart';
 import 'package:dailyanimelist/constant.dart';
-import 'package:dailyanimelist/screens/malsite_login_screen.dart';
 import 'package:dailyanimelist/widgets/web/mal_toggle_overlay.dart';
 import 'package:flutter/material.dart';
 
@@ -37,47 +36,10 @@ class _MalFavoriteButtonState extends State<MalFavoriteButton> {
     }
   }
 
-  Future<bool> _promptSignIn() async {
-    if (!mounted) return false;
-    final go = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add to favorites'),
-        content: const Text(
-          'Favorites are synced to your MyAnimeList account. '
-          'Sign in to myanimelist.net to continue.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sign in'),
-          ),
-        ],
-      ),
-    );
-    if (go != true) return false;
-    if (!mounted) return false;
-    final ok = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => const MalSiteLoginScreen()),
-    );
-    return ok == true;
-  }
-
   Future<void> _toggle() async {
     if (_busy) return;
     final add = _isFav != true;
     setState(() => _busy = true);
-
-    if (!await MalFavorite.hasSiteLogin()) {
-      setState(() => _busy = false);
-      final signedIn = await _promptSignIn();
-      if (!signedIn || !mounted) return;
-      setState(() => _busy = true);
-    }
 
     if (!mounted) return;
     final outcome = await runMalToggle(
@@ -99,10 +61,7 @@ class _MalFavoriteButtonState extends State<MalFavoriteButton> {
       showToast(
           add ? 'Added to favorites successfully!' : 'Removed from favorites.');
     } else if (result.needsAuth) {
-      await MalFavorite.setSiteLogin(false);
-      showToast(result.message ?? 'Please sign in again.');
-      final signedIn = await _promptSignIn();
-      if (signedIn && mounted) _toggle();
+      showToast('Sign in to MyAnimeList first, then tap the heart again.');
     } else {
       showToast(result.message ?? "Couldn't update favorites.");
     }
