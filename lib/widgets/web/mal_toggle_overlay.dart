@@ -183,10 +183,15 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       body = message.substring(split + 2);
     }
     _log('toggleResult status=$status bodyLen=${body.length} bodyHead=${body.length > 80 ? body.substring(0, 80) : body}');
+    final looksLikeHtmlPage =
+        body.trimLeft().startsWith('<') && body.contains('myanimelist.net');
+    final looksLikeLoginHtml =
+        looksLikeHtmlPage &&
+        (body.contains('login') || body.contains('recaptcha'));
     if (status == 401 || status == 0 ||
-        (status == 200 && body.trimLeft().startsWith('<') ||
-            body.contains('login.php'))) {
-      // Not authenticated → inline site login in the same WebView.
+        (status == 200 && looksLikeHtmlPage) || looksLikeLoginHtml) {
+      // Not authenticated (MAL answers the unauthenticated favorite call with
+      // 400/401 + the login page HTML) → inline site login in the same WebView.
       _sent = false;
       _phase = _Phase.login;
       _status = 'Sign in to MyAnimeList to sync your favorites.';
@@ -206,26 +211,31 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Icon(
-                  _phase == _Phase.login
-                      ? Icons.login
-                      : Icons.favorite_border,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _status,
-                    style: Theme.of(context).textTheme.bodyMedium,
+Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    _phase == _Phase.login || _phase == _Phase.relogin
+                        ? Icons.login
+                        : Icons.favorite_border,
+                    size: 18,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _status,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    tooltip: 'Cancel',
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
             ),
-          ),
           const Divider(height: 1),
           Expanded(
             child: Padding(
