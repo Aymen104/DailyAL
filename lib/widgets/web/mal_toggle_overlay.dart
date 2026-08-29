@@ -194,25 +194,27 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     }
     final dbgMarker = body.indexOf('@@DBG');
     final String dbg;
+    final String cleanBody;
     if (dbgMarker >= 0) {
       dbg = body.substring(dbgMarker + 5);
-      body = body.substring(0, dbgMarker);
+      cleanBody = body.substring(0, dbgMarker);
     } else {
       dbg = '';
+      cleanBody = body;
     }
-    _log('toggleResult status=$status dbg=$dbg bodyLen=${body.length} bodyHead=${body.length > 80 ? body.substring(0, 80) : body}');
+    _log('toggleResult status=$status dbg=$dbg bodyLen=${cleanBody.length} bodyHead=${cleanBody.length > 80 ? cleanBody.substring(0, 80) : cleanBody}');
     final looksLikeHtmlPage =
-        body.trimLeft().startsWith('<') && body.contains('myanimelist.net');
+        cleanBody.trimLeft().startsWith('<') && cleanBody.contains('myanimelist.net');
     final needsLogin =
         status == 401 || status == 0 ||
         (status == 200 && looksLikeHtmlPage) ||
-        (looksLikeHtmlPage && (body.contains('login') || body.contains('recaptcha')));
+        (looksLikeHtmlPage && (cleanBody.contains('login') || cleanBody.contains('recaptcha')));
     if (needsLogin) {
       if (_phase == _Phase.needsLogin) {
         // The user logged in but the toggle still fell back to the login page —
         // reCAPTCHA is likely unusable in this WebView. Stop looping.
         if (mounted) {
-          Navigator.of(context).pop(MalToggleOutcome(status, body));
+          Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
         }
         return;
       }
@@ -223,7 +225,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       _controller.loadRequest(Uri.parse('https://myanimelist.net/login.php'));
       return;
     }
-    if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, body));
+    if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
   }
 
   @override
