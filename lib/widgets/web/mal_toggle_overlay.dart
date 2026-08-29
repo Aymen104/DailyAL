@@ -133,8 +133,8 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     _controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
-        onDidStartNavigation: (url) {
-          _log('didStart url=$url phase=$_phase');
+        onPageStarted: (url) {
+          _log('pageStarted url=$url phase=$_phase');
           if (_phase == _Phase.needsLogin && !_isLoginUrl(url)) {
             _onLeftLoginPage();
           }
