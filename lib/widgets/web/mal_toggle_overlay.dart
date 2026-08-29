@@ -75,33 +75,40 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   var type = '${widget.type}';
   var id = ${widget.id};
   var add = ${widget.add};
+  var debug = [];
   function done(t){ ResultBridge.postMessage(t); }
-  function ensureLoaded(cb){
+  function dump(label, val){ debug.push(label + ':' + (val === null || val === void 0 ? 'null' : String(val))); }
+  function ensureLoaded(cb, tries){
+    tries = tries || 0;
     if (window.grecaptcha) { cb(); return; }
+    if (tries > 3) { dump('grecaptcha','NOT_LOADED'); done('TNOLIB@@' + debug.join('|')); return; }
     var s = document.createElement('script');
     s.src = 'https://www.google.com/recaptcha/api.js?render=' + key;
     s.async = true;
-    s.onload = cb;
-    s.onerror = function(){ setTimeout(function(){ ensureLoaded(cb); }, 3000); };
+    s.onload = function(){ dump('grecaptcha','loaded'); cb(); };
+    s.onerror = function(){ dump('scriptErr', tries); setTimeout(function(){ ensureLoaded(cb, tries + 1); }, 2500); };
     document.head.appendChild(s);
   }
   function callTokenThen(){
     if (window.grecaptcha && window.grecaptcha.ready) {
       grecaptcha.ready(function(){
-        grecaptcha.execute(key, {action:'social'}).then(function(token){
-          fetch('https://myanimelist.net/favorite/' + type + '/' + id + '.json', {
-            method: add ? 'POST' : 'DELETE',
-            credentials: 'include',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'g-recaptcha-response=' + encodeURIComponent(token)
-          }).then(function(r){
-            return r.text().then(function(t){ done('T' + r.status + '@@' + t); });
-          }).catch(function(){ done('T0@@network'); });
-        }).catch(function(){ setTimeout(callTokenThen, 2000); });
+        try {
+          grecaptcha.execute(key, {action:'social'}).then(function(token){
+            dump('tokenLen', token.length);
+            fetch('https://myanimelist.net/favorite/' + type + '/' + id + '.json', {
+              method: add ? 'POST' : 'DELETE',
+              credentials: 'include',
+              headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+              body: 'g-recaptcha-response=' + encodeURIComponent(token)
+            }).then(function(r){
+              return r.text().then(function(t){ done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|')); });
+            }).catch(function(e){ done('T0@@network@@DBG' + debug.join('|')); });
+          }).catch(function(e){ dump('executeErr', String(e && e.message)); setTimeout(callTokenThen, 2000); });
+        } catch (e) { dump('execExc', String(e)); setTimeout(callTokenThen, 2000); }
       });
     } else { setTimeout(callTokenThen, 400); }
   }
-  setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }); }, 400);
+  setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }, 0); }, 400);
 })();''';
 
   void _log(String message) => debugPrint('[MalToggle] $message');
@@ -185,7 +192,15 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       status = int.tryParse(message.substring(1, split)) ?? 0;
       body = message.substring(split + 2);
     }
-    _log('toggleResult status=$status bodyLen=${body.length} bodyHead=${body.length > 80 ? body.substring(0, 80) : body}');
+    final dbgMarker = body.indexOf('@@DBG');
+    final String dbg;
+    if (dbgMarker >= 0) {
+      dbg = body.substring(dbgMarker + 5);
+      body = body.substring(0, dbgMarker);
+    } else {
+      dbg = '';
+    }
+    _log('toggleResult status=$status dbg=$dbg bodyLen=${body.length} bodyHead=${body.length > 80 ? body.substring(0, 80) : body}');
     final looksLikeHtmlPage =
         body.trimLeft().startsWith('<') && body.contains('myanimelist.net');
     final needsLogin =
