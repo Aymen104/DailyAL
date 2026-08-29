@@ -1,7 +1,7 @@
 import 'package:dailyanimelist/api/malfavorite.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/screens/malsite_login_screen.dart';
-import 'package:dailyanimelist/widgets/web/recaptcha_overlay.dart';
+import 'package:dailyanimelist/widgets/web/mal_toggle_overlay.dart';
 import 'package:flutter/material.dart';
 
 /// Heart toggle ("Add to Favorites / Remove from Favorites") that syncs with a
@@ -61,10 +61,10 @@ class _MalFavoriteButtonState extends State<MalFavoriteButton> {
     );
     if (go != true) return false;
     if (!mounted) return false;
-    final cookie = await Navigator.of(context).push<String>(
+    final ok = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const MalSiteLoginScreen()),
     );
-    return cookie != null && cookie.isNotEmpty;
+    return ok == true;
   }
 
   Future<void> _toggle() async {
@@ -72,8 +72,7 @@ class _MalFavoriteButtonState extends State<MalFavoriteButton> {
     final add = _isFav != true;
     setState(() => _busy = true);
 
-    String? cookie = await MalFavorite.getSessionCookie();
-    if (cookie == null || cookie.isEmpty) {
+    if (!await MalFavorite.hasSiteLogin()) {
       setState(() => _busy = false);
       final signedIn = await _promptSignIn();
       if (!signedIn || !mounted) return;
@@ -81,33 +80,29 @@ class _MalFavoriteButtonState extends State<MalFavoriteButton> {
     }
 
     if (!mounted) return;
-    final token = await obtainRecaptchaToken(context);
-    if (token == null || token.isEmpty) {
-      if (mounted) {
-        setState(() => _busy = false);
-        showToast("Couldn't verify with Google reCAPTCHA. Try again.");
-      }
-      return;
-    }
-
-    final result = await MalFavorite.call(
+    final outcome = await runMalToggle(
+      context,
       type: widget.type,
       id: widget.id,
       add: add,
-      token: token,
     );
     if (!mounted) return;
     setState(() => _busy = false);
 
+    if (outcome == null) {
+      showToast("Couldn't sync with MyAnimeList. Try again.");
+      return;
+    }
+    final result = MalFavorite.fromOutcome(outcome, wasAdded: add);
     if (result.ok) {
       setState(() => _isFav = add);
       showToast(
           add ? 'Added to favorites successfully!' : 'Removed from favorites.');
     } else if (result.needsAuth) {
-      await MalFavorite.clearSessionCookie();
+      await MalFavorite.setSiteLogin(false);
       showToast(result.message ?? 'Please sign in again.');
       final signedIn = await _promptSignIn();
-      if (signedIn) _toggle();
+      if (signedIn && mounted) _toggle();
     } else {
       showToast(result.message ?? "Couldn't update favorites.");
     }

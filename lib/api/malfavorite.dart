@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/user/user.dart';
+import 'package:dailyanimelist/widgets/web/mal_toggle_overlay.dart';
 import 'package:dal_commons/dal_commons.dart';
-import 'package:http/http.dart' as http;
 
 class MalFavResult {
   final bool ok;
@@ -25,35 +24,31 @@ class MalFavResult {
 /// Syncs "likes" (favorites) with a real MyAnimeList account, exactly like the
 /// MAL website "Add to Favorites" button.
 ///
-/// The website uses an internal endpoint that requires a site session cookie
-/// (`MALCF`) plus a fresh Google reCAPTCHA v3 token — the official OAuth v2
-/// API does not expose favorites, so this taps into the same mechanism the
-/// website's `#v-favorite` Vue component uses.
+/// The website uses an internal endpoint that requires the site session cookie
+/// (HttpOnly, not readable from Dart) plus a fresh Google reCAPTCHA v3 token —
+/// the official OAuth v2 API does not expose favorites. The actual request is
+/// therefore performed inside a WebView on the myanimelist.net origin (see
+/// [MalToggleOverlay]), reusing the shared cookie jar.
 class MalFavorite {
-  static const String cookieKey = 'mal_site_cookie';
-  static String? _cachedCookie;
+  static const String _loginKey = 'mal_site_login';
 
-  static Future<String?> getSessionCookie() async {
-    if (_cachedCookie != null && _cachedCookie!.isNotEmpty) {
-      return _cachedCookie;
-    }
+  /// Whether the user has gone through the MAL site sign-in at least once.
+  /// The WebView cookie jar itself is the real auth; this is only a UI hint to
+  /// skip the login screen when a session is already established.
+  static Future<bool> hasSiteLogin() async {
     try {
-      final value = await CacheManager.instance.getValue(cookieKey);
-      _cachedCookie = (value == null || value.isEmpty) ? null : value;
+      final value = await CacheManager.instance.getValue(_loginKey);
+      return value == '1';
     } catch (_) {
-      _cachedCookie = null;
+      return false;
     }
-    return _cachedCookie;
   }
 
-  static Future<void> storeSessionCookie(String? cookie) async {
-    _cachedCookie = (cookie == null || cookie.isEmpty) ? null : cookie;
+  static Future<void> setSiteLogin(bool on) async {
     try {
-      await CacheManager.instance.setValue(cookieKey, cookie ?? '');
+      await CacheManager.instance.setValue(_loginKey, on ? '1' : '');
     } catch (_) {}
   }
-
-  static Future<void> clearSessionCookie() => storeSessionCookie(null);
 
   static Future<String?> currentUsername() async {
     try {
@@ -81,53 +76,28 @@ class MalFavorite {
     }
   }
 
-  /// Calls `POST`/`DELETE https://myanimelist.net/favorite/{type}/{id}.json`
-  /// — the same endpoint the website's toggle hits.
-  static Future<MalFavResult> call({
-    required String type,
-    required int id,
-    required bool add,
-    required String token,
-  }) async {
-    final cookie = await getSessionCookie();
-    if (cookie == null || cookie.isEmpty) {
+  /// Maps the outcome of the in-WebView toggle request to a friendly result.
+  static MalFavResult fromOutcome(
+    MalToggleOutcome outcome, {
+    required bool wasAdded,
+  }) {
+    final status = outcome.status;
+    if (status == 200 || status == 201) {
+      return MalFavResult(ok: true, wasAdded: wasAdded);
+    }
+    if (outcome.looksLikeLoginPage || status == 401) {
       return const MalFavResult(
         needsAuth: true,
         message: 'Sign in to MyAnimeList first.',
       );
     }
-    final pageUrl =
-        '${CredMal.htmlEnd}${type == 'people' ? 'people' : 'character'}/$id';
-    final headers = <String, String>{
-      'Accept': 'application/json',
-      'Cookie': cookie,
-      'Referer': pageUrl,
-      'Origin': 'https://myanimelist.net',
-    };
-    final body = <String, String>{'g-recaptcha-response': token};
-    final url = '${CredMal.htmlEnd}favorite/$type/$id.json';
-    try {
-      final http.Response response = add
-          ? await http.post(Uri.parse(url), headers: headers, body: body)
-          : await http.delete(Uri.parse(url), headers: headers, body: body);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return MalFavResult(ok: true, wasAdded: add);
-      }
-      if (response.statusCode == 400) {
-        return _maxFavsError(response.body);
-      }
-      if (response.statusCode == 401) {
-        await clearSessionCookie();
-        return const MalFavResult(
-          needsAuth: true,
-          message: 'Your MyAnimeList session expired. Please sign in again.',
-        );
-      }
-      return MalFavResult(message: _serverMessage(response.body));
-    } catch (e) {
-      logDal(e);
+    if (status == 400) {
+      return _maxFavsError(outcome.body);
+    }
+    if (status == 0) {
       return const MalFavResult(message: "Couldn't connect to MyAnimeList.");
     }
+    return MalFavResult(message: _serverMessage(outcome.body));
   }
 
   static MalFavResult _maxFavsError(String body) {
