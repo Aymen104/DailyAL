@@ -4,9 +4,9 @@ import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
-import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/user/user.dart';
+import 'package:dal_commons/dal_commons.dart';
 import 'package:http/http.dart' as http;
 
 class MalFavResult {
@@ -59,7 +59,7 @@ class MalFavorite {
     try {
       if (user.status != AuthStatus.AUTHENTICATED) return null;
       final prof = await MalUser.getUserInfo(fromCache: true);
-      return prof?.name;
+      return prof.name;
     } catch (_) {
       return null;
     }

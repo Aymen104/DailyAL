@@ -3,6 +3,7 @@ import 'package:dailyanimelist/api/malfavorite.dart';
 import 'package:dailyanimelist/screens/plainscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 /// Full-screen embedded browser for signing in to myanimelist.net so that
 /// favorites can be synced to the real MAL account.
@@ -18,7 +19,6 @@ class MalSiteLoginScreen extends StatefulWidget {
 
 class _MalSiteLoginScreenState extends State<MalSiteLoginScreen> {
   final WebViewController _controller = WebViewController();
-  final WebViewCookieManager _cookieManager = WebViewCookieManager();
   bool _loggedIn = false;
 
   @override
@@ -40,8 +40,7 @@ class _MalSiteLoginScreenState extends State<MalSiteLoginScreen> {
   Future<void> _onPageFinished(String url) async {
     if (_loggedIn) return;
     try {
-      final cookies = await _cookieManager
-          .getCookies('https://myanimelist.net');
+      final cookies = await _readCookies();
       final hasMalf =
           cookies.any((c) => c.name == 'MALCF' && c.value.isNotEmpty);
       final isLoggedIn =
@@ -62,6 +61,17 @@ class _MalSiteLoginScreenState extends State<MalSiteLoginScreen> {
     } catch (e) {
       // Keep the user on the login page; cookies just aren't readable yet.
     }
+  }
+
+  Future<List<WebViewCookie>> _readCookies() async {
+    if (WebViewPlatform.instance is AndroidWebViewPlatform) {
+      final platform = WebViewCookieManager().platform;
+      if (platform is AndroidWebViewCookieManager) {
+        return platform
+            .getCookies(Uri.parse('https://myanimelist.net'));
+      }
+    }
+    return const <WebViewCookie>[];
   }
 
   @override

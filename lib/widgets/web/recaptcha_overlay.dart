@@ -53,6 +53,15 @@ class _RecaptchaTokenOverlayState extends State<RecaptchaTokenOverlay> {
 (function(){
   var key = '$malRecaptchaSiteKey';
   function done(t){ RecaptchaBridge.postMessage(t); }
+  function ensureLoaded(cb){
+    if (window.grecaptcha) { cb(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://www.google.com/recaptcha/api.js?render=' + key;
+    s.async = true;
+    s.onload = cb;
+    s.onerror = function(){ setTimeout(function(){ ensureLoaded(cb); }, 3000); };
+    document.head.appendChild(s);
+  }
   function tryRun(){
     if (window.grecaptcha && window.grecaptcha.ready) {
       try {
@@ -63,7 +72,7 @@ class _RecaptchaTokenOverlayState extends State<RecaptchaTokenOverlay> {
       } catch(e){ setTimeout(tryRun, 2000); }
     } else { setTimeout(tryRun, 1200); }
   }
-  setTimeout(tryRun, 500);
+  setTimeout(function(){ ensureLoaded(function(){ setTimeout(tryRun, 300); }); }, 500);
 })();''';
 
   @override
@@ -82,11 +91,17 @@ class _RecaptchaTokenOverlayState extends State<RecaptchaTokenOverlay> {
           _controller.runJavaScript(_executeJs);
         },
         onWebResourceError: (error) {
-          if (!_sent && mounted && !_mainLoaded && error.isForMainFrame) {
+          if (!_sent && mounted && !_mainLoaded && error.isForMainFrame == true) {
             Navigator.of(context).pop();
           }
         },
-      ));
+      ))
+      ..addJavaScriptChannel(
+        'RecaptchaBridge',
+        onMessageReceived: (JavaScriptMessage message) {
+          _onToken(message.message);
+        },
+      );
     _controller.loadRequest(Uri.parse('${CredMal.htmlEnd}'));
   }
 
@@ -96,11 +111,11 @@ class _RecaptchaTokenOverlayState extends State<RecaptchaTokenOverlay> {
     super.dispose();
   }
 
-  void _onToken(JavascriptMessage message) {
-    if (_sent || message.message.isEmpty) return;
+  void _onToken(String token) {
+    if (_sent || token.isEmpty) return;
     _sent = true;
     if (mounted) {
-      Navigator.of(context).pop(message.message);
+      Navigator.of(context).pop(token);
     }
   }
 
@@ -122,15 +137,7 @@ class _RecaptchaTokenOverlayState extends State<RecaptchaTokenOverlay> {
             SizedBox(
               width: 1,
               height: 1,
-              child: WebViewWidget(
-                controller: _controller,
-                javascriptChannels: <JavascriptChannel>{
-                  JavascriptChannel(
-                    name: 'RecaptchaBridge',
-                    onMessageReceived: _onToken,
-                  ),
-                },
-              ),
+              child: WebViewWidget(controller: _controller),
             ),
           ],
         ),
