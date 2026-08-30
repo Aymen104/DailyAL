@@ -9,6 +9,7 @@ import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/user/user.dart';
 import 'package:dailyanimelist/widgets/web/c_webview.dart';
+import 'package:dailyanimelist/widgets/web/mal_site_login_screen.dart';
 import 'package:dal_commons/dal_commons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -151,8 +152,24 @@ class MalAuth {
         user.status = AuthStatus.UNAUTHENTICATED;
         user.updateUserStatus();
       }
+    } else if (!kIsWeb && Platform.isAndroid) {
+      // Android logs in inside the app's own WebView so the myanimelist.net
+      // website session lands in the shared cookie jar and favorites can
+      // auto-sync from the first login, with no second login.
+      logDal('Starting OAuth with in-app WebView for Android');
+      try {
+        await MyApp.navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => MalSiteLoginScreen(url: url),
+          ),
+        );
+      } catch (e) {
+        logDal('OAuth error on Android: $e');
+        user.status = AuthStatus.UNAUTHENTICATED;
+        user.updateUserStatus();
+      }
     } else {
-      // For mobile platforms, use the existing webview approach
+      // iOS and other platforms keep the existing custom-tab webview approach.
       launchWebView(url);
     }
   }
