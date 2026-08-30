@@ -1,6 +1,5 @@
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/credmal.dart';
-import 'package:dailyanimelist/api/malfavorite_session.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -8,10 +7,10 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// Android OAuth login handled inside the app's own WebView.
 ///
 /// The custom-tab login keeps the myanimelist.net website session in Chrome's
-/// cookie jar, which the app cannot read — so favorites still need a second
-/// login later. Logging in inside this WebView drops the session into the
-/// shared jar instead, so [MalSessionStore.captureFromWebView] can persist it
-/// and the favorite toggle never asks for credentials again.
+/// cookie jar, which the app cannot read — a favorite toggle later would need
+/// a second, separate login. Logging in inside this WebView instead drops the
+/// session into the shared app-global cookie store, so the favorite toggle
+/// auto-syncs from the very first app login with no extra login screen.
 class MalSiteLoginScreen extends StatefulWidget {
   final String url;
   const MalSiteLoginScreen({super.key, required this.url});
@@ -40,7 +39,8 @@ class _MalSiteLoginScreenState extends State<MalSiteLoginScreen> {
               if (code != null) {
                 final verifier = await CacheManager.instance.getValue('cc');
                 if (verifier != null && await MalAuth.onCodeReceived(code, verifier)) {
-                  await MalSessionStore.captureFromWebView();
+                  // The session cookie from the in-app login lives in the
+                  // shared app-global cookie store now; favorite sync is seeded.
                   _completed = true;
                   if (mounted) Navigator.of(context).pop(true);
                 }

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dailyanimelist/api/credmal.dart';
-import 'package:dailyanimelist/api/malfavorite_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -136,9 +135,8 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     _phase = _Phase.favoriting;
     _status = 'Signed in. Syncing with MyAnimeList\u2026';
     if (mounted) setState(() {});
-    // Persist the freshly-created session so future overlays are seeded and
-    // never show a login screen again.
-    MalSessionStore.captureFromWebView();
+    // The login happened inside this WebView, so the session now lives in the
+    // app-global Android cookie store — every future overlay auto-syncs.
     _controller.loadRequest(Uri.parse(_baseUrl));
   }
 
@@ -200,15 +198,6 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         },
       );
     _log('loading $_baseUrl add=${widget.add}');
-    _applySessionThenLoad();
-  }
-
-  /// Seeds the shared cookie jar from the stored session (if any) before
-  /// loading the base page, so a previously-logged-in user goes straight to
-  /// the toggle without the login wall.
-  Future<void> _applySessionThenLoad() async {
-    await MalSessionStore.applyToWebView();
-    if (!mounted) return;
     _controller.loadRequest(Uri.parse(_baseUrl));
   }
 
