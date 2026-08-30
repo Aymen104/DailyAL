@@ -62,9 +62,9 @@ class MalFavorite {
     required bool wasAdded,
   }) {
     final status = outcome.status;
-    if (status == 200 || status == 201) {
-      return MalFavResult(ok: true, wasAdded: wasAdded);
-    }
+    // MAL answers an unauthenticated toggle with 200 + the login page HTML
+    // (it aggressively redirects *all* requests to the login wall), so the
+    // login-page check must beat the plain 200 success check.
     if (outcome.looksLikeLoginPage ||
         (outcome.body.contains('login') &&
             outcome.body.contains('recaptcha'))) {
@@ -73,6 +73,9 @@ class MalFavorite {
         message:
             "reCAPTCHA couldn't load in the sign-in window. Please try again.",
       );
+    }
+    if (status == 200 || status == 201) {
+      return MalFavResult(ok: true, wasAdded: wasAdded);
     }
     if (status == 401) {
       return const MalFavResult(

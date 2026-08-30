@@ -56,6 +56,12 @@ class MalToggleOverlay extends StatefulWidget {
     required this.add,
   }) : super(key: key);
 
+  /// Fires inside the WebView after page load and reports whether the cookie
+  /// jar holds a live MAL session (probe page responds as logged-in instead of
+  /// the login wall). Posted on [ProbeBridge].
+  static const String sessionProbe =
+      '''(function(){fetch('https://myanimelist.net/mymessages.php',{credentials:'include'}).then(function(r){return r.text().then(function(t){var logged=(t.indexOf('Watch Later')>-1);AndroidBridge.postMessage('SESH status='+r.status+' len='+t.length+' logged='+logged);});}).catch(function(e){AndroidBridge.postMessage('SESH ERR '+e);});})();''';
+
   @override
   State<MalToggleOverlay> createState() => _MalToggleOverlayState();
 }
@@ -124,6 +130,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   /// The user completed a real login: the WebView left the login form.
   void _onLeftLoginPage() {
     _log('user navigation away from login page -> authenticated, retrying');
+    _sent = false; // a previous needs-auth attempt may have consumed the bridge
     _phase = _Phase.favoriting;
     _status = 'Signed in. Syncing with MyAnimeList\u2026';
     if (mounted) setState(() {});
@@ -133,6 +140,8 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   @override
   void initState() {
     super.initState();
+    final probe = MalToggleOverlay.sessionProbe
+        .replaceAll('AndroidBridge', 'ProbeBridge');
     _timeout = Timer(const Duration(seconds: 120), () {
       _log('timeout fired, sent=$_sent phase=$_phase');
       if (!_sent && mounted) Navigator.of(context).pop();
@@ -153,6 +162,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             _status = 'Syncing with MyAnimeList\u2026';
             if (mounted) setState(() {});
             _controller.runJavaScript(_toggleJs);
+            _controller.runJavaScript(probe);
           }
         },
         onWebResourceError: (error) {
@@ -164,6 +174,12 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         'ResultBridge',
         onMessageReceived: (JavaScriptMessage message) {
           _onResult(message.message);
+        },
+      )
+      ..addJavaScriptChannel(
+        'ProbeBridge',
+        onMessageReceived: (JavaScriptMessage message) {
+          _log('sessionProbe=${message.message}');
         },
       );
     _log('loading $_baseUrl add=${widget.add}');
