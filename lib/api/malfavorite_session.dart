@@ -55,7 +55,8 @@ class MalSessionStore {
   static Future<void> captureFromWebView() async {
     try {
       final manager = WebViewCookieManager();
-      final cookies = await manager.getCookies('https://myanimelist.net');
+      final cookies =
+          await manager.getCookies(domain: Uri.parse('https://myanimelist.net'));
       if (!_isLiveSession(cookies)) return;
       await save(cookies);
     } catch (e) {
