@@ -70,6 +70,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   final WebViewController _controller = WebViewController();
   Timer? _timeout;
   bool _sent = false;
+  bool _logged = false;
   _Phase _phase = _Phase.check;
   String _status = 'Syncing with MyAnimeList\u2026';
 
@@ -162,6 +163,12 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             if (mounted) setState(() {});
             _controller.runJavaScript(_toggleJs);
             _controller.runJavaScript(probe);
+          } else if (_phase == _Phase.needsLogin) {
+            // A successful login bounces back to the MAL homepage, which
+            // _isLoginUrl still treats as a login URL — so the URL watcher
+            // never sees a "leave". Detect the new session on the page's own
+            // origin via the probe instead.
+            _controller.runJavaScript(probe);
           }
         },
         onWebResourceError: (error) {
@@ -179,6 +186,13 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         'ProbeBridge',
         onMessageReceived: (JavaScriptMessage message) {
           _log('sessionProbe=${message.message}');
+          final m = message.message;
+          if (m.startsWith('SESH ')) {
+            _logged = m.contains('logged=true');
+            if (_logged && _phase == _Phase.needsLogin) {
+              _onLeftLoginPage();
+            }
+          }
         },
       );
     _log('loading $_baseUrl add=${widget.add}');
