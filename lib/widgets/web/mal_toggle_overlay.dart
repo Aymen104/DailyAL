@@ -60,7 +60,7 @@ class MalToggleOverlay extends StatefulWidget {
   /// jar holds a live MAL session (probe page responds as logged-in instead of
   /// the login wall). Posted on [ProbeBridge].
   static const String sessionProbe =
-      '''(function(){fetch('https://myanimelist.net/mymessages.php',{credentials:'include'}).then(function(r){return r.text().then(function(t){var logged=(t.indexOf('Watch Later')>-1);AndroidBridge.postMessage('SESH status='+r.status+' len='+t.length+' logged='+logged);});}).catch(function(e){AndroidBridge.postMessage('SESH ERR '+e);});})();''';
+      '''(function(){try{fetch('https://myanimelist.net/mymessages.php',{credentials:'include'}).then(function(r){return r.text().then(function(t){var logged=(t.indexOf('Watch Later')>-1);ProbeBridge.postMessage('SESH status='+r.status+' len='+t.length+' logged='+logged);});}).catch(function(e){ProbeBridge.postMessage('SESH ERR '+e);});}catch(e2){ProbeBridge.postMessage('SESH EXC '+e2);}})();''';
 
   @override
   State<MalToggleOverlay> createState() => _MalToggleOverlayState();
@@ -140,8 +140,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   @override
   void initState() {
     super.initState();
-    final probe = MalToggleOverlay.sessionProbe
-        .replaceAll('AndroidBridge', 'ProbeBridge');
+    final probe = MalToggleOverlay.sessionProbe;
     _timeout = Timer(const Duration(seconds: 120), () {
       _log('timeout fired, sent=$_sent phase=$_phase');
       if (!_sent && mounted) Navigator.of(context).pop();
