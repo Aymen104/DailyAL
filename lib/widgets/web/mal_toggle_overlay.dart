@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dailyanimelist/api/credmal.dart';
+import 'package:dailyanimelist/api/malsite_credentials.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -30,6 +31,7 @@ Future<MalToggleOutcome?> runMalToggle(
   required String type,
   required int id,
   required bool add,
+  bool autoLogin = false,
 }) {
   return showDialog<MalToggleOutcome>(
     context: context,
@@ -38,6 +40,7 @@ Future<MalToggleOutcome?> runMalToggle(
       type: type,
       id: id,
       add: add,
+      autoLogin: autoLogin,
     ),
   );
 }
@@ -49,12 +52,45 @@ class MalToggleOverlay extends StatefulWidget {
   final String type;
   final int id;
   final bool add;
+  /// When true, the overlay fills and submits the MAL login form itself (using
+  /// [MalSiteCredentials]) on first login so the user never types into the
+  /// WebView. Defaults to false — callers opt in.
+  final bool autoLogin;
   const MalToggleOverlay({
     Key? key,
     required this.type,
     required this.id,
     required this.add,
+    this.autoLogin = false,
   }) : super(key: key);
+
+  /// Fills and submits the MAL login form via the DOM (deterministic — immune
+  /// to layout shifts caused by the on-screen keyboard). The submitted
+  /// credentials come from secure storage; see [credentialStore].
+  static const String loginJs = r'''
+(function(){
+  var u = document.getElementById('login_username');
+  var p = document.getElementById('login_password');
+  var debug = [];
+  if (!u || !p) {
+    ProbeBridge.postMessage('LOGINDBG fields_missing username=' + (u?1:0) + ' password=' + (p?1:0));
+    return;
+  }
+  u.value = 'USER';
+  p.value = 'PASS';
+  debug.push('filled');
+  ProbeBridge.postMessage('LOGINDBG username=' + u.value + ' pass_len=' + p.value.length);
+  // Find and click the submit button; fall back to form.submit().
+  var btn = document.querySelector('form input[type=submit]') || document.querySelector('form button[type=submit]');
+  if (btn) { debug.push('btn_click'); btn.click(); }
+  else {
+    var f = document.querySelector('form');
+    if (f) { debug.push('form_submit'); f.submit(); }
+    else debug.push('no_form');
+  }
+  ProbeBridge.postMessage('LOGINDBG submit=' + debug.join(','));
+})();
+''';
 
   /// Fires inside the WebView after page load and reports whether the cookie
   /// jar holds a live MAL session (probe page responds as logged-in instead of
@@ -71,6 +107,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   Timer? _timeout;
   bool _sent = false;
   bool _logged = false;
+  bool _loginInjected = false;
   _Phase _phase = _Phase.check;
   String _status = 'Syncing with MyAnimeList\u2026';
 
@@ -128,6 +165,80 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         (u.endsWith('myanimelist.net/') || u.endsWith('myanimelist.net'));
   }
 
+  /// Auto-fills + submits the MAL login form if credentials exist. If no site
+  /// credentials are stored yet, captures them once via a Dart dialog (the
+  /// first favorite tap), stores them securely, then injects — so the very
+  /// first login makes every subsequent favorites sync automatic.
+  Future<void> _maybeAutoLogin() async {
+    if (!widget.autoLogin || _loginInjected || _logged) return;
+    var creds = await MalSiteCredentials.load();
+    if (creds == null && context.mounted) {
+      // First use: ask for the MAL site password once, store it securely.
+      final captured = await _captureCredentials();
+      if (captured == null || !mounted) return;
+      await MalSiteCredentials.save(captured.$1, captured.$2);
+      creds = captured;
+    }
+    if (creds == null || !mounted) return;
+    _loginInjected = true;
+    _log('auto-filling MAL login for ${creds.username}');
+    final js = MalToggleOverlay.loginJs
+        .replaceAll('USER', creds.username)
+        .replaceAll('PASS', creds.password);
+    _controller.runJavaScript(js);
+  }
+
+  /// Shows a modal asking for the MAL site username + password (needed to
+  /// auto-submit the site's login form on first use).
+  Future<(String, String)?> _captureCredentials() {
+    final userController = TextEditingController();
+    final passController = TextEditingController();
+    return showDialog<(String, String)>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('One-time MyAnimeList login'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'To sync favorites automatically, enter your MyAnimeList '
+              'username and password once. They are stored encrypted on this '
+              'device and used only to keep your favorite toggle in sync.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: userController,
+              decoration: const InputDecoration(labelText: 'Username'),
+              autofocus: true,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: passController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final u = userController.text.trim();
+              final p = passController.text;
+              if (u.isEmpty || p.isEmpty) return;
+              Navigator.of(dialogCtx).pop((u, p));
+            },
+            child: const Text('Save & Sync'),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// The user completed a real login: the WebView left the login form.
   void _onLeftLoginPage() {
     _log('user navigation away from login page -> authenticated, retrying');
@@ -171,6 +282,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             // never sees a "leave". Detect the new session on the page's own
             // origin via the probe instead.
             _controller.runJavaScript(probe);
+            _maybeAutoLogin();
           }
         },
         onWebResourceError: (error) {

@@ -47,6 +47,7 @@ class _MalFavoriteButtonState extends State<MalFavoriteButton> {
       type: widget.type,
       id: widget.id,
       add: add,
+      autoLogin: true,
     );
     if (!mounted) return;
     setState(() => _busy = false);
