@@ -69,26 +69,33 @@ class MalToggleOverlay extends StatefulWidget {
   /// credentials come from secure storage; see [credentialStore].
   static const String loginJs = r'''
 (function(){
-  var u = document.getElementById('login_username');
-  var p = document.getElementById('login_password');
+  function probe(name, val){ ProbeBridge.postMessage(name + val); }
+  var u = document.getElementById('loginUserName') || document.getElementById('login_username') || document.querySelector('input[name=user_name]');
+  var p = document.getElementById('login-password') || document.getElementById('login_password') || document.querySelector('input[type=password][name=password]');
   var debug = [];
   if (!u || !p) {
-    ProbeBridge.postMessage('LOGINDBG fields_missing username=' + (u?1:0) + ' password=' + (p?1:0));
+    probe('LOGINDBG fields_missing username=', (u?1:0) + ' password=' + (p?1:0));
     return;
   }
   u.value = 'USER';
   p.value = 'PASS';
+  // Dispatch input events so Vue/model bindings and recaptcha hooks observe the change.
+  try { u.dispatchEvent(new Event('input', {bubbles:true})); p.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
   debug.push('filled');
-  ProbeBridge.postMessage('LOGINDBG username=' + u.value + ' pass_len=' + p.value.length);
-  // Find and click the submit button; fall back to form.submit().
-  var btn = document.querySelector('form input[type=submit]') || document.querySelector('form button[type=submit]');
+  probe('LOGINDBG username=', u.value + ' pass_len=' + p.value.length);
+  // Click the recaptcha-driven submit button first (it triggers the token fetch),
+  // then fall back to a plain submit button or form.submit().
+  var btn = document.querySelector('form input.btn-recaptcha-submit')
+          || document.querySelector('form button.btn-recaptcha-submit')
+          || document.querySelector('form input[type=submit]')
+          || document.querySelector('form button[type=submit]');
   if (btn) { debug.push('btn_click'); btn.click(); }
   else {
     var f = document.querySelector('form');
     if (f) { debug.push('form_submit'); f.submit(); }
     else debug.push('no_form');
   }
-  ProbeBridge.postMessage('LOGINDBG submit=' + debug.join(','));
+  probe('LOGINDBG submit=', debug.join(','));
 })();
 ''';
 
