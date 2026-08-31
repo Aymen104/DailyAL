@@ -170,11 +170,14 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   /// first favorite tap), stores them securely, then injects — so the very
   /// first login makes every subsequent favorites sync automatic.
   Future<void> _maybeAutoLogin() async {
+    _log('_maybeAutoLogin autoLogin=${widget.autoLogin} injected=$_loginInjected logged=$_logged');
     if (!widget.autoLogin || _loginInjected || _logged) return;
     var creds = await MalSiteCredentials.load();
+    _log('_maybeAutoLogin creds=${creds == null ? 'none' : creds.username} mounted=$context.mounted');
     if (creds == null && context.mounted) {
       // First use: ask for the MAL site password once, store it securely.
       final captured = await _captureCredentials();
+      _log('_maybeAutoLogin captured=${captured == null ? 'cancelled' : captured.$1}');
       if (captured == null || !mounted) return;
       await MalSiteCredentials.save(captured.$1, captured.$2);
       creds = MalSiteCredentials(captured.$1, captured.$2);
