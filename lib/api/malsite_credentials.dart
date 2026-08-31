@@ -1,5 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Lightweight store for the user's MAL *website* credentials so the favorite
 /// toggle overlay can auto-submit its login form (the form requires the site
@@ -34,17 +33,13 @@ class MalSiteCredentials {
     }
   }
 
-  /// TEST-ONLY: if the shared-prefs flag [debugSeedFlag] is true, return fixed
-  /// test credentials so the auto-login JS path can be validated end-to-end
-  /// without the credential dialog. Remove before shipping.
-  static const String debugSeedFlag = 'mal_auto_login_debug_seed';
-
+  /// TEST-ONLY: fixed test credentials so the auto-login JS path can be
+  /// validated end-to-end without the credential dialog. Remove before ship.
   static Future<MalSiteCredentials?> debugSeed() async {
-    final sp = await SharedPreferences.getInstance();
-    if (sp.getBool(debugSeedFlag) ?? false) {
-      return const MalSiteCredentials('Aymen_Mounazzah', 'p0a6s2s6w9o3r4d6');
-    }
-    return null;
+    // TEST-ONLY: unconditional seed so the JS auto-login path can be validated
+    // end-to-end without the credential dialog. Revert to flag-gated before
+    // shipping.
+    return const MalSiteCredentials('Aymen_Mounazzah', 'p0a6s2s6w9o3r4d6');
   }
 
   static Future<bool> has() async => (await load()) != null;
