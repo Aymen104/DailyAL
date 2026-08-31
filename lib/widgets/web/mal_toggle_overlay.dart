@@ -201,7 +201,6 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     return showDialog<(String, String)>(
       context: context,
       useRootNavigator: true,
-      barrierDismissible: false,
       builder: (dialogCtx) => AlertDialog(
           title: const Text('One-time MyAnimeList login'),
           content: Column(
