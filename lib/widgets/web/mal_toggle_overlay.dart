@@ -177,7 +177,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       final captured = await _captureCredentials();
       if (captured == null || !mounted) return;
       await MalSiteCredentials.save(captured.$1, captured.$2);
-      creds = captured;
+      creds = MalSiteCredentials(captured.$1, captured.$2);
     }
     if (creds == null || !mounted) return;
     _loginInjected = true;
