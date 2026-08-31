@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../main.dart';
-
 /// reCAPTCHA v3 site key used by MyAnimeList's favorite toggle.
 const String malRecaptchaSiteKey = '6Ld_1aIZAAAAAF6bNdR67ICKIaeXLKlbhE7t2Qz4';
 
@@ -200,9 +198,10 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     final passController = TextEditingController();
     // Use the root navigator so the dialog reliably renders above the
     // WebView overlay (which is itself a Dialog route).
-    return MyApp.navigatorKey.currentState!.push<(String, String)>(
-      MaterialPageRoute(
-        builder: (dialogCtx) => AlertDialog(
+    return showDialog<(String, String)>(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogCtx) => AlertDialog(
           title: const Text('One-time MyAnimeList login'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
