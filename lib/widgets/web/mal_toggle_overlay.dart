@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../main.dart';
+
 /// reCAPTCHA v3 site key used by MyAnimeList's favorite toggle.
 const String malRecaptchaSiteKey = '6Ld_1aIZAAAAAF6bNdR67ICKIaeXLKlbhE7t2Qz4';
 
@@ -196,44 +198,45 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   Future<(String, String)?> _captureCredentials() {
     final userController = TextEditingController();
     final passController = TextEditingController();
-    return showDialog<(String, String)>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('One-time MyAnimeList login'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'To sync favorites automatically, enter your MyAnimeList '
-              'username and password once. They are stored encrypted on this '
-              'device and used only to keep your favorite toggle in sync.',
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: userController,
-              decoration: const InputDecoration(labelText: 'Username'),
-              autofocus: true,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: passController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: const Text('Cancel'),
+    // Use the root navigator so the dialog reliably renders above the
+    // WebView overlay (which is itself a Dialog route).
+    return MyApp.navigatorKey.currentState!.push<(String, String)>(
+      MaterialPageRoute(
+        builder: (dialogCtx) => AlertDialog(
+          title: const Text('One-time MyAnimeList login'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'To sync favorites automatically, enter your MyAnimeList '
+                'username and password once. They are stored encrypted on this '
+                'device and used only to keep your favorite toggle in sync.',
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: userController,
+                decoration: const InputDecoration(labelText: 'Username'),
+                autofocus: true,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: passController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              final u = userController.text.trim();
-              final p = passController.text;
-              if (u.isEmpty || p.isEmpty) return;
-              Navigator.of(dialogCtx).pop((u, p));
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final u = userController.text.trim();
+                final p = passController.text;
+                if (u.isEmpty || p.isEmpty) return;
+                Navigator.of(dialogCtx).pop((u, p));
             },
             child: const Text('Save & Sync'),
           ),
