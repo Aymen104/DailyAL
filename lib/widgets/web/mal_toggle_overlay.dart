@@ -90,6 +90,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
 
   late final String _toggleJs = '''(function(){
+  window.__togRan = 1;
   var key = window.GRECAPTCHA_SITE_KEY || '$malRecaptchaSiteKey';
   var type = '${widget.type}';
   var id = ${widget.id};
@@ -147,6 +148,15 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
 
   void _log(String message) => debugPrint('[MalToggle] $message');
 
+  /// Polls the live page for _toggleJs markers + bridge availability.
+  void _diagJsState() {
+    final js = "'' + (window.__togRan === 1) + '|' + (typeof window.grecaptcha)" +
+        " + '|' + (typeof ResultBridge) + '|' + (typeof ProbeBridge)";
+    _controller.runJavaScript(js).then((v) {
+      if (v != null) _log('diag __togRan|grecaptcha|ResultBridge|ProbeBridge=$v');
+    }).catchError((e) => _log('diag error: $e'));
+  }
+
   /// Whether [url] is (any of) MAL's login pages.
   static bool _isLoginUrl(String url) {
     final u = url.toLowerCase();
@@ -194,6 +204,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             if (mounted) setState(() {});
             _controller.runJavaScript(_toggleJs);
             _controller.runJavaScript(probe);
+            Timer(const Duration(seconds: 4), _diagJsState);
           } else if (_phase == _Phase.needsLogin) {
             // The overlay's own WebView stays on the entry page while the
             // full-screen site sign-in (MalSiteSignInScreen) seeds the shared
