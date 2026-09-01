@@ -150,11 +150,15 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
 
   /// Polls the live page for _toggleJs markers + bridge availability.
   void _diagJsState() {
-    final js = "'' + (window.__togRan === 1) + '|' + (typeof window.grecaptcha)" +
-        " + '|' + (typeof ResultBridge) + '|' + (typeof ProbeBridge)";
-    _controller.runJavaScript(js).then((v) {
-      if (v != null) _log('diag __togRan|grecaptcha|ResultBridge|ProbeBridge=$v');
-    }).catchError((e) => _log('diag error: $e'));
+    final js = "ProbeBridge.postMessage('DIAGJS ' + (window.__togRan === 1)" +
+        " + '|' + (typeof window.grecaptcha)" +
+        " + '|' + (typeof ResultBridge)" +
+        " + '|' + (typeof ProbeBridge));";
+    try {
+      _controller.runJavaScript(js);
+    } catch (e) {
+      _log('diag error: $e');
+    }
   }
 
   /// Whether [url] is (any of) MAL's login pages.
