@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/credmal.dart';
-import 'package:dailyanimelist/widgets/web/mal_site_sign_in_screen.dart';
+import 'package:dailyanimelist/cache/cachemanager.dart';
+import 'package:dailyanimelist/widgets/web/mal_site_login_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -272,23 +274,43 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
   }
 
-  /// Opens the full-screen in-app site login (seeds the shared WebView cookie
-  /// jar with the MAL session) and, once it returns, re-probes and retries the
-  /// toggle. The overlay's own WebView doesn't navigate to login.php — the
-  /// cramped in-dialog form is dropped in favor of a comfortable sign-in.
+  /// Grants access exactly the way DailyAL already does (see the in-app OAuth
+  /// authorization screen): it opens the myanimelist.net OAuth v2 consent page
+  /// inside the app's own WebView. The user signs in there, so the site session
+  /// cookie lands in the shared app-global cookie jar, and the OAuth `code` is
+  /// exchanged for the API token. Once it succeeds the favorite toggle retries
+  /// with a valid site session and no separate login.
   Future<void> _startSiteSignIn() async {
     if (!mounted) return;
-    final loggedIn = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => const MalSiteSignInScreen()),
-    );
-    if (!mounted) return;
-    if (loggedIn == true) {
-      _log('site sign-in returned true; probing session');
-      // Re-read the shared cookie jar from the overlay's own origin.
-      _controller.runJavaScript(MalToggleOverlay.sessionProbe);
-      // If the probe flips _logged it will call _onLeftLoginPage and retry.
-    } else {
-      _log('site sign-in cancelled');
+    try {
+      final cc = MalAuth.codeChallenge(127);
+      final url = '${CredMal.oauthEndPoint}'
+          '?response_type=code&client_id=${CredMal.clientId}'
+          '&code_challenge=$cc&state=OAuthLogin&redirect_uri=${CredMal.redirectUri}';
+      await CacheManager.instance.setValue('cc', cc);
+      final loggedIn = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => MalSiteLoginScreen(url: url),
+        ),
+      );
+      if (!mounted) return;
+      if (loggedIn == true) {
+        // OAuth exchanged the code: the app holds the API token and the shared
+        // jar holds the myanimelist.net site session. Retry the favorite.
+        _log('oauth sign-in succeeded; site session seeded, retrying toggle');
+        _sent = false; // a previous needs-auth attempt may have consumed it
+        _phase = _Phase.favoriting;
+        _status = 'Signed in. Syncing with MyAnimeList\u2026';
+        if (mounted) setState(() {});
+        _controller.loadRequest(Uri.parse(_baseUrl));
+      } else {
+        _log('oauth sign-in cancelled');
+        if (_phase == _Phase.needsLogin) {
+          Navigator.of(context).pop();
+        }
+      }
+    } catch (e) {
+      _log('oauth sign-in error: $e');
       if (_phase == _Phase.needsLogin) {
         Navigator.of(context).pop();
       }
