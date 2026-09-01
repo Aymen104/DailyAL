@@ -89,8 +89,9 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   late final String _baseUrl =
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
 
-  late final String _toggleJs = '''(function(){
+  late final String _toggleJs = r'''(function(){
   window.__togRan = 1;
+  ProbeBridge.postMessage('TSTART');
   var key = window.GRECAPTCHA_SITE_KEY || '$malRecaptchaSiteKey';
   var type = '${widget.type}';
   var id = ${widget.id};
@@ -122,10 +123,9 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       body: 'g-recaptcha-response=' + encodeURIComponent(token)
     }).then(function(r){
       return r.text().then(function(t){
-        var mt = (t.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
-        dump('bodyTitle', mt.trim());
+        dump('bodyTitle', ((t.split('<title>')[1] || '').split('</title>')[0] || '').trim());
         var hit = t.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);
-        dump('bodyHit', hit ? hit[0].replace(/\s+/g, ' ') : 'none');
+        dump('bodyHit', hit ? hit[0] : 'none');
         done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|'));
       });
     }).catch(function(e){ done('T0@@network@@DBG' + debug.join('|')); });
