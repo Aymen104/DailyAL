@@ -119,7 +119,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
               headers: {'Content-Type': 'application/x-www-form-urlencoded'},
               body: 'g-recaptcha-response=' + encodeURIComponent(token)
             }).then(function(r){
-              return r.text().then(function(t){ done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|')); });
+              return r.text().then(function(t){ dump('bodyTitle', ((t.match(/<title>([^<]*)<\/title>/)||[])[1]||'').trim()); dump('bodyHit', (/recaptcha|verif|human|error|captcha|rate|limit|block/i.test(t) ? (t.match(/.{0,40}(?:recaptcha|verif|human|error|captcha|rate|limit|block).{0,60}/i)||[''])[0] : 'none')); done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|')); });
             }).catch(function(e){ done('T0@@network@@DBG' + debug.join('|')); });
           }).catch(function(e){ dump('executeErr', String(e && e.message)); setTimeout(callTokenThen, 2000); });
         } catch (e) { dump('execExc', String(e)); setTimeout(callTokenThen, 2000); }
