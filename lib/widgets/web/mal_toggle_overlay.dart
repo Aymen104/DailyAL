@@ -66,14 +66,12 @@ class MalToggleOverlay extends StatefulWidget {
   }) : super(key: key);
 
   /// Fires inside the WebView after page load and reports whether the cookie
-  /// jar holds a live MAL session. mymessages.php redirects to a login/login-required
-  /// page when logged out; when logged in it returns the user's messages page.
-  /// This DIAGNOSTIC variant additionally dumps the first ~130 chars of the
-  /// fetched page plus a set of marker checks so the exact logged-out page the
-  /// WebView receives can be identified. logged=true iff no login markers.
+  /// jar holds a live MAL session. This DIAGNOSTIC variant dumps the <title>,
+  /// the login/layout marker flags, and a user-profile signal so the page the
+  /// WebView actually receives can be classified as logged-in vs logged-out.
   /// Posted on [ProbeBridge].
   static const String sessionProbe =
-      '''(function(){try{fetch('https://myanimelist.net/mymessages.php',{credentials:'include'}).then(function(r){return r.text().then(function(t){var lp=(t.indexOf('login.php')>=0);var un=(t.indexOf('loginUserName')>=0);var bl=(t.indexOf('class="btn-login"')>=0);var ml=(t.indexOf('id="malLogin"')>=0);var lg=(t.indexOf('MyAnimeList')>=0);var head=t.substring(0,130).replace(/\\s+/g,' ');var logged=!(lp||un||ml);ProbeBridge.postMessage('SESH status='+r.status+' len='+t.length+' logged='+logged+' lp='+lp+' un='+un+' bl='+bl+' ml='+ml+' lg='+lg+' head=<'+head+'>');});}).catch(function(e){ProbeBridge.postMessage('SESH ERR '+e);});}catch(e2){ProbeBridge.postMessage('SESH EXC '+e2);}})();''';
+      '''(function(){try{fetch('https://myanimelist.net/mymessages.php',{credentials:'include'}).then(function(r){return r.text().then(function(t){var lp=(t.indexOf('login.php')>=0);var un=(t.indexOf('loginUserName')>=0);var unpw=(t.indexOf('name="password"')>=0);var sig=(t.indexOf('Sign out')>=0||t.indexOf('logout')>=0);var prof=(t.indexOf('/profile/')>=0);var titled=(t.match(/<title>([^<]*)<\\/title>/)||[])[1]||'';var msg=(t.indexOf('inbox')>=0||t.indexOf('no messages')>=0);var head=t.substring(0,80).replace(/\\s+/g,' ');var logged=(sig||prof||msg);ProbeBridge.postMessage('SESH len='+t.length+' logged='+logged+' lp='+lp+' un='+un+' pw='+unpw+' signOut='+sig+' profile='+prof+' msg='+msg+' title=<'+titled+'> head=<'+head+'>');});}).catch(function(e){ProbeBridge.postMessage('SESH ERR '+e);});}catch(e2){ProbeBridge.postMessage('SESH EXC '+e2);}})();''';
 
   @override
   State<MalToggleOverlay> createState() => _MalToggleOverlayState();
