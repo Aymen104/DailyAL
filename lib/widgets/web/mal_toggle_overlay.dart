@@ -64,14 +64,15 @@ class MalToggleOverlay extends StatefulWidget {
   }) : super(key: key);
 
   /// Fires inside the WebView after page load and reports whether the cookie
-  /// jar holds a live MAL session. mymessages.php redirects to the homepage
-  /// when logged out; when logged in it returns the user's messages page. The
-  /// header account area renders `class="btn-login"` (login/sign-up buttons)
-  /// ONLY when logged out — a logged-in page has no btn-login and instead shows
-  /// the user's `/profile/...` avatar link. So a session is live iff the page
-  /// has NO login button. Posted on [ProbeBridge].
+  /// jar holds a live MAL session. mymessages.php redirects to a login/login-required
+  /// page when logged out; when logged in it returns the user's messages page.
+  /// On the MOBILE site (which the Android WebView is served), a logged-out page
+  /// always links `login.php` in its header/redirect target, while a logged-in
+  /// page shows the user's avatar instead and contains no `login.php` at all.
+  /// So a session is live iff the probed page contains NO `login.php`.
+  /// Posted on [ProbeBridge].
   static const String sessionProbe =
-      '''(function(){try{fetch('https://myanimelist.net/mymessages.php',{credentials:'include'}).then(function(r){return r.text().then(function(t){var logged=(t.indexOf('class="btn-login"')<0);ProbeBridge.postMessage('SESH status='+r.status+' len='+t.length+' logged='+logged);});}).catch(function(e){ProbeBridge.postMessage('SESH ERR '+e);});}catch(e2){ProbeBridge.postMessage('SESH EXC '+e2);}})();''';
+      '''(function(){try{fetch('https://myanimelist.net/mymessages.php',{credentials:'include'}).then(function(r){return r.text().then(function(t){var logged=(t.indexOf('login.php')<0);ProbeBridge.postMessage('SESH status='+r.status+' len='+t.length+' logged='+logged);});}).catch(function(e){ProbeBridge.postMessage('SESH ERR '+e);});}catch(e2){ProbeBridge.postMessage('SESH EXC '+e2);}})();''';
 
   @override
   State<MalToggleOverlay> createState() => _MalToggleOverlayState();
