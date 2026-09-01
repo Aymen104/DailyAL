@@ -289,11 +289,23 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             _controller.runJavaScript(_toggleJs);
             _controller.runJavaScript(probe);
           } else if (_phase == _Phase.needsLogin) {
-            // A successful login bounces back to the MAL homepage, which
-            // _isLoginUrl still treats as a login URL — so the URL watcher
-            // never sees a "leave". Detect the new session on the page's own
-            // origin via the probe instead.
+            // A successful login bounces back to the MAL homepage or the `from`
+            // URL, which _isLoginUrl may still treat as a login URL — so the
+            // URL watcher never sees a "leave". Detect the new session on the
+            // page's own origin via the probe instead.
             _controller.runJavaScript(probe);
+            // MAL frequently bounces an unauthenticated login.php?from= request
+            // to the homepage instead of rendering the form. If we ended up on
+            // the bare homepage and still aren't logged in, force the form back
+            // up so the user can actually sign in (they can't log in from the
+            // homepage without digging through the header).
+            final u = url.toLowerCase();
+            if (u == 'https://myanimelist.net/' && !_logged) {
+              _log('needsLogin landed on homepage without session, reloading login form');
+              _controller.loadRequest(Uri.parse(
+                  'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_baseUrl)}'));
+              return;
+            }
             _status = 'Sign in to MyAnimeList in the window, then return here.';
             if (mounted) setState(() {});
           }
@@ -378,7 +390,12 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       _status = 'Sign in to MyAnimeList to sync your favorites.';
       debugPrint('[MalToggle] needs auth, showing login in overlay');
       if (mounted) setState(() {});
-      _controller.loadRequest(Uri.parse('https://myanimelist.net/login.php'));
+      // Use a `from` param so MAL keeps showing the login form instead of
+      // bouncing an unauthenticated request to the homepage, and so a
+      // successful login redirects back to the character page (whose page
+      // finish then lets the probe confirm the new session).
+      final from = Uri.encodeComponent(_baseUrl);
+      _controller.loadRequest(Uri.parse('https://myanimelist.net/login.php?from=$from'));
       return;
     }
     if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
