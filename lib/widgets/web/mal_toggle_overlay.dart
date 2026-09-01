@@ -294,7 +294,8 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             // never sees a "leave". Detect the new session on the page's own
             // origin via the probe instead.
             _controller.runJavaScript(probe);
-            _maybeAutoLogin();
+            _status = 'Sign in to MyAnimeList in the window, then return here.';
+            if (mounted) setState(() {});
           }
         },
         onWebResourceError: (error) {

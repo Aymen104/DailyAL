@@ -27,19 +27,10 @@ class MalSiteCredentials {
       if (u != null && u.isNotEmpty && p != null && p.isNotEmpty) {
         return MalSiteCredentials(u, p);
       }
-      return await debugSeed();
+      return null;
     } catch (e) {
-      return await debugSeed();
+      return null;
     }
-  }
-
-  /// TEST-ONLY: fixed test credentials so the auto-login JS path can be
-  /// validated end-to-end without the credential dialog. Remove before ship.
-  static Future<MalSiteCredentials?> debugSeed() async {
-    // TEST-ONLY: unconditional seed so the JS auto-login path can be validated
-    // end-to-end without the credential dialog. Revert to flag-gated before
-    // shipping.
-    return const MalSiteCredentials('Aymen_Mounazzah', 'p0a6s2s6w9o3r4d6');
   }
 
   static Future<bool> has() async => (await load()) != null;
