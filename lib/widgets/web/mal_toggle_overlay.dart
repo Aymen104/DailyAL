@@ -94,49 +94,55 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   var type = '${widget.type}';
   var id = ${widget.id};
   var add = ${widget.add};
-  var debug = [];
+  var debug = ['start'];
   var finished = false;
-  var deadline = Date.now() + 35000;
+  var deadline = Date.now() + 30000;
   function done(t){ if (finished) return; finished = true; ResultBridge.postMessage(t); }
   function dump(label, val){ debug.push(label + ':' + (val === null || val === void 0 ? 'null' : String(val))); }
-  function outOfTime(){ return Date.now() > deadline; }
-  function watchdog(){ if (finished) return; dump('watchdog','fire'); done('TWATCHDOG@@' + debug.join('|')); }
-  setTimeout(watchdog, 36000);
-  function ensureLoaded(cb, tries){
-    tries = tries || 0;
+  function soak(){ return Date.now() > deadline; }
+  setTimeout(function(){ if (finished) return; dump('watchdog','fire'); done('TWATCHDOG@@' + debug.join('|')); }, 31000);
+  function ensureLoaded(cb){
+    if (soak()) return;
     if (window.grecaptcha) { cb(); return; }
-    if (outOfTime()) return;
-    if (tries > 3) { dump('grecaptcha','NOT_LOADED'); done('TNOLIB@@' + debug.join('|')); return; }
     var s = document.createElement('script');
     s.src = 'https://www.google.com/recaptcha/api.js?render=' + key;
     s.async = true;
     s.onload = function(){ dump('grecaptcha','loaded'); cb(); };
-    s.onerror = function(){ dump('scriptErr', tries); setTimeout(function(){ ensureLoaded(cb, tries + 1); }, 2500); };
+    s.onerror = function(){ dump('scriptErr','onerror'); setTimeout(function(){ ensureLoaded(cb); }, 2500); };
     document.head.appendChild(s);
   }
+  function postToken(token){
+    if (soak()) return;
+    dump('tokenLen', token.length);
+    fetch('https://myanimelist.net/favorite/' + type + '/' + id + '.json', {
+      method: add ? 'POST' : 'DELETE',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'g-recaptcha-response=' + encodeURIComponent(token)
+    }).then(function(r){
+      return r.text().then(function(t){
+        var mt = (t.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+        dump('bodyTitle', mt.trim());
+        var hit = t.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);
+        dump('bodyHit', hit ? hit[0].replace(/\s+/g, ' ') : 'none');
+        done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|'));
+      });
+    }).catch(function(e){ done('T0@@network@@DBG' + debug.join('|')); });
+  }
   function callTokenThen(){
-    if (outOfTime()) return;
+    if (soak()) return;
     if (window.grecaptcha && window.grecaptcha.ready) {
       grecaptcha.ready(function(){
-        if (outOfTime()) return;
+        if (soak()) return;
         try {
           grecaptcha.execute(key, {action:'social'}).then(function(token){
-            if (outOfTime()) return;
-            dump('tokenLen', token.length);
-            fetch('https://myanimelist.net/favorite/' + type + '/' + id + '.json', {
-              method: add ? 'POST' : 'DELETE',
-              credentials: 'include',
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-              body: 'g-recaptcha-response=' + encodeURIComponent(token)
-            }).then(function(r){
-              return r.text().then(function(t){ dump('bodyTitle', ((t.match(/<title>([^<]*)<\/title>/)||[])[1]||'').trim()); dump('bodyHit', (/recaptcha|verif|human|error|captcha|rate|limit|block/i.test(t) ? (t.match(/.{0,40}(?:recaptcha|verif|human|error|captcha|rate|limit|block).{0,60}/i)||[''])[0] : 'none')); done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|')); });
-            }).catch(function(e){ done('T0@@network@@DBG' + debug.join('|')); });
-          }).catch(function(e){ dump('executeErr', String(e && e.message)); if (!outOfTime()) setTimeout(callTokenThen, 2000); });
-        } catch (e) { dump('execExc', String(e)); if (!outOfTime()) setTimeout(callTokenThen, 2000); }
+            postToken(token);
+          }).catch(function(e){ dump('executeErr', String(e && e.message)); setTimeout(callTokenThen, 2000); });
+        } catch (e) { dump('execExc', String(e)); setTimeout(callTokenThen, 2000); }
       });
-    } else { if (!outOfTime()) setTimeout(callTokenThen, 400); }
+    } else { setTimeout(callTokenThen, 400); }
   }
-  setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }, 0); }, 400);
+  setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }); }, 300);
 })();''';
 
   void _log(String message) => debugPrint('[MalToggle] $message');
