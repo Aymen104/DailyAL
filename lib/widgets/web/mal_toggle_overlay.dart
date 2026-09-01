@@ -298,12 +298,18 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             // to the homepage instead of rendering the form. If we ended up on
             // the bare homepage and still aren't logged in, force the form back
             // up so the user can actually sign in (they can't log in from the
-            // homepage without digging through the header).
+            // homepage without digging through the header). Wait a beat so an
+            // actually-successful login (which also lands here via the probe)
+            // can flip _logged first and avoid cancelling the session.
             final u = url.toLowerCase();
             if (u == 'https://myanimelist.net/' && !_logged) {
-              _log('needsLogin landed on homepage without session, reloading login form');
-              _controller.loadRequest(Uri.parse(
-                  'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_baseUrl)}'));
+              Future.delayed(const Duration(milliseconds: 1500), () {
+                if (_phase == _Phase.needsLogin && !_logged && mounted) {
+                  _log('needsLogin still on homepage without session, reloading login form');
+                  _controller.loadRequest(Uri.parse(
+                      'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_baseUrl)}'));
+                }
+              });
               return;
             }
             _status = 'Sign in to MyAnimeList in the window, then return here.';
