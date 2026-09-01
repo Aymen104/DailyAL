@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dailyanimelist/api/credmal.dart';
-import 'package:dailyanimelist/api/malsite_credentials.dart';
+import 'package:dailyanimelist/widgets/web/mal_site_sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -52,9 +52,8 @@ class MalToggleOverlay extends StatefulWidget {
   final String type;
   final int id;
   final bool add;
-  /// When true, the overlay fills and submits the MAL login form itself (using
-  /// [MalSiteCredentials]) on first login so the user never types into the
-  /// WebView. Defaults to false — callers opt in.
+  /// When true, the overlay is allowed to show the favorite/sign-in flow on a
+  /// not-yet-logged-in session. Defaults to false — callers opt in.
   final bool autoLogin;
   const MalToggleOverlay({
     Key? key,
@@ -63,41 +62,6 @@ class MalToggleOverlay extends StatefulWidget {
     required this.add,
     this.autoLogin = false,
   }) : super(key: key);
-
-  /// Fills and submits the MAL login form via the DOM (deterministic — immune
-  /// to layout shifts caused by the on-screen keyboard). The submitted
-  /// credentials come from secure storage; see [credentialStore].
-  static const String loginJs = r'''
-(function(){
-  function probe(name, val){ ProbeBridge.postMessage(name + val); }
-  var u = document.getElementById('loginUserName') || document.getElementById('login_username') || document.querySelector('input[name=user_name]');
-  var p = document.getElementById('login-password') || document.getElementById('login_password') || document.querySelector('input[type=password][name=password]');
-  var debug = [];
-  if (!u || !p) {
-    probe('LOGINDBG fields_missing username=', (u?1:0) + ' password=' + (p?1:0));
-    return;
-  }
-  u.value = 'USER';
-  p.value = 'PASS';
-  // Dispatch input events so Vue/model bindings and recaptcha hooks observe the change.
-  try { u.dispatchEvent(new Event('input', {bubbles:true})); p.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
-  debug.push('filled');
-  probe('LOGINDBG username=', u.value + ' pass_len=' + p.value.length);
-  // Click the recaptcha-driven submit button first (it triggers the token fetch),
-  // then fall back to a plain submit button or form.submit().
-  var btn = document.querySelector('form input.btn-recaptcha-submit')
-          || document.querySelector('form button.btn-recaptcha-submit')
-          || document.querySelector('form input[type=submit]')
-          || document.querySelector('form button[type=submit]');
-  if (btn) { debug.push('btn_click'); btn.click(); }
-  else {
-    var f = document.querySelector('form');
-    if (f) { debug.push('form_submit'); f.submit(); }
-    else debug.push('no_form');
-  }
-  probe('LOGINDBG submit=', debug.join(','));
-})();
-''';
 
   /// Fires inside the WebView after page load and reports whether the cookie
   /// jar holds a live MAL session (probe page responds as logged-in instead of
@@ -114,17 +78,11 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   Timer? _timeout;
   bool _sent = false;
   bool _logged = false;
-  bool _loginInjected = false;
   _Phase _phase = _Phase.check;
   String _status = 'Syncing with MyAnimeList\u2026';
 
   late final String _baseUrl =
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
-
-  /// The relative MAL path for this entry (used as login.php `from` so MAL keeps
-  /// the login form visible and returns here on success).
-  late final String _fromPath =
-      '/${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
 
   late final String _toggleJs = '''(function(){
   var key = window.GRECAPTCHA_SITE_KEY || '$malRecaptchaSiteKey';
@@ -177,85 +135,6 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         (u.endsWith('myanimelist.net/') || u.endsWith('myanimelist.net'));
   }
 
-  /// Auto-fills + submits the MAL login form if credentials exist. If no site
-  /// credentials are stored yet, captures them once via a Dart dialog (the
-  /// first favorite tap), stores them securely, then injects — so the very
-  /// first login makes every subsequent favorites sync automatic.
-  Future<void> _maybeAutoLogin() async {
-    _log('_maybeAutoLogin autoLogin=${widget.autoLogin} injected=$_loginInjected logged=$_logged');
-    if (!widget.autoLogin || _loginInjected || _logged) return;
-    var creds = await MalSiteCredentials.load();
-    _log('_maybeAutoLogin creds=${creds == null ? 'none' : creds.username} mounted=$context.mounted');
-    if (creds == null && context.mounted) {
-      // First use: ask for the MAL site password once, store it securely.
-      final captured = await _captureCredentials();
-      _log('_maybeAutoLogin captured=${captured == null ? 'cancelled' : captured.$1}');
-      if (captured == null || !mounted) return;
-      await MalSiteCredentials.save(captured.$1, captured.$2);
-      creds = MalSiteCredentials(captured.$1, captured.$2);
-    }
-    if (creds == null || !mounted) return;
-    _loginInjected = true;
-    _log('auto-filling MAL login for ${creds.username}');
-    final js = MalToggleOverlay.loginJs
-        .replaceAll('USER', creds.username)
-        .replaceAll('PASS', creds.password);
-    _controller.runJavaScript(js);
-  }
-
-  /// Shows a modal asking for the MAL site username + password (needed to
-  /// auto-submit the site's login form on first use).
-  Future<(String, String)?> _captureCredentials() {
-    final userController = TextEditingController();
-    final passController = TextEditingController();
-    // Use the root navigator so the dialog reliably renders above the
-    // WebView overlay (which is itself a Dialog route).
-    return showDialog<(String, String)>(
-      context: context,
-      useRootNavigator: true,
-      builder: (dialogCtx) => AlertDialog(
-          title: const Text('One-time MyAnimeList login'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'To sync favorites automatically, enter your MyAnimeList '
-                'username and password once. They are stored encrypted on this '
-                'device and used only to keep your favorite toggle in sync.',
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: userController,
-                decoration: const InputDecoration(labelText: 'Username'),
-                autofocus: true,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: passController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final u = userController.text.trim();
-                final p = passController.text;
-                if (u.isEmpty || p.isEmpty) return;
-                Navigator.of(dialogCtx).pop((u, p));
-            },
-            child: const Text('Save & Sync'),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// The user completed a real login: the WebView left the login form.
   void _onLeftLoginPage() {
     _log('user navigation away from login page -> authenticated, retrying');
@@ -294,30 +173,12 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             _controller.runJavaScript(_toggleJs);
             _controller.runJavaScript(probe);
           } else if (_phase == _Phase.needsLogin) {
-            // A successful login bounces back to the MAL homepage or the `from`
-            // URL, which _isLoginUrl may still treat as a login URL — so the
-            // URL watcher never sees a "leave". Detect the new session on the
-            // page's own origin via the probe instead.
+            // The overlay's own WebView stays on the entry page while the
+            // full-screen site sign-in (MalSiteSignInScreen) seeds the shared
+            // cookie jar. A successful login is detected via the session probe,
+            // not by URL watching. Just keep probing here.
             _controller.runJavaScript(probe);
-            // MAL frequently bounces an unauthenticated login.php?from= request
-            // to the homepage instead of rendering the form. If we ended up on
-            // the bare homepage and still aren't logged in, force the form back
-            // up so the user can actually sign in (they can't log in from the
-            // homepage without digging through the header). Wait a beat so an
-            // actually-successful login (which also lands here via the probe)
-            // can flip _logged first and avoid cancelling the session.
-            final u = url.toLowerCase();
-            if (u == 'https://myanimelist.net/' && !_logged) {
-              Future.delayed(const Duration(milliseconds: 1500), () {
-                if (_phase == _Phase.needsLogin && !_logged && mounted) {
-                  _log('needsLogin still on homepage without session, reloading login form');
-                  _controller.loadRequest(Uri.parse(
-                      'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_fromPath)}'));
-                }
-              });
-              return;
-            }
-            _status = 'Sign in to MyAnimeList in the window, then return here.';
+            _status = 'Sign in to MyAnimeList to sync favorites.';
             if (mounted) setState(() {});
           }
         },
@@ -398,18 +259,36 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         return;
       }
       _phase = _Phase.needsLogin;
-      _status = 'Sign in to MyAnimeList to sync your favorites.';
-      debugPrint('[MalToggle] needs auth, showing login in overlay');
+      _status = 'Sign in to MyAnimeList to sync favorites.';
+      debugPrint('[MalToggle] needs auth, opening full-screen site sign-in');
       if (mounted) setState(() {});
-      // MAL's `from` param expects a RELATIVE path (e.g. /character/40). Passing
-      // an absolute URL mangles the login URL, so use the bare path here. A
-      // successful login redirects back to that page, whose page finish then
-      // lets the probe confirm the new session.
-      _controller.loadRequest(Uri.parse(
-          'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_fromPath)}'));
+      _startSiteSignIn();
       return;
     }
     if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
+  }
+
+  /// Opens the full-screen in-app site login (seeds the shared WebView cookie
+  /// jar with the MAL session) and, once it returns, re-probes and retries the
+  /// toggle. The overlay's own WebView doesn't navigate to login.php — the
+  /// cramped in-dialog form is dropped in favor of a comfortable sign-in.
+  Future<void> _startSiteSignIn() async {
+    if (!mounted) return;
+    final loggedIn = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const MalSiteSignInScreen()),
+    );
+    if (!mounted) return;
+    if (loggedIn == true) {
+      _log('site sign-in returned true; probing session');
+      // Re-read the shared cookie jar from the overlay's own origin.
+      _controller.runJavaScript(MalToggleOverlay.sessionProbe);
+      // If the probe flips _logged it will call _onLeftLoginPage and retry.
+    } else {
+      _log('site sign-in cancelled');
+      if (_phase == _Phase.needsLogin) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   @override
@@ -437,6 +316,11 @@ Padding(
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
+                  if (_phase == _Phase.needsLogin)
+                    TextButton(
+                      onPressed: _startSiteSignIn,
+                      child: const Text('Sign in'),
+                    ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     tooltip: 'Cancel',
