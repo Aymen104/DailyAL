@@ -82,6 +82,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   Timer? _timeout;
   bool _sent = false;
   bool _logged = false;
+  int _toggleRetries = 0;
   _Phase _phase = _Phase.check;
   String _status = 'Syncing with MyAnimeList\u2026';
 
@@ -94,11 +95,17 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   var id = ${widget.id};
   var add = ${widget.add};
   var debug = [];
-  function done(t){ ResultBridge.postMessage(t); }
+  var finished = false;
+  var deadline = Date.now() + 35000;
+  function done(t){ if (finished) return; finished = true; ResultBridge.postMessage(t); }
   function dump(label, val){ debug.push(label + ':' + (val === null || val === void 0 ? 'null' : String(val))); }
+  function outOfTime(){ return Date.now() > deadline; }
+  function watchdog(){ if (finished) return; dump('watchdog','fire'); done('TWATCHDOG@@' + debug.join('|')); }
+  setTimeout(watchdog, 36000);
   function ensureLoaded(cb, tries){
     tries = tries || 0;
     if (window.grecaptcha) { cb(); return; }
+    if (outOfTime()) return;
     if (tries > 3) { dump('grecaptcha','NOT_LOADED'); done('TNOLIB@@' + debug.join('|')); return; }
     var s = document.createElement('script');
     s.src = 'https://www.google.com/recaptcha/api.js?render=' + key;
@@ -108,10 +115,13 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     document.head.appendChild(s);
   }
   function callTokenThen(){
+    if (outOfTime()) return;
     if (window.grecaptcha && window.grecaptcha.ready) {
       grecaptcha.ready(function(){
+        if (outOfTime()) return;
         try {
           grecaptcha.execute(key, {action:'social'}).then(function(token){
+            if (outOfTime()) return;
             dump('tokenLen', token.length);
             fetch('https://myanimelist.net/favorite/' + type + '/' + id + '.json', {
               method: add ? 'POST' : 'DELETE',
@@ -121,10 +131,10 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             }).then(function(r){
               return r.text().then(function(t){ dump('bodyTitle', ((t.match(/<title>([^<]*)<\/title>/)||[])[1]||'').trim()); dump('bodyHit', (/recaptcha|verif|human|error|captcha|rate|limit|block/i.test(t) ? (t.match(/.{0,40}(?:recaptcha|verif|human|error|captcha|rate|limit|block).{0,60}/i)||[''])[0] : 'none')); done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|')); });
             }).catch(function(e){ done('T0@@network@@DBG' + debug.join('|')); });
-          }).catch(function(e){ dump('executeErr', String(e && e.message)); setTimeout(callTokenThen, 2000); });
-        } catch (e) { dump('execExc', String(e)); setTimeout(callTokenThen, 2000); }
+          }).catch(function(e){ dump('executeErr', String(e && e.message)); if (!outOfTime()) setTimeout(callTokenThen, 2000); });
+        } catch (e) { dump('execExc', String(e)); if (!outOfTime()) setTimeout(callTokenThen, 2000); }
       });
-    } else { setTimeout(callTokenThen, 400); }
+    } else { if (!outOfTime()) setTimeout(callTokenThen, 400); }
   }
   setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }, 0); }, 400);
 })();''';
@@ -143,6 +153,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   void _onLeftLoginPage() {
     _log('user navigation away from login page -> authenticated, retrying');
     _sent = false; // a previous needs-auth attempt may have consumed the bridge
+    _toggleRetries = 0;
     _phase = _Phase.favoriting;
     _status = 'Signed in. Syncing with MyAnimeList\u2026';
     if (mounted) setState(() {});
@@ -171,6 +182,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         onPageFinished: (url) {
           _log('pageFinished url=$url phase=$_phase');
           if (_phase == _Phase.check || _phase == _Phase.favoriting) {
+            _sent = false; // fresh page load = fresh toggle attempt
             _phase = _Phase.favoriting;
             _status = 'Syncing with MyAnimeList\u2026';
             if (mounted) setState(() {});
@@ -225,6 +237,20 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
     if (_sent) return;
     // toggle result: T<status>@@<body>
     if (!message.startsWith('T')) return;
+    // Watchdog/no-script guard: the reCAPTCHA path hung or the lib never
+    // loaded. Retry the whole page once before giving up.
+    if (message.startsWith('TWATCHDOG@@') || message.startsWith('TNOLIB@@')) {
+      _log('toggle JS ${message.substring(0, message.indexOf('@@'))} -> reload retry $_toggleRetries');
+      if (!_sent && _toggleRetries < 2) {
+        _sent = true;
+        _toggleRetries++;
+        _controller.loadRequest(Uri.parse(_baseUrl));
+        return;
+      }
+      _sent = true;
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
     _sent = true;
     final split = message.indexOf('@@');
     final int status;
@@ -297,6 +323,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
         // jar holds the myanimelist.net site session. Retry the favorite.
         _log('oauth sign-in succeeded; site session seeded, retrying toggle');
         _sent = false; // a previous needs-auth attempt may have consumed it
+        _toggleRetries = 0;
         _phase = _Phase.favoriting;
         _status = 'Signed in. Syncing with MyAnimeList\u2026';
         if (mounted) setState(() {});
