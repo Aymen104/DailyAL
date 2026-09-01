@@ -121,6 +121,11 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   late final String _baseUrl =
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
 
+  /// The relative MAL path for this entry (used as login.php `from` so MAL keeps
+  /// the login form visible and returns here on success).
+  late final String _fromPath =
+      '/${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
+
   late final String _toggleJs = '''(function(){
   var key = window.GRECAPTCHA_SITE_KEY || '$malRecaptchaSiteKey';
   var type = '${widget.type}';
@@ -307,7 +312,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
                 if (_phase == _Phase.needsLogin && !_logged && mounted) {
                   _log('needsLogin still on homepage without session, reloading login form');
                   _controller.loadRequest(Uri.parse(
-                      'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_baseUrl)}'));
+                      'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_fromPath)}'));
                 }
               });
               return;
@@ -396,12 +401,12 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       _status = 'Sign in to MyAnimeList to sync your favorites.';
       debugPrint('[MalToggle] needs auth, showing login in overlay');
       if (mounted) setState(() {});
-      // Use a `from` param so MAL keeps showing the login form instead of
-      // bouncing an unauthenticated request to the homepage, and so a
-      // successful login redirects back to the character page (whose page
-      // finish then lets the probe confirm the new session).
-      final from = Uri.encodeComponent(_baseUrl);
-      _controller.loadRequest(Uri.parse('https://myanimelist.net/login.php?from=$from'));
+      // MAL's `from` param expects a RELATIVE path (e.g. /character/40). Passing
+      // an absolute URL mangles the login URL, so use the bare path here. A
+      // successful login redirects back to that page, whose page finish then
+      // lets the probe confirm the new session.
+      _controller.loadRequest(Uri.parse(
+          'https://myanimelist.net/login.php?from=${Uri.encodeComponent(_fromPath)}'));
       return;
     }
     if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
