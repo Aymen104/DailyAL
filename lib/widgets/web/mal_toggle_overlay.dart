@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/credmal.dart';
@@ -146,6 +147,20 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }); }, 300);
 })();''';
 
+  /// Multi-line transport control: if this tiny IIFE's message arrives while
+  /// the (also multi-line) toggle's TSTART does not, multi-line strings are
+  /// still fine and the failure is specific to the toggle string itself.
+  late final String _mlCtrl = '''(function(){
+  ProbeBridge.postMessage('MLCTRL');
+})();''';
+
+  /// The toggle shipped as a single-line eval(atob(...)) payload. This removes
+  /// every newline / length / quote-encoding variable from the transport so we
+  /// can tell definitively whether the previous multi-line raw string was the
+  /// reason the IIFE never started.
+  late final String _toggleEval =
+      'eval(atob("${base64Encode(utf8.encode(_toggleJs))}"));';
+
   void _log(String message) => debugPrint('[MalToggle] $message');
 
   /// Polls the live page for _toggleJs markers + bridge availability.
@@ -206,7 +221,8 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             _phase = _Phase.favoriting;
             _status = 'Syncing with MyAnimeList\u2026';
             if (mounted) setState(() {});
-            _controller.runJavaScript(_toggleJs);
+            _controller.runJavaScript(_mlCtrl);
+            _controller.runJavaScript(_toggleEval);
             _controller.runJavaScript(probe);
             Timer(const Duration(seconds: 4), _diagJsState);
           } else if (_phase == _Phase.needsLogin) {
