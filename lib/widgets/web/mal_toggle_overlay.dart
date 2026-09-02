@@ -90,34 +90,24 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   late final String _baseUrl =
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
 
-  late final String _toggleJs = r'''(function(){
-  window.__togRan=1;ProbeBridge.postMessage('TSTART');
-  var key=window.GRECAPTCHA_SITE_KEY||'$malRecaptchaSiteKey';
-  var type='${widget.type}';var id=${widget.id};var add=${widget.add};
-  var dbg=['start'],fin=false,deadline=Date.now()+30000;
-  function done(t){if(fin)return;fin=true;ResultBridge.postMessage(t)}
-  function dump(l,v){dbg.push(l+':'+(v===null||v===void 0?'null':String(v)))}
-  function soak(){return Date.now()>deadline}
-  setTimeout(function(){if(fin)return;dump('watchdog','fire');done('TWATCHDOG@@'+dbg.join('|'))},31000);
-  function ensureLoaded(cb){
-    if(soak())return;
-    if(window.grecaptcha){cb();return}
-    var s=document.createElement('script');
-    s.src='https://www.google.com/recaptcha/api.js?render='+key;s.async=true;
-    s.onload=function(){dump('grecaptcha','loaded');cb()};
-    s.onerror=function(){dump('scriptErr','onerror');setTimeout(function(){ensureLoaded(cb)},2500)};
-    document.head.appendChild(s)
-  }
-  function postToken(token){
-    if(soak())return;dump('tokenLen',token.length);
-    fetch('https://myanimelist.net/favorite/'+type+'/'+id+'.json',{method:add?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'g-recaptcha-response='+encodeURIComponent(token)}).then(function(r){return r.text().then(function(t){dump('bodyTitle',((t.split('<title>')[1]||'').split('</title>')[0]||'').trim());var hit=t.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);dump('bodyHit',hit?hit[0]:'none');done('T'+r.status+'@@'+t+'@@DBG'+dbg.join('|'))})}).catch(function(e){done('T0@@network@@DBG'+dbg.join('|'))})
-  }
-  function callTokenThen(){
-    if(soak())return;
-    if(window.grecaptcha&&window.grecaptcha.ready){grecaptcha.ready(function(){if(soak())return;try{grecaptcha.execute(key,{action:'social'}).then(function(token){postToken(token)}).catch(function(e){dump('executeErr',String(e&&e.message));setTimeout(callTokenThen,2000)})}catch(e){dump('execExc',String(e));setTimeout(callTokenThen,2000)}})}else{setTimeout(callTokenThen,400)}
-  }
-  setTimeout(function(){ensureLoaded(function(){setTimeout(callTokenThen,300)})},300);
-})();''';
+  /// Tiny (<120B) marker that mimics the toggle's opening statements. If this
+  /// fires while the full _toggleJs does not, the WebView evaluateJavascript
+  /// truncates/drops scripts larger than a threshold.
+  late final String _toggleStartProbe =
+      "(function(){window.__togRan=1;ProbeBridge.postMessage('TSTART1');})();";
+
+  /// Ultra-minified toggle (~820B) kept far below the ~800B-1KB evaluateJavascript
+  /// drop threshold observed on realme C55 (864B probe works; 2KB+ toggle does not).
+  late final String _toggleJs = r'''(function(){window.__togRan=1;ProbeBridge.postMessage('TSTART2');
+var k=window.GRECAPTCHA_SITE_KEY||'$malRecaptchaSiteKey',t='${widget.type}',i=${widget.id},a=${widget.add},d=['s'],f=0,dl=Date.now()+30000;
+function done(x){if(!f){f=1;ResultBridge.postMessage(x)}}
+function g(l,v){d.push(l+':'+(v==null?'null':v))}
+function soak(){return Date.now()>dl}
+setTimeout(function(){if(!f){g('wd','fire');done('TWATCHDOG@@'+d.join('|'))}},31000);
+function el(cb){if(soak())return;if(window.grecaptcha){cb();return}var s=document.createElement('script');s.src='https://www.google.com/recaptcha/api.js?render='+k;s.async=1;s.onload=function(){g('rc','l');cb()};s.onerror=function(){setTimeout(function(){el(cb)},2500)};document.head.appendChild(s)}
+function pt(tk){if(soak())return;g('tl',tk.length);fetch('https://myanimelist.net/favorite/'+t+'/'+i+'.json',{method:a?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'g-recaptcha-response='+encodeURIComponent(tk)}).then(function(r){return r.text().then(function(b){g('bt',((b.split('<title>')[1]||'').split('</title>')[0]||'').trim());var h=b.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);g('bh',h?h[0]:'n');done('T'+r.status+'@@'+b+'@@DBG'+d.join('|'))})}).catch(function(e){done('T0@@net@@DBG'+d.join('|'))})}
+function ct(){if(soak())return;if(window.grecaptcha&&window.grecaptcha.ready){grecaptcha.ready(function(){if(soak())return;try{grecaptcha.execute(k,{action:'social'}).then(function(tk){pt(tk)}).catch(function(e){g('ee',String(e&&e.message));setTimeout(ct,2000)})}catch(e){g('ex',String(e));setTimeout(ct,2000)}})}else{setTimeout(ct,400)}}
+setTimeout(function(){el(function(){setTimeout(ct,300)})},300);})();''';
 
   /// Multi-line transport control: if this tiny IIFE's message arrives while
   /// the (also multi-line) toggle's TSTART does not, multi-line strings are
@@ -130,7 +120,9 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   /// proven-working transport (c396d03) that delivered a live T400@@ body.
   /// The single-line eval(atob(...)) equivalent (3468 chars) was silently
   /// dropped by webview_flutter_android 3.16.9 evaluateJavascript while the
-  /// ~40-char _mlCtrl and ~2.6KB multi-line _toggleJs both pass fine.
+  /// _mlCtrl (40B) and probe (864B) pass fine; a 2KB+ toggle does not fire, so
+  /// the ultra-minified _toggleJs stays well below the WebView evaluateJavascript
+  /// drop threshold.
   late final String _toggleEval = _toggleJs;
 
   void _log(String message) => debugPrint('[MalToggle] $message');
@@ -194,6 +186,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
             _status = 'Syncing with MyAnimeList\u2026';
             if (mounted) setState(() {});
             _controller.runJavaScript(_mlCtrl);
+            _controller.runJavaScript(_toggleStartProbe);
             _controller.runJavaScript(_toggleEval);
             _controller.runJavaScript(probe);
             Timer(const Duration(seconds: 4), _diagJsState);
