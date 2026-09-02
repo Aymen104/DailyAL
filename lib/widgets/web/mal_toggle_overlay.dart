@@ -106,7 +106,7 @@ setTimeout(function(){var o=window.__tog;if(!o.f){o.g('wd','fire');o.done('TWATC
 
   late final String _toggleB = '''
 (function(){window.__tog.pt=function(tk){var o=window.__tog;if(o.soak())return;o.g('tl',tk.length);
-fetch('https://myanimelist.net/favorite/'+o.t+'/'+o.i+'.json',{method:o.a?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'g-recaptcha-response='+encodeURIComponent(tk)}).then(function(r){return r.text().then(function(b){o.g('bt',((b.split('<title>')[1]||'').split('</title>')[0]||'').trim());var h=b.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);o.g('bh',h?h[0]:'n');o.done('T'+r.status+'@@'+b+'@@DBG'+o.d.join('|'))})}).catch(function(e){o.done('T0@@net@@DBG'+o.d.join('|'))})};
+fetch('https://myanimelist.net/favorite/'+o.t+'/'+o.i+'.json',{method:o.a?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:'g-recaptcha-response='+encodeURIComponent(tk)}).then(function(r){return r.text().then(function(b){o.g('bt',((b.split('<title>')[1]||'').split('</title>')[0]||'').trim());var h=b.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block|supporter|favorite).{0,70}/i);o.g('bh',h?h[0]:'n');o.done('T'+r.status+'@@'+b+'@@DBG'+o.d.join('|'))})}).catch(function(e){o.done('T0@@net@@DBG'+o.d.join('|'))})};
 })();''';
 
   late final String _toggleC = '''
