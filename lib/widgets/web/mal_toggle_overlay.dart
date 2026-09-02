@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
+
 
 import 'package:dailyanimelist/api/auth/auth.dart';
 import 'package:dailyanimelist/api/credmal.dart';
@@ -154,12 +154,12 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   ProbeBridge.postMessage('MLCTRL');
 })();''';
 
-  /// The toggle shipped as a single-line eval(atob(...)) payload. This removes
-  /// every newline / length / quote-encoding variable from the transport so we
-  /// can tell definitively whether the previous multi-line raw string was the
-  /// reason the IIFE never started.
-  late final String _toggleEval =
-      'eval(atob("${base64Encode(utf8.encode(_toggleJs))}"));';
+  /// The toggle injected directly as the multi-line raw string. This is the
+  /// proven-working transport (c396d03) that delivered a live T400@@ body.
+  /// The single-line eval(atob(...)) equivalent (3468 chars) was silently
+  /// dropped by webview_flutter_android 3.16.9 evaluateJavascript while the
+  /// ~40-char _mlCtrl and ~2.6KB multi-line _toggleJs both pass fine.
+  late final String _toggleEval = _toggleJs;
 
   void _log(String message) => debugPrint('[MalToggle] $message');
 
