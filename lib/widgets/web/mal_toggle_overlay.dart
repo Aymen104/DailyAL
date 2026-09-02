@@ -90,24 +90,32 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   late final String _baseUrl =
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
 
-  /// Tiny (<120B) marker that mimics the toggle's opening statements. If this
-  /// fires while the full _toggleJs does not, the WebView evaluateJavascript
-  /// truncates/drops scripts larger than a threshold.
-  late final String _toggleStartProbe =
-      "(function(){window.__togRan=1;ProbeBridge.postMessage('TSTART1');})();";
+  /// CONFIRMED: realme C55 WebView evaluateJavascript SILENTLY DROPS scripts
+  /// between 864B (SESH fires) and 1695B (toggle doesn't) at 23:03:49 9/2
+  /// (TSTART1 fired, TSTART2 did not). So the toggle is injected in small
+  /// chunks (<700B each) that attach to a shared global `window.__tog` --
+  /// function declarations in separate evaluateJavascript calls share the page
+  /// global scope, bypassing the WebView per-script size cap entirely.
+  late final String _toggleA = '''
+(function(){window.__tog={T:1,d:['s'],f:0,dl:Date.now()+30000,k:window.GRECAPTCHA_SITE_KEY||'$malRecaptchaSiteKey',t:'${widget.type}',i:${widget.id},a:${widget.add}};
+window.__tog.g=function(l,v){var o=window.__tog;o.d.push(l+':'+(v==null?'null':v))};
+window.__tog.done=function(x){var o=window.__tog;if(!o.f){o.f=1;ResultBridge.postMessage(x)}};
+window.__tog.soak=function(){return Date.now()>window.__tog.dl};
+setTimeout(function(){var o=window.__tog;if(!o.f){o.g('wd','fire');o.done('TWATCHDOG@@'+o.d.join('|'))}},31000);
+})();''';
 
-  /// Ultra-minified toggle (~820B) kept far below the ~800B-1KB evaluateJavascript
-  /// drop threshold observed on realme C55 (864B probe works; 2KB+ toggle does not).
-  late final String _toggleJs = r'''(function(){window.__togRan=1;ProbeBridge.postMessage('TSTART2');
-var k=window.GRECAPTCHA_SITE_KEY||'$malRecaptchaSiteKey',t='${widget.type}',i=${widget.id},a=${widget.add},d=['s'],f=0,dl=Date.now()+30000;
-function done(x){if(!f){f=1;ResultBridge.postMessage(x)}}
-function g(l,v){d.push(l+':'+(v==null?'null':v))}
-function soak(){return Date.now()>dl}
-setTimeout(function(){if(!f){g('wd','fire');done('TWATCHDOG@@'+d.join('|'))}},31000);
-function el(cb){if(soak())return;if(window.grecaptcha){cb();return}var s=document.createElement('script');s.src='https://www.google.com/recaptcha/api.js?render='+k;s.async=1;s.onload=function(){g('rc','l');cb()};s.onerror=function(){setTimeout(function(){el(cb)},2500)};document.head.appendChild(s)}
-function pt(tk){if(soak())return;g('tl',tk.length);fetch('https://myanimelist.net/favorite/'+t+'/'+i+'.json',{method:a?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'g-recaptcha-response='+encodeURIComponent(tk)}).then(function(r){return r.text().then(function(b){g('bt',((b.split('<title>')[1]||'').split('</title>')[0]||'').trim());var h=b.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);g('bh',h?h[0]:'n');done('T'+r.status+'@@'+b+'@@DBG'+d.join('|'))})}).catch(function(e){done('T0@@net@@DBG'+d.join('|'))})}
-function ct(){if(soak())return;if(window.grecaptcha&&window.grecaptcha.ready){grecaptcha.ready(function(){if(soak())return;try{grecaptcha.execute(k,{action:'social'}).then(function(tk){pt(tk)}).catch(function(e){g('ee',String(e&&e.message));setTimeout(ct,2000)})}catch(e){g('ex',String(e));setTimeout(ct,2000)}})}else{setTimeout(ct,400)}}
-setTimeout(function(){el(function(){setTimeout(ct,300)})},300);})();''';
+  late final String _toggleB = '''
+(function(){window.__tog.pt=function(tk){var o=window.__tog;if(o.soak())return;o.g('tl',tk.length);
+fetch('https://myanimelist.net/favorite/'+o.t+'/'+o.i+'.json',{method:o.a?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'g-recaptcha-response='+encodeURIComponent(tk)}).then(function(r){return r.text().then(function(b){o.g('bt',((b.split('<title>')[1]||'').split('</title>')[0]||'').trim());var h=b.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);o.g('bh',h?h[0]:'n');o.done('T'+r.status+'@@'+b+'@@DBG'+o.d.join('|'))})}).catch(function(e){o.done('T0@@net@@DBG'+o.d.join('|'))})};
+})();''';
+
+  late final String _toggleC = '''
+(function(){var o=window.__tog;
+o.el=function(cb){var q=window.__tog;if(q.soak())return;if(window.grecaptcha){cb();return}var s=document.createElement('script');s.src='https://www.google.com/recaptcha/api.js?render='+q.k;s.async=1;s.onload=function(){q.g('rc','l');cb()};s.onerror=function(){setTimeout(function(){q.el(cb)},2500)};document.head.appendChild(s)};
+o.ct=function(){var q=window.__tog;if(q.soak())return;
+if(window.grecaptcha&&window.grecaptcha.ready){grecaptcha.ready(function(){if(q.soak())return;try{grecaptcha.execute(q.k,{action:'social'}).then(function(tk){q.pt(tk)}).catch(function(e){q.g('ee',String(e&&e.message));setTimeout(q.ct,2000)})}catch(e){q.g('ex',String(e));setTimeout(q.ct,2000)}})}else{setTimeout(q.ct,400)}};
+window.__togRan=1;setTimeout(function(){o.el(function(){setTimeout(o.ct,300)})},300);
+})();''';
 
   /// Multi-line transport control: if this tiny IIFE's message arrives while
   /// the (also multi-line) toggle's TSTART does not, multi-line strings are
@@ -116,14 +124,9 @@ setTimeout(function(){el(function(){setTimeout(ct,300)})},300);})();''';
   ProbeBridge.postMessage('MLCTRL');
 })();''';
 
-  /// The toggle injected directly as the multi-line raw string. This is the
-  /// proven-working transport (c396d03) that delivered a live T400@@ body.
-  /// The single-line eval(atob(...)) equivalent (3468 chars) was silently
-  /// dropped by webview_flutter_android 3.16.9 evaluateJavascript while the
-  /// _mlCtrl (40B) and probe (864B) pass fine; a 2KB+ toggle does not fire, so
-  /// the ultra-minified _toggleJs stays well below the WebView evaluateJavascript
-  /// drop threshold.
-  late final String _toggleEval = _toggleJs;
+  /// The toggle's functions are defined via _toggleA, _toggleB, _toggleC chunks
+  /// (each <700B) to stay under the realme C55 WebView evaluateJavascript drop
+  /// threshold. Kickoff runs at the end of _toggleC.
 
   void _log(String message) => debugPrint('[MalToggle] $message');
 
@@ -186,8 +189,9 @@ setTimeout(function(){el(function(){setTimeout(ct,300)})},300);})();''';
             _status = 'Syncing with MyAnimeList\u2026';
             if (mounted) setState(() {});
             _controller.runJavaScript(_mlCtrl);
-            _controller.runJavaScript(_toggleStartProbe);
-            _controller.runJavaScript(_toggleEval);
+            _controller.runJavaScript(_toggleA);
+            _controller.runJavaScript(_toggleB);
+            _controller.runJavaScript(_toggleC);
             _controller.runJavaScript(probe);
             Timer(const Duration(seconds: 4), _diagJsState);
           } else if (_phase == _Phase.needsLogin) {
