@@ -91,60 +91,32 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
 
   late final String _toggleJs = r'''(function(){
-  window.__togRan = 1;
-  ProbeBridge.postMessage('TSTART');
-  var key = window.GRECAPTCHA_SITE_KEY || '$malRecaptchaSiteKey';
-  var type = '${widget.type}';
-  var id = ${widget.id};
-  var add = ${widget.add};
-  var debug = ['start'];
-  var finished = false;
-  var deadline = Date.now() + 30000;
-  function done(t){ if (finished) return; finished = true; ResultBridge.postMessage(t); }
-  function dump(label, val){ debug.push(label + ':' + (val === null || val === void 0 ? 'null' : String(val))); }
-  function soak(){ return Date.now() > deadline; }
-  setTimeout(function(){ if (finished) return; dump('watchdog','fire'); done('TWATCHDOG@@' + debug.join('|')); }, 31000);
+  window.__togRan=1;ProbeBridge.postMessage('TSTART');
+  var key=window.GRECAPTCHA_SITE_KEY||'$malRecaptchaSiteKey';
+  var type='${widget.type}';var id=${widget.id};var add=${widget.add};
+  var dbg=['start'],fin=false,deadline=Date.now()+30000;
+  function done(t){if(fin)return;fin=true;ResultBridge.postMessage(t)}
+  function dump(l,v){dbg.push(l+':'+(v===null||v===void 0?'null':String(v)))}
+  function soak(){return Date.now()>deadline}
+  setTimeout(function(){if(fin)return;dump('watchdog','fire');done('TWATCHDOG@@'+dbg.join('|'))},31000);
   function ensureLoaded(cb){
-    if (soak()) return;
-    if (window.grecaptcha) { cb(); return; }
-    var s = document.createElement('script');
-    s.src = 'https://www.google.com/recaptcha/api.js?render=' + key;
-    s.async = true;
-    s.onload = function(){ dump('grecaptcha','loaded'); cb(); };
-    s.onerror = function(){ dump('scriptErr','onerror'); setTimeout(function(){ ensureLoaded(cb); }, 2500); };
-    document.head.appendChild(s);
+    if(soak())return;
+    if(window.grecaptcha){cb();return}
+    var s=document.createElement('script');
+    s.src='https://www.google.com/recaptcha/api.js?render='+key;s.async=true;
+    s.onload=function(){dump('grecaptcha','loaded');cb()};
+    s.onerror=function(){dump('scriptErr','onerror');setTimeout(function(){ensureLoaded(cb)},2500)};
+    document.head.appendChild(s)
   }
   function postToken(token){
-    if (soak()) return;
-    dump('tokenLen', token.length);
-    fetch('https://myanimelist.net/favorite/' + type + '/' + id + '.json', {
-      method: add ? 'POST' : 'DELETE',
-      credentials: 'include',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: 'g-recaptcha-response=' + encodeURIComponent(token)
-    }).then(function(r){
-      return r.text().then(function(t){
-        dump('bodyTitle', ((t.split('<title>')[1] || '').split('</title>')[0] || '').trim());
-        var hit = t.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);
-        dump('bodyHit', hit ? hit[0] : 'none');
-        done('T' + r.status + '@@' + t + '@@DBG' + debug.join('|'));
-      });
-    }).catch(function(e){ done('T0@@network@@DBG' + debug.join('|')); });
+    if(soak())return;dump('tokenLen',token.length);
+    fetch('https://myanimelist.net/favorite/'+type+'/'+id+'.json',{method:add?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'g-recaptcha-response='+encodeURIComponent(token)}).then(function(r){return r.text().then(function(t){dump('bodyTitle',((t.split('<title>')[1]||'').split('</title>')[0]||'').trim());var hit=t.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block).{0,70}/i);dump('bodyHit',hit?hit[0]:'none');done('T'+r.status+'@@'+t+'@@DBG'+dbg.join('|'))})}).catch(function(e){done('T0@@network@@DBG'+dbg.join('|'))})
   }
   function callTokenThen(){
-    if (soak()) return;
-    if (window.grecaptcha && window.grecaptcha.ready) {
-      grecaptcha.ready(function(){
-        if (soak()) return;
-        try {
-          grecaptcha.execute(key, {action:'social'}).then(function(token){
-            postToken(token);
-          }).catch(function(e){ dump('executeErr', String(e && e.message)); setTimeout(callTokenThen, 2000); });
-        } catch (e) { dump('execExc', String(e)); setTimeout(callTokenThen, 2000); }
-      });
-    } else { setTimeout(callTokenThen, 400); }
+    if(soak())return;
+    if(window.grecaptcha&&window.grecaptcha.ready){grecaptcha.ready(function(){if(soak())return;try{grecaptcha.execute(key,{action:'social'}).then(function(token){postToken(token)}).catch(function(e){dump('executeErr',String(e&&e.message));setTimeout(callTokenThen,2000)})}catch(e){dump('execExc',String(e));setTimeout(callTokenThen,2000)}})}else{setTimeout(callTokenThen,400)}
   }
-  setTimeout(function(){ ensureLoaded(function(){ setTimeout(callTokenThen, 300); }); }, 300);
+  setTimeout(function(){ensureLoaded(function(){setTimeout(callTokenThen,300)})},300);
 })();''';
 
   /// Multi-line transport control: if this tiny IIFE's message arrives while
