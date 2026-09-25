@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dailyanimelist/animex/animex_meta.dart';
 import 'package:dailyanimelist/api/malapi.dart';
 import 'package:dailyanimelist/cache/dubinfomanager.dart';
 import 'package:dailyanimelist/constant.dart';
@@ -95,8 +96,15 @@ class AnimeGridCard extends StatelessWidget {
       logDal(node);
     }
     String? time;
-    if (showTime && node.broadcast != null) {
-      time = MalApi.getFormattedAiringDate(node.broadcast!);
+    if (showTime) {
+      // Prefer AnimeX's exact next-episode countdown when we have it. It
+      // replaces the weekly broadcast line rather than sitting next to it, so
+      // the bar never gets crowded, and titles without it look exactly as they
+      // did before.
+      time = AnimeXService.i.nextAiringLabel(_malId) ??
+          (node.broadcast != null
+              ? MalApi.getFormattedAiringDate(node.broadcast!)
+              : null);
     }
 
     if (_compact || _coverOnly) {
@@ -389,7 +397,34 @@ class AnimeGridCard extends StatelessWidget {
           if (time != null) _timeCard(time),
           if (addtionalWidget != null && !_coverOnly) addtionalWidget!,
           _favoriteCountWidget(),
+          _accentEdge(borderRadius),
         ],
+      ),
+    );
+  }
+
+  /// MAL id of the wrapped node.
+  int? get _malId => node.id;
+
+  /// A thin accent line along the bottom of the card.
+  ///
+  /// Deliberately the only new visual element on a card: a 3px bar reads as an
+  /// underline rather than competing with the artwork, and because
+  /// [AnimeXService.accentOf] always returns a colour it appears on every card
+  /// instead of leaving a grid full of ones without it.
+  Positioned _accentEdge(double borderRadius) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(borderRadius),
+        ),
+        child: Container(
+          height: 3,
+          color: AnimeXService.i.accentOf(_malId),
+        ),
       ),
     );
   }

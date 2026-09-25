@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:dailyanimelist/animex/animex_meta.dart';
 import 'package:dailyanimelist/api/malapi.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/enums.dart';
@@ -72,12 +73,53 @@ class MoreInfoAnime extends StatelessWidget {
     this.links,
     this.relatedLinks,
   });
+
+  /// MAL id of the content being described, used to look up AnimeX metadata.
+  int? get _malId {
+    final id = contentDetailed?.id;
+    if (id is int) return id;
+    if (id == null) return null;
+    return int.tryParse('$id');
+  }
+
+  /// Shortens AniList popularity scores, which run into the hundreds of
+  /// thousands. Kept local rather than pulled from intl so it stays usable
+  /// without a formatter instance on a hot build path.
+  static String _compact(int value) {
+    if (value < 1000) return '$value';
+    if (value < 1000000) {
+      final k = value / 1000;
+      return '${k.toStringAsFixed(k < 10 ? 1 : 0)}K';
+    }
+    final m = value / 1000000;
+    return '${m.toStringAsFixed(m < 10 ? 1 : 0)}M';
+  }
+
   @override
   Widget build(BuildContext context) {
     String? broadcastTime;
 
     if (category.equals('anime') && contentDetailed?.broadcast != null) {
       broadcastTime = MalApi.getFormattedAiringDate(contentDetailed.broadcast);
+    }
+
+    // AniList is a genuinely independent source, so its score and popularity
+    // are shown next to MAL's rather than replacing anything. Both are printed
+    // on their native scales (MAL is 0-10, AniList 0-100) because silently
+    // rescaling one to match the other would imply a comparability that does
+    // not exist -- the gap between them is the interesting part.
+    final anilist = AnimeXService.i.metaOf(_malId);
+    final nextAiring = category.equals('anime')
+        ? AnimeXService.i.nextAiringLabel(_malId)
+        : null;
+    final anilistPopularity =
+        anilist?.popularity == null ? null : _compact(anilist!.popularity!);
+    String? scoreComparison;
+    if (category.equals('anime') && anilist?.score != null) {
+      final malMean = contentDetailed?.mean;
+      scoreComparison = malMean is num
+          ? 'MAL ${malMean.toStringAsFixed(2)} · AniList ${anilist!.score!.toStringAsFixed(0)}'
+          : 'AniList ${anilist!.score!.toStringAsFixed(0)}';
     }
 
     void _onPremierTap() {
@@ -259,6 +301,24 @@ class MoreInfoAnime extends StatelessWidget {
               _field(
                 S.current.Broadcast,
                 broadcastTime,
+              ),
+            // Exact next episode and countdown. MAL only exposes a weekly
+            // `broadcast` string, so this is the only precise airing data the
+            // app can show, and it only appears for titles that are airing.
+            if (nextAiring != null)
+              _field(
+                S.current.Next,
+                nextAiring,
+              ),
+            if (scoreComparison != null)
+              _field(
+                S.current.Score,
+                scoreComparison,
+              ),
+            if (anilistPopularity != null)
+              _field(
+                S.current.Popularity,
+                anilistPopularity,
               ),
             _field(
               S.current.Duration,

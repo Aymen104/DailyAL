@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:dailyanimelist/animex/animex_meta.dart';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/cache/dubinfomanager.dart';
 import 'package:dailyanimelist/constant.dart';
@@ -60,6 +62,10 @@ void main() async {
       androidSDKVersion = androidInfo.version.sdkInt;
     }
     await FlutterDisplayMode.setHighRefreshRate();
+    // Kick off without awaiting: ~19k records, and nothing should sit on the
+    // first frame for an enhancement. Accessors degrade to neutral until it
+    // lands, so there is no need to block startup here.
+    unawaited(AnimeXService.i.ensureLoaded());
   } catch (e) {}
 
   Node? node;

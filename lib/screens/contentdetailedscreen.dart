@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dailyanimelist/animex/animex_meta.dart';
 import 'package:dailyanimelist/api/dalapi.dart';
 import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/api/malapi.dart';
@@ -1721,6 +1722,14 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
     );
   }
 
+  /// MAL id for the content on screen, from whichever node has already loaded.
+  int? get _malId {
+    final id = contentDetailed?.id;
+    if (id is int) return id;
+    if (id == null) return widget.node?.id;
+    return int.tryParse('$id');
+  }
+
   Widget get animeHeader {
     final headerContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1742,9 +1751,15 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
       new Background(
         context: context,
         forceBg: user.pref.showAnimeMangaBg,
-        url: widget.node?.mainPicture?.large != null
-            ? widget.node?.mainPicture?.large
-            : contentDetailed?.mainPicture?.large,
+        // Prefer real key art over the cover. The header is 460-520px tall and
+        // was being handed a portrait poster stretched across the full width,
+        // which is why it reads as soft; a 16:9 banner is the right shape for
+        // it. Only 37% of titles have one, so the cover remains the fallback
+        // and the 63% without one look exactly as they did before.
+        url: AnimeXService.i.metaOf(_malId)?.wideImage ??
+            (widget.node?.mainPicture?.large != null
+                ? widget.node?.mainPicture?.large
+                : contentDetailed?.mainPicture?.large),
       ),
       if (contentDetailed != null)
         Material(

@@ -127,6 +127,10 @@ flutter:
     - assets/images/youtube.png
     - assets/images/error_image.png
     - assets/n8TN5qDG22PAuP50Il
+    # AnimeX/AniList metadata keyed by MAL id: banner, backdrop, dominant
+    # colour, popularity, score, airing schedule. MAL supplies none of the
+    # visual fields here, so this data has no other source.
+    - assets/animex_meta.json
     # - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
