@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/api/malconnect.dart';
+import 'package:dailyanimelist/cache/cachemanager.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/main.dart';
 import 'package:dailyanimelist/user/user.dart';
@@ -10,6 +11,65 @@ import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dal_commons/dal_commons.dart';
 
 class MalUser {
+  /// Drops every cached read of the signed-in user's list for [category].
+  ///
+  /// List reads are cached by full URL, so one logical list exists as dozens of
+  /// keys (one per limit/offset/status/sort combination). Writing to the list
+  /// makes all of them wrong, and because `getAllUserList` defaults to
+  /// `fromCache: true` the user page happily replays the pre-edit values and
+  /// the change appears not to have saved. Invalidate the whole family.
+  static Future<void> _invalidateMyListCache(
+    String category, {
+    int? id,
+  }) async {
+    final removed = await CacheManager.instance.removeKeysWithPrefix(
+      '${CredMal.userEndPoint}@me/${category}list',
+    );
+    // The profile carries anime_statistics/manga_statistics, which move every
+    // time a list entry is added, rescored or deleted.
+    final removedProfile = await CacheManager.instance.removeKeysWithPrefix(
+      '${CredMal.userEndPoint}@me?',
+    );
+    logDal('cache: dropped $removed list + $removedProfile profile entries '
+        '(${category}${id != null ? ' after writing $id' : ''})');
+  }
+
+  /// User statistics for a profile, from MAL where MAL can serve them.
+  ///
+  /// The `anime_statistics`/`manga_statistics` blocks are the only cheap source
+  /// of these numbers (one small request instead of paging the whole list), but
+  /// they are only attached when named in the `fields` parameter — a caller that
+  /// omits `fields` silently gets a profile with null statistics.
+  ///
+  /// `GET /users/{user_name}` is `main_auth` only — it is documented as "You can
+  /// only specify @me", and a client-id authenticated read of another member
+  /// returns 404 (verified live against six real usernames, while `/anime/1`
+  /// answered 200 with the same header). So only our own statistics can come
+  /// from MAL; every other member has to keep using the Jikan mirror, which is
+  /// why `getUserInfo` routes non-`@me` names there too.
+  static Future<UserProf?> getUserStatistics({
+    String username = "@me",
+    bool fromCache = false,
+  }) async {
+    if (username.notEquals("@me")) {
+      return _adaptFromJikan(username, fromCache: fromCache);
+    }
+    // Built to be byte-identical to `getUserInfo(fields: [...])` so both share
+    // one cache entry, and so `_invalidateMyListCache` can drop it.
+    final result = await MalConnect.getContent(
+      '${CredMal.userEndPoint}$username'
+      '?fields=anime_statistics,manga_statistics',
+      fromCache: fromCache,
+      includeNsfw: false,
+      retryOnFail: false,
+    ) as Map<String, dynamic>?;
+    if (result == null) {
+      logDal('getUserStatistics($username) -> empty response');
+      return null;
+    }
+    return UserProf.fromJson(result);
+  }
+
   static Future<UserProf> getUserInfo(
       {List<String>? fields,
       bool fromCache = false,
@@ -84,8 +144,13 @@ class MalUser {
     try {
       var response = await MalConnect.httpPutAsync(url, body: body);
       if (response.statusCode == 200 && response.body != null) {
+        await _invalidateMyListCache("anime", id: animeId);
         return MyAnimeListStatus.fromJson(jsonDecode(response.body));
       }
+      // Previously swallowed entirely, so a 400/401/403 looked identical to a
+      // success to the caller. MAL answers with {"error":..,"message":..}.
+      logDal('updateMyAnimeListStatus($animeId) -> ${response.statusCode} '
+          '${response.body}');
     } catch (e) {
       logDal(e);
     }
@@ -127,9 +192,11 @@ class MalUser {
 
     var response = await MalConnect.httpPutAsync(url, body: body);
     if (response.statusCode == 200 && response.body != null) {
+      await _invalidateMyListCache("manga", id: mangaId);
       return MyMangaListStatus.fromJson(jsonDecode(response.body));
     } else {
-      logDal(response.body);
+      logDal('updateMyMangaListStatus($mangaId) -> ${response.statusCode} '
+          '${response.body}');
     }
     return null;
   }
@@ -157,11 +224,15 @@ class MalUser {
   }
 
   /// Get User Anime Status
+  ///
+  /// [status] must be null for "everything". MAL only accepts
+  /// watching|completed|on_hold|dropped|plan_to_watch and answers 400 to
+  /// anything else, so the old `"all"` default silently produced empty lists.
   static Future<SearchResult> getMyContentList(
       {int limit = 100,
       int offset = 0,
       String category = "anime",
-      String? status = "all",
+      String? status,
       String? sortType,
       List<String>? fields,
       String username = "@me",
@@ -227,8 +298,10 @@ class MalUser {
       var response = await MalConnect.delete(
           '${CredMal.endPoint}$category/$id/my_list_status');
       if (response != null && response.statusCode == 200) {
+        await _invalidateMyListCache(category, id: id);
         return true;
       }
+      logDal('deleteFromList($id) -> ${response.statusCode} ${response.body}');
     } catch (e) {
       logDal(e);
     }

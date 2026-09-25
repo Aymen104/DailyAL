@@ -16,6 +16,7 @@ export './src/model/anime/detailedmixin.dart';
 export './src/model/anime/myanimeliststatus.dart';
 export './src/model/userprof.dart/userprof.dart';
 export './src/model/userprof.dart/animestatistics.dart';
+export './src/model/userprof.dart/mangastatistics.dart';
 export './src/model/forum/forumtopicpost.dart';
 export './src/model/forum/forumtopicpoll.dart';
 export './src/model/forum/forumuser.dart';

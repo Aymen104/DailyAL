@@ -57,6 +57,28 @@ class CacheManager {
     await pref?.clear();
   }
 
+  /// Removes every cached entry whose key starts with [prefix].
+  ///
+  /// Cache keys are raw request URLs, and a single logical resource fans out
+  /// into many keys (one per limit/offset/status/sort/fields combination).
+  /// After writing to a resource we have to drop that whole family, otherwise
+  /// the list screens keep replaying pre-write values from SharedPreferences
+  /// and a successful edit looks like it was lost.
+  Future<int> removeKeysWithPrefix(String prefix) async {
+    try {
+      final prefs = await _pref;
+      final matches =
+          prefs.getKeys().where((key) => key.startsWith(prefix)).toList();
+      for (final key in matches) {
+        await prefs.remove(key);
+      }
+      return matches.length;
+    } catch (e) {
+      logDal(e);
+    }
+    return 0;
+  }
+
   Future<String?> getValue(String key) async {
     return (pref ?? await SharedPreferences.getInstance()).getString(key);
   }

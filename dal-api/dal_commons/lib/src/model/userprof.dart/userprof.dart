@@ -1,4 +1,5 @@
 import 'package:dal_commons/src/model/userprof.dart/animestatistics.dart';
+import 'package:dal_commons/src/model/userprof.dart/mangastatistics.dart';
 
 class UserProf {
   final int? id;
@@ -11,6 +12,7 @@ class UserProf {
   final String? joinedAt;
   final String? picture;
   final UserAnimeStatistics? animeStatistics;
+  final UserMangaStatistics? mangaStatistics;
   bool? fromCache;
 
   UserProf(
@@ -24,6 +26,7 @@ class UserProf {
       this.location,
       this.joinedAt,
       this.animeStatistics,
+      this.mangaStatistics,
       this.fromCache});
 
   factory UserProf.fromJson(Map<String, dynamic>? json) {
@@ -33,6 +36,8 @@ class UserProf {
             id: json["id"],
             animeStatistics:
                 UserAnimeStatistics.fromJson(json["anime_statistics"]),
+            mangaStatistics:
+                UserMangaStatistics.fromJson(json["manga_statistics"]),
             joinedAt: json["joined_at"],
             location: json["location"],
             picture: json["picture"],
@@ -53,6 +58,7 @@ class UserProf {
       "joined_at": joinedAt,
       "picture": picture,
       "anime_statistics": animeStatistics?.toJson(),
+      "manga_statistics": mangaStatistics?.toJson(),
       "gender": gender,
       "birthday": birthday.toString(),
       "is_supporter": isSupporter ?? false,

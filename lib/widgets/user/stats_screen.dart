@@ -113,6 +113,7 @@ class _UserStatsScreenState extends State<UserStatsScreen> {
             userProf?.animeStatistics?.numItems?.toStringAsFixed(0) ??
             "?")
         : (jikanUser?.statistics?.manga?.totalEntries?.toStringAsFixed(0) ??
+            userProf?.mangaStatistics?.numItems?.toStringAsFixed(0) ??
             "?"));
   }
 
@@ -121,7 +122,9 @@ class _UserStatsScreenState extends State<UserStatsScreen> {
         ? (userProf?.animeStatistics?.numDaysWatched?.toStringAsFixed(2) ??
             jikanUser?.statistics?.anime?.daysWatched?.toStringAsFixed(2) ??
             "?")
-        : (jikanUser?.statistics?.manga?.daysRead?.toStringAsFixed(2) ?? "?"));
+        : (jikanUser?.statistics?.manga?.daysRead?.toStringAsFixed(2) ??
+            userProf?.mangaStatistics?.numDays?.toStringAsFixed(2) ??
+            "?"));
   }
 
   String _soFar(UserProf? userProf) {
@@ -130,10 +133,16 @@ class _UserStatsScreenState extends State<UserStatsScreen> {
                 userProf?.animeStatistics?.numEpisodes?.toStringAsFixed(0) ??
                 "0") +
             " ${S.current.Episodes}")
-        : ((jikanUser?.statistics?.manga?.chaptersRead?.toString() ?? "0") +
-                " Chps") +
+        // MAL's manga_statistics is the only source of raw volume/chapter
+        // totals, and it used to be requested and then thrown away.
+        : ((userProf?.mangaStatistics?.numChapters?.toStringAsFixed(0) ??
+                jikanUser?.statistics?.manga?.chaptersRead?.toString() ??
+                "0") +
+            " Chps") +
             " - " +
-            (jikanUser?.statistics?.manga?.volumesRead?.toString() ?? "0") +
+            (userProf?.mangaStatistics?.numVolumes?.toStringAsFixed(0) ??
+                jikanUser?.statistics?.manga?.volumesRead?.toString() ??
+                "0") +
             " Vols";
   }
 
@@ -186,7 +195,11 @@ class _UserStatsScreenState extends State<UserStatsScreen> {
     if (widget.isSelf) {
       return UserProfService.i.userProf;
     } else {
-      return MalUser.getUserInfo(username: widget.username, fromCache: true);
+      // Requests the statistics blocks explicitly, so MAL stops handing back a
+      // bare profile with null stats. For another member this routes to the
+      // Jikan mirror, because MAL's /users/{user_name} is @me-only.
+      return MalUser.getUserStatistics(
+          username: widget.username, fromCache: true);
     }
   }
 
