@@ -159,13 +159,20 @@ void main() {
     image.dispose();
     expect(data, isNotNull);
 
-    await tester.runAsync(() async {
-      final out = File('test_output/animex_cards.png');
-      await out.parent.create(recursive: true);
-      await out.writeAsBytes(data!.buffer.asUint8List());
-      stdout.writeln('wrote ${out.path} '
-          '(${out.lengthSync()} bytes)');
-    });
+    // Synchronous I/O on purpose. The bytes are already in memory, so there is
+    // no reason to reach for runAsync - and a second runAsync is a good way to
+    // leave the test's async guard open, which shows up as a hang after a body
+    // that has plainly finished.
+    final out = File('test_output/animex_cards.png');
+    out.parent.createSync(recursive: true);
+    out.writeAsBytesSync(data!.buffer.asUint8List());
+    stdout.writeln('wrote ${out.path} (${out.lengthSync()} bytes)');
+
+    // Unmount before returning. A live tree holds scroll positions, image
+    // handles and any ticker its widgets own; the framework will not complete
+    // the test while those are still attached.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('every sampled id produces a visible, non-black accent', () {
