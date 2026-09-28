@@ -78,14 +78,20 @@ void main() {
           scaffoldBackgroundColor: const Color(0xFF151515),
         ),
         home: Scaffold(
-          body: Container(
+          // Must be a RepaintBoundary, not a bare Container: toImage() needs a
+          // RenderRepaintBoundary and a Container is a _RenderColoredBox.
+          body: RepaintBoundary(
             key: const Key('shot'),
-            color: const Color(0xFF151515),
-            padding: const EdgeInsets.all(8),
-            child: GridView.count(
-              crossAxisCount: 4,
-              childAspectRatio: 0.68,
-              children: cards,
+            child: ColoredBox(
+              color: const Color(0xFF151515),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: GridView.count(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.68,
+                  children: cards,
+                ),
+              ),
             ),
           ),
         ),
@@ -120,12 +126,16 @@ void main() {
     // Guards the "does it actually show anything" question numerically, so a
     // regression to a transparent or pure-black accent fails even if nobody
     // looks at the PNG.
+    //
+    // computeLuminance() is on a 0..1 scale. Note Color.r/g/b are ALSO 0..1
+    // doubles in current Flutter, not 0..255 - a 0..255 weighting formula on
+    // them returns ~0.86 for every colour and silently passes nothing.
     for (final id in [9253, 21, 36055, 1, 5114, 20583, 30240, 32928]) {
       final c = AnimeXService.i.accentOf(id);
       expect(c.a, 1.0, reason: 'id $id accent is not opaque');
-      final luma = (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b);
-      expect(luma, greaterThan(12), reason: 'id $id accent is near-black');
-      expect(luma, lessThan(243), reason: 'id $id accent is near-white');
+      final luma = c.computeLuminance();
+      expect(luma, greaterThan(0.03), reason: 'id $id accent is near-black');
+      expect(luma, lessThan(0.97), reason: 'id $id accent is near-white');
     }
   });
 }

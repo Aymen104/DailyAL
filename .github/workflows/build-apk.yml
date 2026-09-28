@@ -27,6 +27,17 @@ jobs:
       - name: Flutter test
         run: flutter test --no-pub --reporter=expanded
 
+      - name: Upload render proof
+        # The AnimeX card render is written here by the test suite. Kept even when
+        # a test fails, because a failure is exactly when the picture is worth
+        # looking at. Not gating: the build result is the tests' exit code.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-proof
+          path: test_output/
+          if-no-files-found: ignore
+
       - name: Prepare Gradle 8.14.3 wrapper and release signing
         run: |
           curl -fsSL -o /tmp/gradle-8.14.3-bin.zip \
