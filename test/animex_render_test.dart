@@ -173,7 +173,7 @@ void main() {
     // the test while those are still attached.
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
-  }, timeout: const Timeout(Duration(minutes: 2)));
+  }, timeout: const Timeout(Duration(seconds: 90)));
 
   test('every sampled id produces a visible, non-black accent', () {
     // Guards the "does it actually show anything" question numerically, so a
