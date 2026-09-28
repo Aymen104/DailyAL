@@ -109,10 +109,13 @@ void main() {
   group('airing countdown ageing', () {
     // The asset freezes ONE upcoming broadcast at build time. These cases pin
     // the behaviour that makes that survivable.
-    final meta = index[21]!;
+    //
+    // Read inside setUpAll, not at group-declaration time: a group body runs
+    // while main() is still being declared, so `index` would not be assigned
+    // yet and every use here would throw LateError.
     late DateTime anchor;
 
-    setUpAll(() => anchor = meta.nextAiringAt!.toUtc());
+    setUpAll(() => anchor = index[21]!.nextAiringAt!.toUtc());
 
     test('a fresh slot reports the bundled episode and a countdown', () {
       final now = anchor.subtract(const Duration(days: 3, hours: 4));
