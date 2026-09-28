@@ -1252,6 +1252,16 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
       bookMarkMenuItem(context),
       AppbarMenuItem(S.current.More_Info, Icon(Icons.info_outline),
           onTap: _openMoreInfo),
+      // AniList keeps its own score, popularity and airing data, and the app
+      // now shows a comparison in More Info, so a way to actually go look at
+      // the source is the natural companion. Anime-only because that is all the
+      // bundled dataset covers.
+      if (isAnime && _anilistUrl != null)
+        AppbarMenuItem(
+          S.current.Open_In_Browser,
+          Icon(Icons.public),
+          onTap: () => launchURLWithConfirmation(_anilistUrl!, context: context),
+        ),
       AppbarMenuItem(S.current.Search_by_genre, Icon(Icons.manage_search),
           onTap: _onMultiGenreSearch),
       if (isAnime)
@@ -1729,6 +1739,9 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
     if (id == null) return widget.node?.id;
     return int.tryParse('$id');
   }
+
+  /// AniList page for the current title, when the bundled dataset knows its id.
+  String? get _anilistUrl => AnimeXService.i.metaOf(_malId)?.anilistUrl;
 
   Widget get animeHeader {
     final headerContent = Column(

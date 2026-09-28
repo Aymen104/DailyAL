@@ -38,6 +38,11 @@ class AnimeXMeta {
   /// The episode number that will air at [nextAiringAt].
   final int? nextEpisode;
 
+  /// AniList's own numeric id, 100% coverage. Only needed to build an outbound
+  /// link. It is *not* the MAL id: the two coincide for older titles and
+  /// diverge from around 2014 onward (e.g. MAL 36055 is AniList 145756).
+  final int? anilistId;
+
   const AnimeXMeta({
     this.banner,
     this.backdrop,
@@ -47,9 +52,14 @@ class AnimeXMeta {
     this.status,
     this.nextAiringAt,
     this.nextEpisode,
+    this.anilistId,
   });
 
   bool get isReleasing => status == 'RELEASING';
+
+  /// AniList page for this title, or null when the id is unknown.
+  String? get anilistUrl =>
+      anilistId == null ? null : 'https://anilist.co/anime/$anilistId';
 
   /// Best available wide image.
   ///
@@ -75,6 +85,7 @@ class AnimeXMeta {
           ? DateTime.fromMillisecondsSinceEpoch(na.toInt() * 1000)
           : null,
       nextEpisode: (json['ne'] as num?)?.toInt(),
+      anilistId: (json['al'] as num?)?.toInt(),
     );
   }
 }
@@ -152,37 +163,58 @@ class AnimeXService {
   /// Lets a surface opt out of synthetic colours if it ever needs to.
   bool hasRealAccent(int? malId) => metaOf(malId)?.color != null;
 
-  /// Compact airing label such as `EP 1180 · 3d 4h`, or null when this title
-  /// has no precise schedule.
+  /// How many weeks ahead a bundled airing slot is trusted before giving up.
   ///
-  /// Returns null rather than a partial string on purpose: callers use this to
-  /// decide whether they can say something more useful than MAL's weekly
-  /// `broadcast` line, and a bare "in 4h" with no episode number is not more
-  /// useful than the string it would replace.
+  /// AniList hands over a single upcoming broadcast, not a schedule, and the
+  /// asset is frozen into the APK at build time -- so an installed build can
+  /// never learn that the episode it names has since aired. Projecting the
+  /// weekly slot forward keeps the countdown self-correcting with no network
+  /// access, but an irregular slot (hiatus, split cour, a one-off delay) would
+  /// let it drift, so the projection is bounded and past the bound the honest
+  /// answer is "I do not know".
+  static const int _maxProjectionWeeks = 6;
+
+  /// Compact airing label such as `EP 1180 · 3d 4h`, or null when this title has
+  /// no schedule we can still stand behind.
+  ///
+  /// Null is the honest answer in three cases: the title has no airing data, it
+  /// has a broadcast time but no episode number to pair with it, or the bundled
+  /// snapshot is too old to extrapolate from. Callers fall back to MAL's weekly
+  /// `broadcast` string on null, which is vague but not wrong -- a frozen
+  /// "EP 1180" that stopped three weeks ago is strictly worse than vague.
   String? nextAiringLabel(int? malId, {DateTime? now}) {
     final m = metaOf(malId);
-    final at = m?.nextAiringAt;
-    if (at == null) return null;
+    final anchor = m?.nextAiringAt;
     final episode = m?.nextEpisode;
-    final buf = StringBuffer();
-    if (episode != null) {
-      buf.write('EP $episode · ');
+    if (anchor == null || episode == null) return null;
+
+    final ref = now ?? DateTime.now();
+    // Project in UTC so a DST boundary in the device's locale cannot slide the
+    // slot by an hour; only the relative countdown is ever shown.
+    var slot = anchor.toUtc();
+    var ep = episode;
+    var weeks = 0;
+    while (!slot.isAfter(ref) && weeks < _maxProjectionWeeks) {
+      slot = slot.add(const Duration(days: 7));
+      ep++;
+      weeks++;
     }
-    final remaining = at.difference(now ?? DateTime.now());
-    if (remaining.isNegative) {
-      return episode == null ? null : 'EP $episode';
-    }
+    if (!slot.isAfter(ref)) return null;
+
+    final remaining = slot.difference(ref);
     final days = remaining.inDays;
     final hours = remaining.inHours % 24;
     final minutes = remaining.inMinutes % 60;
+
+    final buf = StringBuffer('EP $ep');
     if (days > 0) {
-      buf.write('${days}d');
+      buf.write(' · ${days}d');
       if (hours > 0) buf.write(' ${hours}h');
     } else if (hours > 0) {
-      buf.write('${hours}h');
+      buf.write(' · ${hours}h');
       if (minutes > 0) buf.write(' ${minutes}m');
     } else {
-      buf.write('${minutes}m');
+      buf.write(' · ${minutes}m');
     }
     return buf.toString();
   }
