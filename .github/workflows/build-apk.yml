@@ -24,6 +24,9 @@ jobs:
           flutter config --no-analytics
           flutter pub get
 
+      - name: Flutter test
+        run: flutter test --no-pub --reporter=expanded
+
       - name: Prepare Gradle 8.14.3 wrapper and release signing
         run: |
           curl -fsSL -o /tmp/gradle-8.14.3-bin.zip \

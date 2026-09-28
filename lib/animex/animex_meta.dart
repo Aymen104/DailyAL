@@ -118,14 +118,7 @@ class AnimeXService {
   Future<void> _load() async {
     try {
       final raw = await rootBundle.loadString(assetPath);
-      final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      final out = <int, AnimeXMeta>{};
-      decoded.forEach((key, value) {
-        final id = int.tryParse(key);
-        if (id != null && value is Map) {
-          out[id] = AnimeXMeta.fromJson(value);
-        }
-      });
+      final out = parse(raw);
       _byMalId = out;
       logDal('AnimeX: indexed ${out.length} titles');
     } catch (e) {
@@ -134,6 +127,33 @@ class AnimeXService {
       logDal('AnimeX: asset load failed, continuing without it -> $e');
     }
   }
+
+  /// Parses the flat `{malId: {...}}` asset into an index.
+  ///
+  /// Split out from [_load] so tests can run the real asset off disk instead of
+  /// stubbing the bundle. A row whose key is not a number, or whose value is not
+  /// an object, is skipped rather than thrown on: one malformed entry must not
+  /// cost the other nineteen thousand.
+  @visibleForTesting
+  static Map<int, AnimeXMeta> parse(String raw) {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) {
+      throw const FormatException('AnimeX asset must be a JSON object');
+    }
+    final out = <int, AnimeXMeta>{};
+    decoded.forEach((key, value) {
+      final id = key is int ? key : int.tryParse('$key');
+      if (id != null && value is Map) {
+        out[id] = AnimeXMeta.fromJson(value);
+      }
+    });
+    return out;
+  }
+
+  /// Loads [raw] into this instance. Test-only; production goes through
+  /// [ensureLoaded] and the asset bundle.
+  @visibleForTesting
+  void debugLoadFromString(String raw) => _byMalId = parse(raw);
 
   /// Raw record for [malId], or null if unknown.
   AnimeXMeta? metaOf(int? malId) {
