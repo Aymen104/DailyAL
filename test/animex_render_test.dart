@@ -117,6 +117,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    // The card's no-image placeholder is an Image.asset, and asset resolution
+    // is REAL file I/O. testWidgets runs the body inside a fake-async zone where
+    // real I/O can never complete, so that future is still outstanding when the
+    // body returns and the test then hangs until the timeout - with no
+    // diagnostic, because nothing threw. runAsync is the one place inside a
+    // widget test where the real event loop runs, so give it a window to land.
+    await tester.runAsync(() => Future<void>.delayed(
+        const Duration(milliseconds: 500)));
+    await tester.pump();
+
     expect(find.byType(AnimeGridCard), findsNWidgets(ids.length));
     expect(tester.takeException(), isNull,
         reason: 'rendering a card threw');
@@ -144,6 +154,9 @@ void main() {
         tester.renderObject<RenderRepaintBoundary>(find.byKey(const Key('shot')));
     final image = await boundary.toImage(pixelRatio: 2.0);
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    // Dispose rather than dropping the reference: a live ui.Image holds a
+    // handle that keeps the test's async guard open.
+    image.dispose();
     expect(data, isNotNull);
 
     await tester.runAsync(() async {
