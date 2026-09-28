@@ -50,6 +50,9 @@ void main() {
     //  - 1, 5114, 20583, 30240, 32928 are ordinary real-colour titles.
     const ids = [9253, 21, 36055, 1, 5114, 20583, 30240, 32928];
 
+    // Two minutes, not the default ten. A pending image retry timer shows up as
+    // a hang, and waiting ten minutes for it tells you nothing more than waiting
+    // two does.
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -59,7 +62,18 @@ void main() {
       final meta = AnimeXService.i.metaOf(id);
       cards.add(
         AnimeGridCard(
-          node: Node(id: id, title: '#$id ${meta?.status ?? ''}'.trim()),
+          node: Node(
+            id: id,
+            title: '#$id ${meta?.status ?? ''}'.trim(),
+            // mainPicture is deliberately left null. The card then draws its
+            // local "no image" placeholder instead of a CachedNetworkImage, and
+            // that is the difference between a test that finishes and one that
+            // hangs: the image widget schedules retry timers that never drain,
+            // so the test framework sits waiting until it hits the 10 minute
+            // timeout. The accent bar and the time bar are painted locally and
+            // are unaffected - they are the only two things under test.
+            mainPicture: null,
+          ),
           category: 'anime',
           displaySubType: DisplaySubType.cover_only_grid,
           // Only the airing title opts in, mirroring that no production call
@@ -107,6 +121,25 @@ void main() {
     expect(tester.takeException(), isNull,
         reason: 'rendering a card threw');
 
+    // "Did not throw" is a weak claim. Assert the two surfaces under test are
+    // actually painted: one accent Container per card, each carrying the exact
+    // colour accentOf returned, and the airing label on the one card that opted
+    // into showTime.
+    for (final id in ids) {
+      expect(
+        find.byWidgetPredicate((w) =>
+            w is Container && w.color == AnimeXService.i.accentOf(id)),
+        findsWidgets,
+        reason: 'no accent bar painted for id $id '
+            '(${AnimeXService.i.accentOf(id)})',
+      );
+    }
+    expect(
+      find.textContaining('EP'),
+      findsAtLeastNWidgets(1),
+      reason: 'the airing countdown never reached the time bar',
+    );
+
     final boundary =
         tester.renderObject<RenderRepaintBoundary>(find.byKey(const Key('shot')));
     final image = await boundary.toImage(pixelRatio: 2.0);
@@ -120,7 +153,7 @@ void main() {
       stdout.writeln('wrote ${out.path} '
           '(${out.lengthSync()} bytes)');
     });
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('every sampled id produces a visible, non-black accent', () {
     // Guards the "does it actually show anything" question numerically, so a
