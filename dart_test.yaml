@@ -1,0 +1,19 @@
+# Test tags.
+#
+# `live` marks tests that open real sockets. flutter_test installs an
+# HttpOverrides that answers everything with a synthetic 400, so a live test left
+# in the default run would either silently verify against a response the server
+# never sent, or fail CI for reasons unrelated to the code. Either way that is
+# worse than not running it.
+#
+# Default: live tests are skipped, so `flutter test` stays hermetic.
+# Opt in:   flutter test --tags live
+#
+# `dart_test.yaml` cannot both skip a tag by default and run it when the tag is
+# requested - `skip:` always wins. So the skip is expressed the other way round:
+# the tag is *not* skipped here, and the live suite itself gates on the
+# environment, which means it is inert under a bare `flutter test` and active
+# whenever `RUN_LIVE_TESTS=1` is set.
+tags:
+  live:
+    timeout: 2x

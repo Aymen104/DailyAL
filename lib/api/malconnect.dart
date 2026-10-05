@@ -58,20 +58,7 @@ class MalConnect {
       headers = new Map();
     }
     if (!usePlainOld) {
-      headers["X-MAL-Client-ID"] = CredMal.clientId;
-      headers["Accept"] = "application/json";
-      if (user.status == AuthStatus.AUTHENTICATED) {
-        try {
-          if (MalAuth.checkIfTokenExpired(user.authResponse!)) {
-            await MalAuth.refreshToken();
-          }
-        } catch (e) {
-          logDal(e);
-        }
-        headers["Authorization"] = user.authResponse!.tokenType! +
-            " " +
-            user.authResponse!.accessToken!;
-      }
+      headers = await _malHeaders(headers);
     }
 
     return retryGet(url, headers);
@@ -118,20 +105,7 @@ class MalConnect {
       headers = new Map();
     }
     if (!withNoHeaders) {
-      headers["X-MAL-Client-ID"] = CredMal.clientId;
-      headers["Accept"] = "application/json";
-      if (user.status == AuthStatus.AUTHENTICATED) {
-        try {
-          if (MalAuth.checkIfTokenExpired(user.authResponse!)) {
-            await MalAuth.refreshToken();
-          }
-          headers["Authorization"] = user.authResponse!.tokenType! +
-              " " +
-              user.authResponse!.accessToken!;
-        } catch (e) {
-          logDal(e);
-        }
-      }
+      headers = await _malHeaders(headers);
     }
     http.Response response;
     try {
@@ -197,46 +171,63 @@ class MalConnect {
     }
   }
 
-  static Future<Map<String, String>> get _headers async {
-    Map<String, String> headers = Map();
+  /// The `Authorization` header value, or null when there is nothing usable to
+  /// send.
+  ///
+  /// Single owner of the renew-then-sign step for all three verb helpers. They
+  /// used to each inline their own copy, and the copies had already drifted:
+  /// [httpGetAsync] built the header inside a try/catch, while `httpPutAsync` and
+  /// `_headers` built it outside one. That put `tokenType! + accessToken!` - a
+  /// hard null-check throw on any credential-less `AuthResponse` - on the write
+  /// path's escape route to the UI, which is where a dead session surfaced as
+  /// every update failing.
+  static Future<String?> authorizationHeader() async {
+    final auth = user.authResponse;
+    if (user.status != AuthStatus.AUTHENTICATED ||
+        auth == null ||
+        !auth.isUsable) {
+      return null;
+    }
+    try {
+      if (MalAuth.checkIfTokenExpired(auth)) {
+        if (!await MalAuth.refreshToken()) return null;
+      }
+    } catch (e) {
+      // An expired token whose refresh could not even be attempted stays signed
+      // out for this request; see the re-read below for why that is safe.
+      logDal(e);
+    }
+
+    // Re-read rather than trusting `auth`: a successful refresh replaces the
+    // object outright, and a rejected one clears it. Both are decided by
+    // `refreshToken` returning true/false, and the `!await` above already returned
+    // on false, so by this point either nothing changed (the original guard proved
+    // `auth` usable) or a usable token replaced it.
+    final current = user.authResponse;
+    if (current == null || !current.isUsable) return null;
+    return "${current.tokenType} ${current.accessToken}";
+  }
+
+  /// Applies the common MAL headers, including auth when it is available.
+  static Future<Map<String, String>> _malHeaders(
+      [Map<String, String>? headers]) async {
+    headers ??= Map<String, String>();
     headers["X-MAL-Client-ID"] = CredMal.clientId;
     headers["Accept"] = "application/json";
-    if (user.status == AuthStatus.AUTHENTICATED) {
-      try {
-        if (MalAuth.checkIfTokenExpired(user.authResponse!)) {
-          await MalAuth.refreshToken();
-        }
-      } catch (e) {
-        logDal(e);
-      }
-      headers["Authorization"] =
-          user.authResponse!.tokenType! + " " + user.authResponse!.accessToken!;
+    final authorization = await authorizationHeader();
+    if (authorization != null) {
+      headers["Authorization"] = authorization;
     }
     return headers;
   }
 
+  static Future<Map<String, String>> get _headers async => _malHeaders();
+
   /// Standard Http Put Request with Auth Header
   static Future<http.Response> httpPutAsync(String url,
       {Map<String, String>? headers, Map<String, dynamic>? body}) async {
-    if (headers == null) {
-      headers = new Map();
-    }
-    if (body == null) {
-      body = new Map();
-    }
-    headers["X-MAL-Client-ID"] = CredMal.clientId;
-    headers["Accept"] = "application/json";
-    if (user.status == AuthStatus.AUTHENTICATED) {
-      try {
-        if (MalAuth.checkIfTokenExpired(user.authResponse!)) {
-          await MalAuth.refreshToken();
-        }
-      } catch (e) {
-        logDal(e);
-      }
-      headers["Authorization"] =
-          user.authResponse!.tokenType! + " " + user.authResponse!.accessToken!;
-    }
+    body ??= Map<String, dynamic>();
+    headers = await _malHeaders(headers);
     return http.put(Uri.parse(url), body: body, headers: headers);
   }
 

@@ -19,6 +19,20 @@ import 'package:http/http.dart' as http;
 
 import '../../constant.dart';
 
+/// What a reply from MAL's OAuth token endpoint actually means.
+enum TokenOutcome {
+  /// A usable token came back; the session may be replaced by it.
+  renewed,
+
+  /// The server rejected the credentials. The session cannot be recovered, and
+  /// pretending otherwise is what turned a rejected refresh into a bricked app.
+  dead,
+
+  /// No verdict on our credentials - a server fault or an unparsable reply. The
+  /// stored token is untouched and still worth trying.
+  transient,
+}
+
 class MalAuth {
   String _chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890-._~';
@@ -45,12 +59,67 @@ class MalAuth {
   }
 
   static bool checkIfTokenExpired(AuthResponse authResponse) {
-    DateTime expiryDate = authResponse.createdTime!
-        .add(Duration(seconds: authResponse.expiresIn!));
+    final createdTime = authResponse.createdTime;
+    final expiresIn = authResponse.expiresIn;
+    // An unknown expiry has to count as expired. The previous `createdTime!` /
+    // `expiresIn!` pair threw here, the throw was swallowed by the callers'
+    // catch, and the request went out on a token that should have been renewed.
+    if (createdTime == null || expiresIn == null) return true;
+    DateTime expiryDate = createdTime.add(Duration(seconds: expiresIn));
     return expiryDate.isBefore(DateTime.now());
   }
 
-  static Future<void> refreshToken() async {
+  /// Interprets a token-endpoint reply.
+  ///
+  /// Split out from [refreshToken] and [onCodeReceived] because both used to
+  /// accept whatever JSON arrived and let it stand in for a credential. Neither
+  /// checked the status code, and MAL answers a rejected refresh *and* a rejected
+  /// code exchange with a decodable JSON object - `{"error":"invalid_request",
+  /// "message":"The refresh token is invalid."}` - whose field lookups all miss.
+  /// The result was an [AuthResponse] with a null `accessToken`/`tokenType` that
+  /// was stored over the working token, flagged AUTHENTICATED, and written to
+  /// secure storage. From there every write threw on `tokenType!` while the UI
+  /// still showed a signed-in user, permanently, across restarts.
+  ///
+  /// [decoded] is the result of `jsonDecode` on the response body: null means
+  /// the body was absent or unparsable.
+  static TokenOutcome classifyTokenResponse(
+      int statusCode, Map<String, dynamic>? decoded) {
+    // A 5xx says nothing about our credentials, so keep them and let a later
+    // request retry. Only an explicit rejection ends the session.
+    if (statusCode >= 500) return TokenOutcome.transient;
+    if (statusCode != 200) return TokenOutcome.dead;
+    if (decoded == null) return TokenOutcome.transient;
+    return AuthResponse.fromJson(decoded).isUsable
+        ? TokenOutcome.renewed
+        : TokenOutcome.dead;
+  }
+
+  /// Drops a session whose token the server refused to renew.
+  ///
+  /// A non-2xx from the token endpoint is not a transient hiccup: it means the
+  /// refresh token is gone, and nothing will ever authorise a request with the
+  /// old credentials. Clearing them and reporting UNAUTHENTICATED puts the UI in
+  /// the state that can actually be recovered from (re-login) instead of a state
+  /// that looks signed-in while every write throws.
+  ///
+  /// Awaited by [refreshToken]: the stored credential has to be cleared *before*
+  /// the caller is told the refresh failed. Not awaiting it left the dead token
+  /// on disk while the in-memory state said otherwise, so a restart resurrected
+  /// a session that could only ever fail again.
+  static Future<void> _endSession() async {
+    user.authResponse = null;
+    user.status = AuthStatus.UNAUTHENTICATED;
+    user.updateUserStatus();
+    await user.setIntance();
+  }
+
+  /// Renews the access token. Returns whether a usable token is now held.
+  ///
+  /// Only ever *replaces* [user.authResponse] once a usable token has actually
+  /// been parsed, so a rejected refresh can no longer destroy the working
+  /// credentials it was called to extend.
+  static Future<bool> refreshToken() async {
     String url = CredMal.otokenEndPoint;
 
     Map<String, String> body = {
@@ -62,14 +131,41 @@ class MalAuth {
     };
 
     try {
-      var response = await httpPostAsync(url, body: body);
-      AuthResponse authResponse =
-          AuthResponse.fromJson(jsonDecode(response.body));
-      user.authResponse = authResponse;
-      user.status = AuthStatus.AUTHENTICATED;
-      user.setIntance();
+      final response = await httpPostAsync(url, body: body);
+      final Map<String, dynamic>? decoded = _tryDecode(response.body);
+      switch (classifyTokenResponse(response.statusCode, decoded)) {
+        case TokenOutcome.renewed:
+          user.authResponse = AuthResponse.fromJson(decoded);
+          user.status = AuthStatus.AUTHENTICATED;
+          await user.setIntance();
+          return true;
+        case TokenOutcome.dead:
+          logDal('refreshToken rejected -> ${response.statusCode} '
+              '${response.body}');
+          await _endSession();
+          return false;
+        case TokenOutcome.transient:
+          logDal('refreshToken inconclusive -> ${response.statusCode} '
+              '${response.body}');
+          return false;
+      }
+    } catch (e) {
+      // Transport-level failure: the request never got an answer, so the stored
+      // credentials are untouched and still worth keeping.
+      logDal(e);
+      return false;
+    }
+  }
+
+  /// `jsonDecode` without letting a non-JSON body escape as a throw.
+  static Map<String, dynamic>? _tryDecode(String body) {
+    if (body.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(body);
+      return decoded is Map<String, dynamic> ? decoded : null;
     } catch (e) {
       logDal(e);
+      return null;
     }
   }
 
@@ -97,10 +193,21 @@ class MalAuth {
     };
 
     try {
-      var response = await httpPostAsync(url, body: body);
-      AuthResponse authResponse =
-          AuthResponse.fromJson(jsonDecode(response.body));
-      user.authResponse = authResponse;
+      final response = await httpPostAsync(url, body: body);
+      final Map<String, dynamic>? decoded = _tryDecode(response.body);
+      final outcome = classifyTokenResponse(response.statusCode, decoded);
+      if (outcome != TokenOutcome.renewed) {
+        // Routed through the same classifier as refreshToken so the two cannot
+        // drift. Previously any decodable body counted as success: a rejected
+        // code exchange left an all-null credential stored, flagged
+        // AUTHENTICATED, and still returned true to the WebView login screen.
+        logDal('onCodeReceived -> ${outcome.name} '
+            '${response.statusCode} ${response.body}');
+        user.status = AuthStatus.UNAUTHENTICATED;
+        user.updateUserStatus();
+        return false;
+      }
+      user.authResponse = AuthResponse.fromJson(decoded);
       user.status = AuthStatus.AUTHENTICATED;
       user.updateUserStatus();
       await user.setIntance();

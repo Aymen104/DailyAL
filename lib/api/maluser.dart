@@ -128,6 +128,17 @@ class MalUser {
     return null;
   }
 
+  /// Whether a MAL write actually succeeded.
+  ///
+  /// Only 200 used to be accepted. MAL answers a completed update with 2xx, so
+  /// any 201/204 the API returned was reported to the user as "Couldn't Update!"
+  /// even though the write had landed. Paired with it, `response.body != null`
+  /// guarded nothing at all: `http.Response.body` is a non-nullable `String`,
+  /// so that half of the condition was always true and a 2xx carrying an empty
+  /// body fell straight into `jsonDecode("")`.
+  static bool isWriteSuccessful(int statusCode) =>
+      statusCode >= 200 && statusCode < 300;
+
   static Future<MyAnimeListStatus?> updateMyAnimeListStatus(int animeId,
       {String? status,
       int? score,
@@ -159,7 +170,8 @@ class MalUser {
 
     try {
       var response = await MalConnect.httpPutAsync(url, body: body);
-      if (response.statusCode == 200 && response.body != null) {
+      if (isWriteSuccessful(response.statusCode) &&
+          response.body.isNotEmpty) {
         await _invalidateMyListCache("anime", id: animeId);
         return MyAnimeListStatus.fromJson(jsonDecode(response.body));
       }
@@ -206,13 +218,22 @@ class MalUser {
     if (priority != null) body["priority"] = priority.toString();
     if (rereadValue != null) body["reread_value"] = rereadValue.toString();
 
-    var response = await MalConnect.httpPutAsync(url, body: body);
-    if (response.statusCode == 200 && response.body != null) {
-      await _invalidateMyListCache("manga", id: mangaId);
-      return MyMangaListStatus.fromJson(jsonDecode(response.body));
-    } else {
-      logDal('updateMyMangaListStatus($mangaId) -> ${response.statusCode} '
-          '${response.body}');
+    // Wrapped for symmetry with the anime path above. This one had no handler,
+    // so a transport failure - or the `tokenType! + accessToken!` throw that a
+    // credential-less AuthResponse produced inside httpPutAsync - escaped as an
+    // unhandled async error instead of a "Couldn't Update!" toast.
+    try {
+      var response = await MalConnect.httpPutAsync(url, body: body);
+      if (isWriteSuccessful(response.statusCode) &&
+          response.body.isNotEmpty) {
+        await _invalidateMyListCache("manga", id: mangaId);
+        return MyMangaListStatus.fromJson(jsonDecode(response.body));
+      } else {
+        logDal('updateMyMangaListStatus($mangaId) -> ${response.statusCode} '
+            '${response.body}');
+      }
+    } catch (e) {
+      logDal(e);
     }
     return null;
   }
@@ -349,7 +370,9 @@ class MalUser {
     try {
       var response = await MalConnect.delete(
           '${CredMal.endPoint}$category/$id/my_list_status');
-      if (response != null && response.statusCode == 200) {
+      // 2xx, not 200: MAL answers a completed DELETE with 204 No Content, so
+      // requiring exactly 200 reported every successful removal as a failure.
+      if (response != null && isWriteSuccessful(response.statusCode)) {
         await _invalidateMyListCache(category, id: id);
         return true;
       }
