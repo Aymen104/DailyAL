@@ -36,6 +36,42 @@ class MalApi {
   static const userAnimeFields =
       'my_list_status{is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}';
 
+  /// Fields requested when a caller does not name any.
+  ///
+  /// Includes `my_list_status`, so a caller that drops this loses the signed-in
+  /// user's own progress on every row.
+  static const defaultSearchFields =
+      "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,"
+      "mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,"
+      "updated_at,media_type,status,genres,my_list_status,num_episodes,"
+      "start_season,broadcast,source,average_episode_duration,rating,pictures,"
+      "background,related_anime,related_manga,recommendations,studios,"
+      "statistics";
+
+  /// Build the `/search` URL for [query].
+  ///
+  /// Split out of [searchForContent] so the query string can be asserted
+  /// directly. The bug this guards against: the query is opened with `?q=`, so
+  /// the fallback field list has to join with `&`. It used to append a second
+  /// `?`, which turned the entire `fields=` blob into part of the `offset`
+  /// value - MAL then ignored it and answered without any of those fields.
+  static String buildSearchUrl(
+    String query, {
+    int limit = 100,
+    String category = "anime",
+    int offset = 0,
+    List<String>? fields,
+  }) {
+    final fieldList = (fields != null && fields.length != 0)
+        ? fields.reduce((value, element) => "$value,$element")
+        : defaultSearchFields;
+    return "${CredMal.endPoint}${category}"
+        "?q=${Uri.encodeQueryComponent(query)}"
+        "&limit=$limit"
+        "&offset=$offset"
+        "&fields=$fieldList";
+  }
+
   /// Get Animelist/Mangalist using query with default values limit=100, offset=0, category can be 'anime', 'manga'
   static Future<SearchResult> searchForContent(String query,
       {int limit = 100,
@@ -43,22 +79,8 @@ class MalApi {
       int offset = 0,
       List<String>? fields,
       bool fromCache = false}) async {
-    String url = CredMal.endPoint +
-        category +
-        "?q=" +
-        query.toString() +
-        "&limit=" +
-        limit.toString() +
-        "&offset=" +
-        offset.toString();
-
-    if (fields != null && fields.length != 0) {
-      url += "&fields=" +
-          fields.reduce((value, element) => (value + "," + element));
-    } else {
-      url +=
-          "?fields=id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics";
-    }
+    String url = buildSearchUrl(query,
+        limit: limit, category: category, offset: offset, fields: fields);
     return SearchResult.fromJson(
         await MalConnect.getContent(url, fromCache: fromCache),
         category: category);

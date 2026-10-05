@@ -11,6 +11,22 @@ import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dal_commons/dal_commons.dart';
 
 class MalUser {
+  /// Whether a read of [username]'s list can succeed given [status].
+  ///
+  /// `@me` is resolved by MAL from the caller's own bearer token, so it is the
+  /// one value that *cannot* be read without being authenticated. Any other
+  /// name is a public `/users/{name}/{category}list` route.
+  ///
+  /// Split out of [getMyContentList] so it is testable: the bug this guards
+  /// against was an inverted condition that let the unauthenticated `@me` case
+  /// through, which returned null from `getContent`, which `SearchResult
+  /// .fromJson` turned into an empty list, which the home page rendered as a
+  /// blank "my list". Asserting on the returned [SearchResult] cannot catch a
+  /// regression here, because both the early return and the rejected request
+  /// produce an empty result - only the predicate distinguishes them.
+  static bool canReadUserList(AuthStatus status, String username) {
+    return status == AuthStatus.AUTHENTICATED || username.notEquals("@me");
+  }
   /// Drops every cached read of the signed-in user's list for [category].
   ///
   /// List reads are cached by full URL, so one logical list exists as dozens of
@@ -237,27 +253,63 @@ class MalUser {
       List<String>? fields,
       String username = "@me",
       bool fromCache = false}) async {
-    if (user.status != AuthStatus.AUTHENTICATED &&
-        username != null &&
-        username.notEquals("@me")) {
+    final url = buildUserListUrl(
+      user.status,
+      username: username,
+      category: category,
+      limit: limit,
+      offset: offset,
+      status_: status,
+      sortType: sortType,
+      fields: fields,
+    );
+    // Bail out before the request rather than letting it go out and come back
+    // null, which `SearchResult.fromJson` turns into an empty list.
+    if (url == null) {
       return SearchResult();
-    }
-    String? fieldsString = !nullOrEmpty(fields)
-        ? fields!.reduce((value, element) => (value + "," + element))
-        : null;
-    String url =
-        "${CredMal.userEndPoint}$username/${category}list?fields=num_episodes,alternative_titles,broadcast,start_date,status,mean,num_list_users,genres,media_type,num_volumes,${fieldsString != null ? (fieldsString + ',') : ''}list_status{is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}&limit=$limit&offset=$offset";
-    if (status != null) {
-      url += "&status=$status";
-    }
-    if (sortType != null) {
-      url += "&sort=$sortType";
     }
 
     return SearchResult.fromJson(
       await MalConnect.getContent(url, fromCache: fromCache),
       category: category,
     );
+  }
+
+  /// The URL to read [username]'s [category] list, or null when the read cannot
+  /// succeed.
+  ///
+  /// Folding the auth decision in here (rather than leaving it as a bare
+  /// `if` in [getMyContentList]) is what makes it testable. A separate
+  /// `canReadUserList` call left the two able to drift: the predicate's own
+  /// tests all passed against a build that had stopped calling it entirely,
+  /// and against one that reinstated the original inverted condition. Asserting
+  /// on the URL returned - null versus a real endpoint - pins the guard and the
+  /// request shape together, which is the only place they can be pinned.
+  static String? buildUserListUrl(
+    AuthStatus status, {
+    int limit = 100,
+    int offset = 0,
+    String category = "anime",
+    String? status_,
+    String? sortType,
+    List<String>? fields,
+    String username = "@me",
+  }) {
+    if (!canReadUserList(status, username)) {
+      return null;
+    }
+    final fieldsString = !nullOrEmpty(fields)
+        ? fields!.reduce((value, element) => (value + "," + element))
+        : null;
+    var url =
+        "${CredMal.userEndPoint}$username/${category}list?fields=num_episodes,alternative_titles,broadcast,start_date,status,mean,num_list_users,genres,media_type,num_volumes,${fieldsString != null ? (fieldsString + ',') : ''}list_status{is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}&limit=$limit&offset=$offset";
+    if (status_ != null) {
+      url += "&status=$status_";
+    }
+    if (sortType != null) {
+      url += "&sort=$sortType";
+    }
+    return url;
   }
 
   static Future<MyAnimeListStatus?> updateEpisodeCount(content,

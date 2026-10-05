@@ -41,12 +41,35 @@ class User with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Re-derive [status] from a stored token.
+  ///
+  /// [AuthStatus.INPROGRESS] only means "a login is mid-flight", which is
+  /// meaningless across a process restart - nothing is in flight any more. It
+  /// was being persisted verbatim and restored verbatim, so a user who was
+  /// killed during login came back permanently `INPROGRESS`: no code path
+  /// completes that login, so it never resolved, and every `INPROGRESS` guard
+  /// (such as `MalUser.canReadUserList`) treated it as "no usable token".
+  ///
+  /// A stored `accessToken` is the only durable evidence of being signed in, so
+  /// trust that and treat everything else as signed out.
+  static AuthStatus resolvePersistedStatus(AuthStatus persisted, AuthResponse? auth) {
+    if (auth?.accessToken != null) return AuthStatus.AUTHENTICATED;
+    return AuthStatus.UNAUTHENTICATED;
+  }
+
   static Future<User> getInstance() async {
     var sharedPref = await SharedPreferences.getInstance();
     User newUser =
         User.fromJson(jsonDecode(sharedPref.getString("user") ?? "{}"));
     if (!kIsWeb) {
       newUser.authResponse = await _getAuthResponse();
+      // Off-web the stored token is authoritative in both directions. A token
+      // that has gone missing (cleared storage, revoked session) must not leave
+      // a stale AUTHENTICATED behind, because every guard then treats the user
+      // as able to read `@me` and gets an empty list back. On web no token is
+      // stored at all, so the persisted flag is the only evidence there is.
+      newUser.status =
+          resolvePersistedStatus(newUser.status, newUser.authResponse);
     }
     return newUser;
   }
