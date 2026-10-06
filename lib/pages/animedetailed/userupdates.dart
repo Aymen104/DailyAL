@@ -1,17 +1,12 @@
 import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
-import 'package:dailyanimelist/main.dart';
-import 'package:dailyanimelist/pages/userpage.dart';
 import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/customfuture.dart';
-import 'package:dailyanimelist/widgets/forum/nextprev.dart';
 import 'package:dailyanimelist/widgets/home/animecard.dart';
 import 'package:dailyanimelist/widgets/home/nodebadge.dart';
-import 'package:dailyanimelist/widgets/loading/shimmerwidget.dart';
 import 'package:dailyanimelist/widgets/shimmecolor.dart';
 import 'package:dal_commons/dal_commons.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class UserUpdatesPage extends StatefulWidget {
@@ -44,8 +39,12 @@ class _UserUpdatesPageState extends State<UserUpdatesPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return CFutureBuilder<UserUpdateList?>(
       future: updatesFuture,
+      onError: (e) {
+        logDal('UserUpdates fetch error: $e');
+      },
       done: (s) => _userListWidget(s.data?.data ?? []),
       loadingChild:
           _userListWidget(List<UserUpdate?>.generate(12, (index) => null)),
@@ -87,7 +86,7 @@ class _UserUpdatesPageState extends State<UserUpdatesPage>
 
   Widget _userCardDetailed(UserUpdate e) {
     var nsv = NodeStatusValue.fromString(e.status!);
-    var date = DateTime.tryParse(e.date ?? "");
+    final date = DateTime.tryParse(e.date ?? "");
     final username = e.user?.username;
     final imageUrl = e.user?.images?.jpg?.imageUrl;
     return InkWell(
@@ -137,8 +136,10 @@ class _UserUpdatesPageState extends State<UserUpdatesPage>
                     displayTimeAgo(date),
                     fontStyle: FontStyle.italic,
                     fontSize: 12,
-                  ),
-                if (nsv?.status != null) StatusBadge(nsv, height: 25)
+                  )
+                else
+                  SB.z,
+                if (nsv != null && nsv.status != null) StatusBadge(nsv, height: 25)
               ],
             )
           ],

@@ -74,12 +74,19 @@ class JikanHelper {
   }
 
   static Future<UserUpdateList> getUserUpdates(String category, int id) async {
-    return JikanV4Result.fromJson(
-            DataUnionType.userupdates,
-            (await MalConnect.getContent(
-                '${CredMal.jikanV4}$category/$id/userupdates',
-                withNoHeaders: true)))
-        .data as UserUpdateList;
+    try {
+      final result = await MalConnect.getContent(
+          '${CredMal.jikanV4}$category/$id/userupdates',
+          withNoHeaders: true);
+      if (result == null) {
+        return UserUpdateList(data: []);
+      }
+      final parsed = JikanV4Result.fromJson(DataUnionType.userupdates, result);
+      return (parsed.data as UserUpdateList?) ?? UserUpdateList(data: []);
+    } catch (e) {
+      logDal('getUserUpdates failed: $e');
+      return UserUpdateList(data: []);
+    }
   }
 
   static Future<Club?> getClubInfo(int id) async {
