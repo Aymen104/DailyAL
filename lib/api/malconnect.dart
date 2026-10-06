@@ -241,15 +241,21 @@ class MalConnect {
     Function(Document) fromHtml, {
     bool fromCache = false,
     List<int> validCodes = const [200],
+    bool withAuth = false,
   }) async {
     SearchResult? result;
     logDal('Html --> $url');
-    var response = await retryGet(url, Map());
+    var headers = Map<String, String>();
+    if (withAuth) {
+      headers = await _malHeaders(headers);
+    }
+    var response = await retryGet(url, headers);
     if (response == null || !validCodes.contains(response.statusCode)) {
       logDal(response.body);
     } else {
       result = fromHtml(parse(response.body));
-      result!.fromCache = false;
+      if (result == null) return null;
+      result.fromCache = false;
       if (result.data != null && result.data!.isNotEmpty) {
         result.paging = Paging(next: nextUrl, previous: url);
       } else {
@@ -262,10 +268,14 @@ class MalConnect {
 
   static Future<commons.Node?> htmlPage(
       String url, commons.Node Function(Document) fromHtml,
-      {bool fromCache = false}) async {
+      {bool fromCache = false, bool withAuth = false}) async {
     commons.Node? result;
     logDal(url);
-    var response = await retryGet(url, Map());
+    var headers = Map<String, String>();
+    if (withAuth) {
+      headers = await _malHeaders(headers);
+    }
+    var response = await retryGet(url, headers);
     if (response.statusCode != 200) {
       logDal(response.body);
     } else {
