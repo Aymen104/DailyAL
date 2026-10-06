@@ -52,11 +52,7 @@ class _UserUpdatesPageState extends State<UserUpdatesPage>
   }
 
   Widget _userListWidget(List<UserUpdate?>? userList) {
-    if (userList == null || userList.isEmpty) {
-      return showNoContent(
-        text: "No user updates available",
-      );
-    }
+    if (userList == null || userList.isEmpty) return showNoContent();
 
     return Container(
       height: 280,
