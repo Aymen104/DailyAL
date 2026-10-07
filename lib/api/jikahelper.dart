@@ -78,15 +78,59 @@ class JikanHelper {
       final result = await MalConnect.getContent(
           '${CredMal.jikanV4}$category/$id/userupdates',
           withNoHeaders: true);
-      if (result == null) {
-        return UserUpdateList(data: []);
+      if (result != null) {
+        final parsed = JikanV4Result.fromJson(DataUnionType.userupdates, result);
+        final list = (parsed.data as UserUpdateList?);
+        if (list != null && list.data != null && list.data!.isNotEmpty) {
+          return list;
+        }
       }
-      final parsed = JikanV4Result.fromJson(DataUnionType.userupdates, result);
-      return (parsed.data as UserUpdateList?) ?? UserUpdateList(data: []);
     } catch (e) {
-      logDal('getUserUpdates failed: $e');
-      return UserUpdateList(data: []);
+      logDal('getUserUpdates failed (primary): $e');
     }
+
+    // Fallback to jikan-edge which returns working data with different schema
+    try {
+      final result = await MalConnect.getContent(
+          'https://jikan.lucashdo.com/v1/$category/$id/userupdates',
+          withNoHeaders: true);
+      if (result != null && result['data'] != null) {
+        final List transformed = [];
+        for (var item in (result['data'] as List)) {
+          final Map<String, dynamic> t = {};
+          if (item['username'] != null) {
+            t['user'] = {
+              'username': item['username'],
+              'images': {
+                'jpg': {'image_url': item['imageUrl']},
+                'webp': {'image_url': item['imageUrl']}
+              }
+            };
+          }
+          t['score'] = item['score'];
+          t['status'] = item['status'];
+          final total = item['total'];
+          final progress = item['progress'];
+          if (category == 'anime') {
+            t['episodes_seen'] = progress;
+            t['episodes_total'] = total;
+          } else {
+            t['volumes_read'] = progress;
+            t['volumes_total'] = total;
+            t['chapters_read'] = progress;
+            t['chapters_total'] = total;
+          }
+          t['date'] = item['date'];
+          transformed.add(t);
+        }
+        final list = UserUpdateList.fromJson({'data': transformed});
+        return list;
+      }
+    } catch (e) {
+      logDal('getUserUpdates failed (fallback): $e');
+    }
+
+    return UserUpdateList(data: []);
   }
 
   static Future<Club?> getClubInfo(int id) async {
