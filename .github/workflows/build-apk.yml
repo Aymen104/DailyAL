@@ -25,7 +25,7 @@ jobs:
           flutter pub get
 
       - name: Flutter test
-        run: flutter test --no-pub test/animex_meta_test.dart --reporter=expanded
+        run: flutter test --no-pub test/animex_meta_test.dart test/character_fallback_test.dart --reporter=expanded
 
       - name: Render proof (non-gating)
         # Renders the real AnimeGridCard and writes test_output/animex_cards.png.

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:dailyanimelist/api/credmal.dart';
+import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/api/malconnect.dart';
 import 'package:dailyanimelist/api/maluser.dart';
 import 'package:dailyanimelist/cache/cachemanager.dart';
@@ -103,13 +104,14 @@ class DalApi {
   }
 
   Future<dynamic> httpGet(String endpoint,
-      [fromCache = true, int? timeInhours]) async {
+      [fromCache = true, int? timeInhours, Duration? timeoutDuration]) async {
     return MalConnect.getContent(
       '${await _preferredServer}$endpoint',
       fromCache: fromCache,
       retryOnFail: false,
       withNoHeaders: true,
       timeinHours: timeInhours,
+      timeoutDuration: timeoutDuration,
     );
   }
 
@@ -153,8 +155,26 @@ class DalApi {
   }
 
   Future<DataUnion?> getCharaPeopleInfo(int id, DataUnionType type) async {
-    return JikanV4Result.fromJson(type, await httpGet('${type.name}/$id')).data;
+    // Primary: the embedded handler proxies the Jikan-compatible upstream
+    // (Tenrai). That route is the only one still served by a single upstream, so
+    // give it a short leash and fall through to jikan-edge on any failure —
+    // missing data, a timeout, or a schema drift that trips a model parser
+    // (`CharacterV4Data.fromJson` throws when `nicknames` is absent).
+    try {
+      final primary = JikanV4Result.fromJson(type,
+              await httpGet('${type.name}/$id', true, null, _charaTimeout))
+          .data;
+      if (primary != null) return primary;
+    } catch (e) {
+      logDal('getCharaPeopleInfo primary failed ($id/$type): $e');
+    }
+    return JikanHelper.getCharaPeopleEdge(id, type);
   }
+
+  /// Ceiling for the character/person primary fetch. Deliberately shorter than
+  /// the handler's own 10s attempt budget: the jikan-edge fallback carries the
+  /// same data, so waiting longer only delays the screen without adding value.
+  static const Duration _charaTimeout = Duration(seconds: 6);
 
   Future<dynamic> getRecomData({
     int? id,

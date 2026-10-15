@@ -128,7 +128,15 @@ class MalConnect {
               timeoutCache ? cachedResult : jsonDecode(response.body) ?? {};
           result["url"] = url;
           result["fromCache"] = false;
-          CacheManager.instance.setCachedJson(url, result);
+          // Never persist an error payload as if it were content. The embedded
+          // handler answers HTTP 200 with {"error": true} on any upstream
+          // failure, and caching that under the request URL turned a single
+          // transient hiccup into the same error for the whole cache window
+          // (e.g. the character screen kept showing "Couldn't retreive Content"
+          // long after the upstream had recovered).
+          if (result["error"] != true) {
+            CacheManager.instance.setCachedJson(url, result);
+          }
           result["lastUpdated"] = DateTime.now().toString();
           return result;
         }
@@ -155,7 +163,7 @@ class MalConnect {
     } else if (isDalLocal) {
       var value = await HandlerCore()
           .handleRequestAsString(Uri.parse(url))
-          .timeout(_retryDuration);
+          .timeout(timeoutDuration ?? _retryDuration);
       return http.Response.bytes(utf8.encode(value ?? ''), 200, headers: {
         HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8'
       });

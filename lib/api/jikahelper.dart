@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:dailyanimelist/api/jikan_edge_mapper.dart';
+import 'package:http/http.dart' as http;
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/episodemodels.dart';
 import 'package:dailyanimelist/api/jikan_models.dart';
@@ -89,11 +92,17 @@ class JikanHelper {
       logDal('getUserUpdates failed (primary): $e');
     }
 
-    // Fallback to jikan-edge which returns working data with different schema
+    // Fallback to jikan-edge which returns working data with different schema.
+    // NOTE: must NOT go through MalConnect.getContent — it appends
+    // ?nsfw=..&fromCache=.. to every URL, and jikan.lucashdo.com rejects any
+    // unexpected query params with HTTP 400. Raw fetch with plain headers,
+    // jsonDecode the body directly (same shape as getContent would return).
     try {
-      final result = await MalConnect.getContent(
-          'https://jikan.lucashdo.com/v1/$category/$id/userupdates',
-          withNoHeaders: true);
+      final raw = await http
+          .get(Uri.parse('https://jikan.lucashdo.com/v1/$category/$id/userupdates'),
+              headers: const {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 15));
+      final result = raw.statusCode == 200 ? jsonDecode(raw.body) : null;
       if (result != null && result['data'] != null) {
         final List transformed = [];
         for (var item in (result['data'] as List)) {
@@ -120,7 +129,7 @@ class JikanHelper {
             t['chapters_read'] = progress;
             t['chapters_total'] = total;
           }
-          t['date'] = item['date'];
+          t['date'] = _normalizeFallbackDate(item['date']);
           transformed.add(t);
         }
         final list = UserUpdateList.fromJson({'data': transformed});
@@ -131,6 +140,82 @@ class JikanHelper {
     }
 
     return UserUpdateList(data: []);
+  }
+
+  /// jikan-edge mirror. Same MAL data as the primary Jikan-compatible upstream
+  /// (Tenrai) but in a flatter camelCase schema, so it is only ever a fallback
+  /// and every payload is normalised back to Jikan v4 on the way in.
+  static const String jikanEdgeRoot = 'https://jikan.lucashdo.com/v1';
+
+  /// Fetch a character or person by MAL id from jikan-edge and normalise it to
+  /// the Jikan v4 (snake_case) shape [DataUnion.fromJson] understands.
+  ///
+  /// Wired in by [DalApi.getCharaPeopleInfo] only when the embedded handler's
+  /// primary upstream returned nothing, so the healthy path never pays for it.
+  /// Raw [http.get] on purpose: jikan-edge answers HTTP 400 to the
+  /// `?nsfw=..&fromCache=..` params that [MalConnect.getContent] appends (same
+  /// reason as [getUserUpdates]).
+  static Future<DataUnion?> getCharaPeopleEdge(
+      int id, DataUnionType type) async {
+    final endpoint = type == DataUnionType.people ? 'people' : 'characters';
+    try {
+      final raw = await http
+          .get(Uri.parse('$jikanEdgeRoot/$endpoint/$id/full'),
+              headers: const {'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 15));
+      if (raw.statusCode != 200) return null;
+      final body = jsonDecode(raw.body);
+      final data = body is Map ? body['data'] : null;
+      if (data is! Map) return null;
+      final source = data.cast<String, dynamic>();
+      final normalized = type == DataUnionType.people
+          ? JikanEdgeMapper.person(source)
+          : JikanEdgeMapper.character(source);
+      return DataUnion.fromJson(type, normalized, normalized);
+    } catch (e) {
+      logDal('getCharaPeopleEdge failed ($endpoint/$id): $e');
+      return null;
+    }
+  }
+
+  /// jikan-edge serves `date` as a human relative string ("2 minutes ago")
+  /// while the primary Jikan v4 schema uses ISO-8601. Try to convert the
+  /// relative form to UTC ISO so displayTimeAgo works; unknown formats are
+  /// returned verbatim (the UI renders raw relative text as a last resort).
+  static final RegExp _agoDateRe =
+      RegExp(r'^(\d+)\s*(second|minute|hour|day|week|month|year)s?\s+ago$');
+  static final RegExp _justNowDateRe =
+      RegExp(r'^\s*(just\s+now|now)\s*$', caseSensitive: false);
+  static const _agoDateUnits = {
+    'second': const Duration(seconds: 1),
+    'minute': const Duration(minutes: 1),
+    'hour': const Duration(hours: 1),
+    'day': const Duration(days: 1),
+    'week': const Duration(days: 7),
+    'month': const Duration(days: 30),
+    'year': const Duration(days: 365),
+  };
+
+  static String? _normalizeFallbackDate(dynamic raw) {
+    if (raw == null) return null;
+    final s = raw.toString().trim();
+    if (s.isEmpty) return null;
+    if (_justNowDateRe.hasMatch(s)) {
+      return DateTime.now().toUtc().toIso8601String();
+    }
+    final m = _agoDateRe.firstMatch(s);
+    if (m != null) {
+      final n = int.tryParse(m.group(1)!) ?? 0;
+      final unit = m.group(2)!.toLowerCase();
+      final mult = _agoDateUnits[unit];
+      if (mult != null) {
+        return DateTime.now()
+            .subtract(Duration(microseconds: mult.inMicroseconds * n))
+            .toUtc()
+            .toIso8601String();
+      }
+    }
+    return s;
   }
 
   static Future<Club?> getClubInfo(int id) async {
