@@ -98,6 +98,7 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   /// global scope, bypassing the WebView per-script size cap entirely.
   late final String _toggleA = '''
 (function(){window.__tog={T:1,d:['s'],f:0,dl:Date.now()+30000,k:window.GRECAPTCHA_SITE_KEY||'$malRecaptchaSiteKey',t:'${widget.type}',i:${widget.id},a:${widget.add}};
+window.__tog.c=(document.querySelector('meta[name=csrf_token]')||{}).content||'';
 window.__tog.g=function(l,v){var o=window.__tog;o.d.push(l+':'+(v==null?'null':v))};
 window.__tog.done=function(x){var o=window.__tog;if(!o.f){o.f=1;ResultBridge.postMessage(x)}};
 window.__tog.soak=function(){return Date.now()>window.__tog.dl};
@@ -106,7 +107,7 @@ setTimeout(function(){var o=window.__tog;if(!o.f){o.g('wd','fire');o.done('TWATC
 
   late final String _toggleB = '''
 (function(){window.__tog.pt=function(tk){var o=window.__tog;if(o.soak())return;o.g('tl',tk.length);
-fetch('https://myanimelist.net/favorite/'+o.t+'/'+o.i+'.json',{method:o.a?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:'g-recaptcha-response='+encodeURIComponent(tk)}).then(function(r){return r.text().then(function(b){o.g('bt',((b.split('<title>')[1]||'').split('</title>')[0]||'').trim());var h=b.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block|supporter|favorite).{0,70}/i);o.g('bh',h?h[0]:'n');o.done('T'+r.status+'@@'+b+'@@DBG'+o.d.join('|'))})}).catch(function(e){o.done('T0@@net@@DBG'+o.d.join('|'))})};
+fetch('https://myanimelist.net/favorite/'+o.t+'/'+o.i+'.json',{method:o.a?'POST':'DELETE',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:'g-recaptcha-response='+encodeURIComponent(tk)+'&csrf_token='+encodeURIComponent(o.c)}).then(function(r){return r.text().then(function(b){o.g('bt',((b.split('<title>')[1]||'').split('</title>')[0]||'').trim());var h=b.match(/.{0,50}(?:recaptcha|verif|human|error|captcha|block|supporter|favorite).{0,70}/i);o.g('bh',h?h[0]:'n');o.done('T'+r.status+'@@'+b+'@@DBG'+o.d.join('|'))})}).catch(function(e){o.done('T0@@net@@DBG'+o.d.join('|'))})};
 })();''';
 
   late final String _toggleC = '''

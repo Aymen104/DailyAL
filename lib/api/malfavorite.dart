@@ -96,17 +96,25 @@ class MalFavorite {
     try {
       final j = jsonDecode(body) as Map<String, dynamic>;
       final max = j['max_favs'];
-      if (j['is_supporter'] == true) {
+      // MAL's own site JS reads max_favs on *any* 400; when the 400 is not a
+      // favorites-limit error (e.g. {"errors":[{"message":"Invalid operation"}]})
+      // max_favs is absent, and their code renders the literal "undefined".
+      // Only show the limit message when the server actually sent a limit.
+      if (max != null) {
+        if (j['is_supporter'] == true) {
+          return MalFavResult(
+              message: 'Only a maximum of $max favorites allowed.');
+        }
         return MalFavResult(
-            message: 'Only a maximum of $max favorites allowed.');
+          message:
+              'Only a maximum of $max favorites allowed. Become a MAL Supporter to double it!',
+        );
       }
-      return MalFavResult(
-        message:
-            'Only a maximum of $max favorites allowed. Become a MAL Supporter to double it!',
-      );
     } catch (_) {
       return const MalFavResult(message: "Couldn't add to favorites.");
     }
+    // Real server error, e.g. "Invalid operation".
+    return MalFavResult(message: _serverMessage(body));
   }
 
   static String _serverMessage(String body) {
