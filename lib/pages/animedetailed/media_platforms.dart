@@ -1,7 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dailyanimelist/constant.dart';
 import 'package:dailyanimelist/generated/l10n.dart';
 import 'package:dailyanimelist/main.dart';
-import 'package:dailyanimelist/widgets/avatarwidget.dart';
 import 'package:dailyanimelist/widgets/custombutton.dart';
 import 'package:dal_commons/commons.dart';
 import 'package:flutter/material.dart';
@@ -151,26 +151,56 @@ Widget _buildLinkImage({
   required AnimeLink link,
   double? size,
 }) {
+  final hasImage = link.imageUrl != null && link.imageUrl!.isNotBlank;
   return SizedBox(
     height: size,
     width: size,
-    child: link.imageUrl != null && link.imageUrl!.isNotBlank
-        ? ToolTipButton(
-            message: link.name,
-            onTap: () => _onLinkTap(context, link),
-            child: AvatarAspect(
-              url: link.imageUrl,
-              useUserImageOnError: false,
-              radius: _borderRadiusTypes.contains(link.linkType)
-                  ? null
-                  : BorderRadius.zero,
-            ),
-          )
-        : ToolTipButton(
-            message: link.name,
-            onTap: () => _onLinkTap(context, link),
-            child: Icon(Icons.link),
-          ),
+    child: ToolTipButton(
+      message: link.name,
+      onTap: () => _onLinkTap(context, link),
+      child: hasImage
+          ? AspectRatio(
+              aspectRatio: 1.0,
+              child: ClipRRect(
+                // Same rule as before: the rounded types get a soft square,
+                // everything else stays a hard-edged rectangle.
+                borderRadius: _borderRadiusTypes.contains(link.linkType)
+                    ? BorderRadius.circular(28)
+                    : BorderRadius.zero,
+                child: CachedNetworkImage(
+                  imageUrl: link.imageUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) =>
+                      cardLoading(borderRadius: BorderRadius.circular(28)),
+                  // MAL titles do not always match the file name in the
+                  // assets repo (e.g. "Amazon Prime Video" vs the lowercase
+                  // file), so a miss lands here. Fall back to the neutral link
+                  // glyph - the same one a link without any image gets -
+                  // instead of the anime-collage placeholder, which reads as a
+                  // broken image.
+                  errorWidget: (context, url, error) =>
+                      _linkFallbackIcon(context, size),
+                ),
+              ),
+            )
+          : _linkFallbackIcon(context, size),
+    ),
+  );
+}
+
+/// Neutral stand-in for a streaming icon we do not have (or could not load).
+/// Scales to the same box the image would have occupied so the row does not
+/// jump.
+Widget _linkFallbackIcon(BuildContext context, double? size) {
+  // The inline row passes no size, so fall back to a compact glyph; the sheet
+  // passes 45 and gets a slightly larger one.
+  final iconSize = (size ?? 24.0).clamp(16.0, 28.0).toDouble();
+  return Center(
+    child: Icon(
+      Icons.link,
+      size: iconSize,
+      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(.6),
+    ),
   );
 }
 

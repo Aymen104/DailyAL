@@ -320,7 +320,85 @@ K? switchCase<T, K>(
   return defaultValue;
 }
 
-String getDomainAsset(String e, [String domain = 'streaming']) {
+/// Known streaming-icon file names in the `psycho` branch of
+/// JICA98/DailyAL's `web_assets/streaming`. MAL emits the platform name in
+/// whatever casing it likes ("Amazon Prime Video", "hidive", "disney plus"),
+/// and the raw-github URL below is case-sensitive, so a bare
+/// string interpolation 404s on any title that does not match byte for byte.
+/// Matching case-insensitively here removes the most common class of miss.
+const _knownStreamingAssets = [
+  'Ani-One Asia',
+  'Animax Asia',
+  'Animax Korea',
+  'Animax Mongolia',
+  'Anime Digital Network',
+  'Aniplus Asia',
+  'Aniplus TV',
+  'Aniverse',
+  'Bahamut Anime Crazy',
+  'Bilibili Global',
+  'CatchPlay',
+  'Crunchyroll',
+  'Disney+ hotstar',
+  'Disney+',
+  'Flixer',
+  'Funimation',
+  'HIDIVE',
+  'Hulu',
+  'Laftel',
+  'MeWatch',
+  'Muse Asia',
+  'Netflix',
+  'Pops',
+  'ProSieben MAXX',
+  'Selecta Visión',
+  'Shahid',
+  'Sushiroll',
+  'TrueID',
+  'Upstream',
+  'Wakanim',
+  'amazon prime video',
+  'iQIYI',
+];
+
+/// A few MAL spellings that differ by more than case. Everything else is
+/// resolved by the case-insensitive pass over [_knownStreamingAssets].
+const _streamingAssetAliases = {
+  'disney plus': 'Disney+',
+  'disney plus hotstar': 'Disney+ hotstar',
+  'disney+ hotstar': 'Disney+ hotstar',
+  'prime video': 'amazon prime video',
+  'amazon prime': 'amazon prime video',
+  'amazon video': 'amazon prime video',
+  'amazon prime video': 'amazon prime video',
+  'bilibili': 'Bilibili Global',
+  // MAL spells this one "Animation Digital Network"; the asset is "Anime ...".
+  'animation digital network': 'Anime Digital Network',
+};
+
+/// Returns the file name (without extension) of the bundled icon that matches
+/// [title], or null when we ship nothing for that platform.
+String? streamingAssetName(String title) {
+  final trimmed = title.trim();
+  if (trimmed.isEmpty) return null;
+  final lower = trimmed.toLowerCase();
+  final alias = _streamingAssetAliases[lower];
+  if (alias != null) return alias;
+  for (final name in _knownStreamingAssets) {
+    if (name.toLowerCase() == lower) return name;
+  }
+  return null;
+}
+
+/// The icon URL for a streaming platform, or null when we ship no matching
+/// asset. Returning null (instead of a URL we know 404s) lets the caller fall
+/// back to a neutral glyph rather than a broken-image placeholder.
+String? getDomainAsset(String e, [String domain = 'streaming']) {
   final ext = domain == 'genres' ? 'webp' : 'png';
+  if (domain == 'streaming') {
+    final name = streamingAssetName(e);
+    if (name == null) return null;
+    return 'https://raw.githubusercontent.com/JICA98/DailyAL/psycho/web_assets/streaming/$name.$ext';
+  }
   return 'https://raw.githubusercontent.com/JICA98/DailyAL/psycho/web_assets/$domain/${e.trim()}.$ext';
 }
