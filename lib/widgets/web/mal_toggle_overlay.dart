@@ -29,23 +29,59 @@ class MalToggleOutcome {
 /// session cookie (HttpOnly, so it cannot be read from Dart) plus a fresh
 /// reCAPTCHA v3 token. Both the login and the toggle happen in THIS one
 /// WebView, guaranteeing the session and the fetch share the same cookie jar.
+///
+/// With [background] the WebView is hosted in an [OverlayEntry] that sits
+/// outside the visible area instead of in a modal [Dialog]: the page load, the
+/// session probe and the favorite fetch all still run, but the app stays usable
+/// and nothing pops up. The outcome comes back through the returned future, so
+/// the caller reports it (spinner + toast) itself. A sign-in is the one thing
+/// that is still surfaced, because the user has to type a password.
 Future<MalToggleOutcome?> runMalToggle(
   BuildContext context, {
   required String type,
   required int id,
   required bool add,
   bool autoLogin = false,
+  bool background = false,
 }) {
-  return showDialog<MalToggleOutcome>(
-    context: context,
-    barrierDismissible: false,
+  if (!background) {
+    return showDialog<MalToggleOutcome>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => MalToggleOverlay(
+        type: type,
+        id: id,
+        add: add,
+        autoLogin: autoLogin,
+      ),
+    );
+  }
+  final completer = Completer<MalToggleOutcome?>();
+  var entryRemoved = false;
+  late final OverlayEntry entry;
+  entry = OverlayEntry(
     builder: (_) => MalToggleOverlay(
       type: type,
       id: id,
       add: add,
       autoLogin: autoLogin,
+      background: true,
+      onDone: (outcome) {
+        if (!completer.isCompleted) completer.complete(outcome);
+        if (!entryRemoved) {
+          entryRemoved = true;
+          try {
+            entry.remove();
+          } catch (_) {
+            // The overlay was already torn down (app shutdown) - the future
+            // above is the only thing the caller is still waiting on.
+          }
+        }
+      },
     ),
   );
+  Overlay.of(context, rootOverlay: true).insert(entry);
+  return completer.future;
 }
 
 enum _Phase { check, favoriting, needsLogin }
@@ -58,12 +94,22 @@ class MalToggleOverlay extends StatefulWidget {
   /// When true, the overlay is allowed to show the favorite/sign-in flow on a
   /// not-yet-logged-in session. Defaults to false — callers opt in.
   final bool autoLogin;
+  /// When true this widget never draws itself: [runMalToggle] hosts it in an
+  /// [OverlayEntry] pushed outside the visible area, so the toggle runs while
+  /// the rest of the app stays usable. It then reports the outcome through
+  /// [onDone] instead of popping a route.
+  final bool background;
+  /// Called exactly once with the toggle outcome, or null when it could not be
+  /// completed. Only used in [background] mode.
+  final ValueChanged<MalToggleOutcome?>? onDone;
   const MalToggleOverlay({
     Key? key,
     required this.type,
     required this.id,
     required this.add,
     this.autoLogin = false,
+    this.background = false,
+    this.onDone,
   }) : super(key: key);
 
   /// Fires inside the WebView after page load and reports whether the cookie
@@ -86,6 +132,9 @@ class _MalToggleOverlayState extends State<MalToggleOverlay> {
   int _toggleRetries = 0;
   _Phase _phase = _Phase.check;
   String _status = 'Syncing with MyAnimeList\u2026';
+  /// Set once the outcome has been handed back, so a late timer or a second
+  /// bridge message cannot deliver it twice.
+  bool _finished = false;
 
   late final String _baseUrl =
       '${CredMal.htmlEnd}${widget.type == 'people' ? 'people' : 'character'}/${widget.id}';
@@ -171,7 +220,7 @@ window.__togRan=1;setTimeout(function(){o.el(function(){setTimeout(o.ct,300)})},
     final probe = MalToggleOverlay.sessionProbe;
     _timeout = Timer(const Duration(seconds: 120), () {
       _log('timeout fired, sent=$_sent phase=$_phase');
-      if (!_sent && mounted) Navigator.of(context).pop();
+      if (!_sent) _complete(null);
     });
     _controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -239,6 +288,21 @@ window.__togRan=1;setTimeout(function(){o.el(function(){setTimeout(o.ct,300)})},
     super.dispose();
   }
 
+  /// Hands the outcome back exactly once: background mode runs the host's
+  /// callback (which then drops the overlay entry), the dialog mode pops the
+  /// route this widget was shown in.
+  void _complete(MalToggleOutcome? outcome) {
+    if (_finished) return;
+    _finished = true;
+    _timeout?.cancel();
+    final onDone = widget.onDone;
+    if (onDone != null) {
+      onDone(outcome);
+    } else if (mounted) {
+      Navigator.of(context).pop(outcome);
+    }
+  }
+
   void _onResult(String message) {
     _log('bridge message=$message phase=$_phase');
     if (_sent) return;
@@ -255,7 +319,7 @@ window.__togRan=1;setTimeout(function(){o.el(function(){setTimeout(o.ct,300)})},
         return;
       }
       _sent = true;
-      if (mounted) Navigator.of(context).pop();
+      _complete(null);
       return;
     }
     _sent = true;
@@ -290,9 +354,7 @@ window.__togRan=1;setTimeout(function(){o.el(function(){setTimeout(o.ct,300)})},
       if (_phase == _Phase.needsLogin) {
         // The user logged in but the toggle still fell back to the login page —
         // reCAPTCHA is likely unusable in this WebView. Stop looping.
-        if (mounted) {
-          Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
-        }
+        _complete(MalToggleOutcome(status, cleanBody));
         return;
       }
       _phase = _Phase.needsLogin;
@@ -302,7 +364,7 @@ window.__togRan=1;setTimeout(function(){o.el(function(){setTimeout(o.ct,300)})},
       _startSiteSignIn();
       return;
     }
-    if (mounted) Navigator.of(context).pop(MalToggleOutcome(status, cleanBody));
+    _complete(MalToggleOutcome(status, cleanBody));
   }
 
   /// Grants access exactly the way DailyAL already does (see the in-app OAuth
@@ -338,19 +400,38 @@ window.__togRan=1;setTimeout(function(){o.el(function(){setTimeout(o.ct,300)})},
       } else {
         _log('oauth sign-in cancelled');
         if (_phase == _Phase.needsLogin) {
-          Navigator.of(context).pop();
+          _complete(null);
         }
       }
     } catch (e) {
       _log('oauth sign-in error: $e');
       if (_phase == _Phase.needsLogin) {
-        Navigator.of(context).pop();
+        _complete(null);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.background) {
+      // Background mode: the WebView must stay attached (the page load, the
+      // session probe and the favorite fetch all run inside it), but nothing
+      // may be drawn. A Positioned host parks it above the top edge; the
+      // Overlay clips to its own bounds and the window clips at the screen, so
+      // the platform view is never visible while it keeps working.
+      // IgnorePointer keeps the stray rect from swallowing taps.
+      return Positioned(
+        left: 0,
+        top: -4000,
+        child: SizedBox(
+          width: 480,
+          height: 800,
+          child: IgnorePointer(
+            child: WebViewWidget(controller: _controller),
+          ),
+        ),
+      );
+    }
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 48),
       constraints: const BoxConstraints(maxWidth: 900, maxHeight: 2000),
@@ -382,7 +463,7 @@ Padding(
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     tooltip: 'Cancel',
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => _complete(null),
                   ),
                 ],
               ),

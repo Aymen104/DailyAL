@@ -42,12 +42,16 @@ class _MalFavoriteButtonState extends State<MalFavoriteButton> {
     setState(() => _busy = true);
 
     if (!mounted) return;
+    // Sync in the background: the WebView overlay runs outside the visible
+    // area, so the page stays usable while the toggle happens. Only the
+    // heart's own spinner + the toast below report progress.
     final outcome = await runMalToggle(
       context,
       type: widget.type,
       id: widget.id,
       add: add,
       autoLogin: true,
+      background: true,
     );
     if (!mounted) return;
     setState(() => _busy = false);
