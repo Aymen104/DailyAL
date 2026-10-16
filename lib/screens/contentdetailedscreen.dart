@@ -1260,7 +1260,8 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
         AppbarMenuItem(
           S.current.Open_In_Browser,
           Icon(Icons.public),
-          onTap: () => launchURLWithConfirmation(_anilistUrl!, context: context),
+          onTap: () =>
+              launchURLWithConfirmation(_anilistUrl!, context: context),
         ),
       AppbarMenuItem(S.current.Search_by_genre, Icon(Icons.manage_search),
           onTap: _onMultiGenreSearch),
@@ -1764,11 +1765,27 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
       new Background(
         context: context,
         forceBg: user.pref.showAnimeMangaBg,
-        // Prefer real key art over the cover. The header is 460-520px tall and
-        // was being handed a portrait poster stretched across the full width,
-        // which is why it reads as soft; a 16:9 banner is the right shape for
-        // it. Only 37% of titles have one, so the cover remains the fallback
-        // and the 63% without one look exactly as they did before.
+        // Hero band: inscribe the art instead of covering with it.
+        // Background's default box is screen-height/1.9 (~1263px, taller than
+        // wide) and BoxFit.cover there scales a 1900x400 banner 3.16x while
+        // discarding 82% of its width, so nothing legible survived the crop.
+        // `contain` + a top anchor keeps every source whole: a banner lands as
+        // a full-width strip behind the title, a 16:9 backdrop as a ~607px
+        // hero, and the portrait cover fallback still fills the pane.
+        //
+        // AniList's banner is still preferred over TMDB's sharper backdrop on
+        // purpose: TMDB's anime entries are community-mapped and are sometimes
+        // attached to the wrong season or to a live-action remake. Right-and-
+        // soft beats sharp-and-wrong.
+        //
+        // fadeStart: the page-wide default of 200 leaves only ~20% of the art
+        // showing, which is why the header read as an empty gradient, while 0
+        // would put full-strength art under the near-black title text. 150
+        // lands at ~40% art behind the title - clearly visible, and still
+        // clear of WCAG AA against even the darkest pixels of the key art.
+        fadeStart: 150,
+        fit: BoxFit.contain,
+        alignment: Alignment.topCenter,
         url: AnimeXService.i.metaOf(_malId)?.wideImage ??
             (widget.node?.mainPicture?.large != null
                 ? widget.node?.mainPicture?.large
@@ -1849,12 +1866,9 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
             title: widget.category.equals("anime")
                 ? S.current.Studios
                 : S.current.Authors,
-            child: widget.category.equals("anime")
-                ? _studiosClickable()
-                : null,
-            content: widget.category.equals("anime")
-                ? null
-                : _getStudiosString(),
+            child: widget.category.equals("anime") ? _studiosClickable() : null,
+            content:
+                widget.category.equals("anime") ? null : _getStudiosString(),
           ),
           _buildDetailSection(
             title: "Media",
