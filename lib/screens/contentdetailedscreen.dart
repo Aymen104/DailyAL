@@ -1761,31 +1761,51 @@ class _ContentDetailedScreenState extends State<ContentDetailedScreen>
         ],
       ],
     );
+    // A real AniList banner is the anamorphic 1900x400 key art that needs the
+    // short hero box; a backdrop or the poster fallback does not.
+    final banner = AnimeXService.i.metaOf(_malId)?.banner;
+    final hasBanner = banner != null && banner.isNotEmpty;
     return Stack(children: [
       new Background(
         context: context,
         forceBg: user.pref.showAnimeMangaBg,
-        // Hero band: inscribe the art instead of covering with it.
-        // Background's default box is screen-height/1.9 (~1263px, taller than
-        // wide) and BoxFit.cover there scales a 1900x400 banner 3.16x while
-        // discarding 82% of its width, so nothing legible survived the crop.
-        // `contain` + a top anchor keeps every source whole: a banner lands as
-        // a full-width strip behind the title, a 16:9 backdrop as a ~607px
-        // hero, and the portrait cover fallback still fills the pane.
+        // The hero band, and why it is sized per source instead of by fit
+        // alone.
+        //
+        // Two shapes land here and they want opposite boxes:
+        //
+        //  * AniList banner - 1900x400, about 4.75:1. The default box is
+        //    screen-height/1.9 (~1263px on a 2400px screen) and `cover` there
+        //    scales the banner 3.16x while throwing away 82% of its width, so
+        //    nothing legible survived. `contain` kept the whole image but left
+        //    it a thin strip whose bottom edge cut a hard seam across the
+        //    pane, because the fade only reaches the background colour at the
+        //    *box* bottom, not at the image's. Giving the banner a short box
+        //    (18% of the screen) fixes both at once: it is drawn at ~1.05x -
+        //    still sharp, about half its width visible - and because `cover`
+        //    scales by height, image bottom == box bottom, so the fade lands
+        //    exactly on the background and there is no seam.
+        //
+        //  * everything else - a 16:9 backdrop, or the portrait cover
+        //    fallback - keeps the default tall box with `cover` and a centred
+        //    anchor, which is how the header has always rendered those.
         //
         // AniList's banner is still preferred over TMDB's sharper backdrop on
         // purpose: TMDB's anime entries are community-mapped and are sometimes
         // attached to the wrong season or to a live-action remake. Right-and-
         // soft beats sharp-and-wrong.
         //
-        // fadeStart: the page-wide default of 200 leaves only ~20% of the art
+        // fadeStart is the wash alpha at the box top, ramping linearly to 255
+        // at the bottom. The page default of 200 leaves only ~20% of the art
         // showing, which is why the header read as an empty gradient, while 0
-        // would put full-strength art under the near-black title text. 150
-        // lands at ~40% art behind the title - clearly visible, and still
-        // clear of WCAG AA against even the darkest pixels of the key art.
-        fadeStart: 150,
-        fit: BoxFit.contain,
-        alignment: Alignment.topCenter,
+        // would put full-strength art right under the app-bar icons. 120 over
+        // the short band keeps the key art clearly visible, and the title -
+        // which starts about 80% down the band - still lands on near-solid
+        // background for contrast.
+        fadeStart: hasBanner ? 120 : 150,
+        fit: BoxFit.cover,
+        alignment: hasBanner ? Alignment.topCenter : Alignment.center,
+        height: hasBanner ? MediaQuery.of(context).size.height * 0.18 : null,
         url: AnimeXService.i.metaOf(_malId)?.wideImage ??
             (widget.node?.mainPicture?.large != null
                 ? widget.node?.mainPicture?.large
