@@ -398,7 +398,9 @@ String? getDomainAsset(String e, [String domain = 'streaming']) {
   if (domain == 'streaming') {
     final name = streamingAssetName(e);
     if (name == null) return null;
-    return 'https://raw.githubusercontent.com/JICA98/DailyAL/psycho/web_assets/streaming/$name.$ext';
+    // File names can contain spaces ("Muse Asia") and '+', so percent-encode
+    // the path segment rather than trusting the raw title.
+    return 'https://raw.githubusercontent.com/JICA98/DailyAL/psycho/web_assets/streaming/${Uri.encodeComponent(name)}.$ext';
   }
   return 'https://raw.githubusercontent.com/JICA98/DailyAL/psycho/web_assets/$domain/${e.trim()}.$ext';
 }
