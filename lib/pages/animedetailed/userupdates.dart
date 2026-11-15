@@ -137,6 +137,13 @@ class _UserUpdatesPageState extends State<UserUpdatesPage>
                     fontStyle: FontStyle.italic,
                     fontSize: 12,
                   )
+                else if (e.date != null && e.date!.isNotEmpty)
+                  title(
+                    e.date!,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 12,
+                    textOverflow: TextOverflow.ellipsis,
+                  )
                 else
                   SB.z,
                 if (nsv != null && nsv.status != null) StatusBadge(nsv, height: 25)
