@@ -62,3 +62,6 @@ _build_apk/
 
 # Rendered proof PNGs from flutter test
 test_output/
+
+# Signing credentials: the build reads this file from the working tree only
+android/key.properties*
