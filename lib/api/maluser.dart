@@ -11,6 +11,17 @@ import 'package:dailyanimelist/widgets/search/filtermodal.dart';
 import 'package:dal_commons/dal_commons.dart';
 
 class MalUser {
+  /// A username safe to put in a URL.
+  ///
+  /// MAL resolves `@me` from the caller's own token. An empty or unknown
+  /// username produces `users//animelist` and `users//full`, which are 404s
+  /// that render as "no data" everywhere the answer is shown -- that is how
+  /// the profile's distributions lost their list. Any caller that does not
+  /// know the name yet should ask for `@me` rather than for an empty string.
+  static String safeUsername(String? username) {
+    if (username == null || username.isEmpty) return '@me';
+    return username;
+  }
   /// Whether a read of [username]'s list can succeed given [status].
   ///
   /// `@me` is resolved by MAL from the caller's own bearer token, so it is the
@@ -94,7 +105,7 @@ class MalUser {
       return (await _adaptFromJikan(username, fromCache: fromCache)) ??
           UserProf();
     }
-    String url = CredMal.endPoint + "users/$username";
+    String url = CredMal.endPoint + "users/${safeUsername(username)}";
     if (fields != null && fields.length != 0) {
       url += "?fields=" +
           fields.reduce((value, element) => (value + "," + element));
@@ -323,7 +334,7 @@ class MalUser {
         ? fields!.reduce((value, element) => (value + "," + element))
         : null;
     var url =
-        "${CredMal.userEndPoint}$username/${category}list?fields=num_episodes,alternative_titles,broadcast,start_date,status,mean,num_list_users,genres,media_type,num_volumes,${fieldsString != null ? (fieldsString + ',') : ''}list_status{is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}&limit=$limit&offset=$offset";
+        "${CredMal.userEndPoint}${safeUsername(username)}/${category}list?fields=num_episodes,alternative_titles,broadcast,start_date,status,mean,num_list_users,genres,media_type,num_volumes,${fieldsString != null ? (fieldsString + ',') : ''}list_status{is_rewatching,is_rereading,num_times_rewatched,num_times_reread,priority,rewatch_value,reread_value,start_date,finish_date,tags,comments}&limit=$limit&offset=$offset";
     if (status_ != null) {
       url += "&status=$status_";
     }
@@ -402,7 +413,7 @@ class MalUser {
   }) async {
     final limit = 1000;
     String url =
-        '${CredMal.userEndPoint}$username/${category}list?fields=alternative_titles,genres,media_type,start_date,broadcast,source,studios,list_status,mean${fields == null ? '' : ',${fields}'}&limit=$limit';
+        '${CredMal.userEndPoint}${safeUsername(username)}/${category}list?fields=alternative_titles,genres,media_type,start_date,broadcast,source,studios,list_status,mean${fields == null ? '' : ',${fields}'}&limit=$limit';
     if (status != null) {
       url += "&status=$status";
     }

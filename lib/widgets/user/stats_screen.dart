@@ -88,6 +88,19 @@ class _UserStatsScreenState extends State<UserStatsScreen> {
     if (mounted) setState(() {});
   }
 
+  @override
+  void didUpdateWidget(covariant UserStatsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The username can arrive after this screen was built (the profile future
+    // resolves asynchronously). An empty name produces `users//animelist`,
+    // which is a 404, and every distribution on the page then reads "no data"
+    // forever -- so a real name has to retrigger the read that was skipped.
+    if (oldWidget.username != widget.username &&
+        widget.username.isNotEmpty) {
+      _setUserInsights();
+    }
+  }
+
   var mangaList = [S.current.Reading, 'CMPL', 'On Hold', 'Dropped', 'PTR'];
   var animeList = [S.current.Watching, 'CMPL', 'On Hold', 'Dropped', 'PTW'];
 

@@ -33,12 +33,25 @@ import '../widgets/custombutton.dart';
 
 class UserProfService {
   late Future<UserProf?> userProf;
+
+  /// The last resolved profile, for callers that need the signed-in name
+  /// synchronously. `userProf` is a Future, so anything built during the first
+  /// frame would otherwise read an empty username and request `users//...`.
+  UserProf? userProfSync;
+
   UserProfService._() {
-    userProf = getUserProfile();
+    _reload();
     user.addListener(() {
       if (user.status == AuthStatus.AUTHENTICATED) {
-        userProf = getUserProfile();
+        _reload();
       }
+    });
+  }
+
+  void _reload() {
+    userProf = getUserProfile().then((value) {
+      userProfSync = value ?? userProfSync;
+      return value;
     });
   }
 

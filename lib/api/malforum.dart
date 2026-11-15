@@ -177,8 +177,11 @@ class MalForum {
 
   static Future<SearchResult> getUserClubs(
       {required String username, bool fromCache = false}) async {
-    String url = "${CredMal.htmlEnd}profile/$username/clubs";
     SearchResult result = SearchResult();
+    // An empty username builds `profile//clubs`, which is a 404 the caller can
+    // only render as an empty list. Fail as "no clubs" instead.
+    if (username.isEmpty) return result;
+    String url = "${CredMal.htmlEnd}profile/$username/clubs";
     try {
       if (fromCache) {
         Map<String, dynamic>? _map =

@@ -19,6 +19,15 @@ import 'package:dal_commons/commons.dart';
 import 'package:dal_commons/dal_commons.dart';
 
 class JikanHelper {
+  /// Jikan is a public mirror and has no `@me` alias, so a caller without a
+  /// username cannot be served here. Returning null (rather than requesting
+  /// `users//full`, which 404s and reads as "no data") lets the caller fall
+  /// back to MAL, where the token resolves the name.
+  static String? jikanUsername(String? username) {
+    if (username == null || username.isEmpty) return null;
+    return username;
+  }
+
   static Future<SearchResult> getGenre({
     int id = 1,
     String category = "anime",
@@ -44,34 +53,42 @@ class JikanHelper {
       {bool fromCache = false,
       String? username,
       Function(dynamic)? onError}) async {
+    final name = jikanUsername(username);
+    if (name == null) return JikanV4Result(data: null);
     return JikanV4Result.fromJson(
       DataUnionType.user,
-      (await MalConnect.getContent('${CredMal.jikanV4}users/$username/full',
+      (await MalConnect.getContent('${CredMal.jikanV4}users/$name/full',
           withNoHeaders: true)),
     );
   }
 
   static Future<JikanV4Result<About>> getUserAbout(String username) async {
+    final name = jikanUsername(username);
+    if (name == null) return JikanV4Result(data: null);
     return JikanV4Result.fromJson(
         DataUnionType.about,
-        (await MalConnect.getContent('${CredMal.jikanV4}users/$username/about',
+        (await MalConnect.getContent('${CredMal.jikanV4}users/$name/about',
             withNoHeaders: true)));
   }
 
   static Future<ClubV4List> getUserClubs(String username) async {
+    final name = jikanUsername(username);
+    if (name == null) return ClubV4List();
     return JikanV4Result.fromJson(
             DataUnionType.club,
             (await MalConnect.getContent(
-                '${CredMal.jikanV4}users/$username/clubs',
+                '${CredMal.jikanV4}users/$name/clubs',
                 withNoHeaders: true)))
         .data as ClubV4List;
   }
 
   static Future<UserFavV4> getUserFavorites(String username) async {
+    final name = jikanUsername(username);
+    if (name == null) return UserFavV4();
     return JikanV4Result.fromJson(
             DataUnionType.favorites,
             (await MalConnect.getContent(
-                '${CredMal.jikanV4}users/$username/favorites',
+                '${CredMal.jikanV4}users/$name/favorites',
                 withNoHeaders: true)))
         .data as UserFavV4;
   }

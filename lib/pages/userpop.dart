@@ -60,8 +60,24 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
   late UserProf? userProfSync = null;
   final ScrollController _fullScreenScrollController = ScrollController();
 
+  /// The username every page on this screen reads.
+  ///
+  /// The profile future resolves asynchronously, so a caller that passes no
+  /// name (the "Profile" tab) used to get `''` here long enough for the first
+  /// build to publish it, and `''` becomes `users//animelist` in MAL and
+  /// `users//full` in the Jikan mirror -- both broken, both silent, and every
+  /// distribution built from the (empty) answer renders as "no data". So the
+  /// resolution orders by "known now" first: the explicit name, then the name
+  /// of the profile we just loaded, then the signed-in profile we already had
+  /// cached from a previous session.
   String get _username {
-    return widget.username ?? userProfSync?.name ?? '';
+    final fromWidget = widget.username;
+    if (fromWidget != null && fromWidget.isNotEmpty) return fromWidget;
+    final fromFetch = userProfSync?.name;
+    if (fromFetch != null && fromFetch.isNotEmpty) return fromFetch;
+    final cached = UserProfService.i.userProfSync?.name;
+    if (cached != null && cached.isNotEmpty) return cached;
+    return '@me';
   }
 
   UserProfileType _userPageType() {
@@ -81,8 +97,14 @@ class _UserPopSlideOpenPageState extends State<UserPopSlideOpenPage> {
   @override
   void initState() {
     isSelf = widget.isSelf;
-    _userProfFuture =
-        _getUserProfileFuture().then((value) => userProfSync = value);
+    _userProfFuture = _getUserProfileFuture().then((value) {
+      userProfSync = value;
+      // The profile resolves after the first build, which is when
+      // `_username` gets its first value. Without this rebuild the tabs keep
+      // the empty name they were built with.
+      if (mounted) setState(() {});
+      return value;
+    });
     _bgImageRefKey = MalAuth.codeChallenge(10);
     _pageController = PageController(initialPage: 0);
     _pageListner = StreamListener(0);
