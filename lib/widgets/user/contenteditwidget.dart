@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:dailyanimelist/api/dalapi.dart';
@@ -96,6 +97,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
   bool animationPending = false;
   DateTime? startDate, finishDate;
   ScheduleData? _scheduleData;
+  StreamSubscription<int>? _scheduleSubscription;
   EpisodeSelectMode _episodeSelectMode = EpisodeSelectMode.bar;
 
   Map<String, bool> accordions = {
@@ -141,6 +143,13 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
         _episodeSelectMode = EpisodeSelectMode.text;
       }
     }
+    _scheduleSubscription?.cancel();
+    _scheduleSubscription =
+        DalApi.i.scheduleVersion.stream.listen((_) {
+      final refreshed = DalApi.i.scheduleForMalIdsSync[_id];
+      if (!mounted || refreshed == _scheduleData) return;
+      setState(() => _scheduleData = refreshed);
+    });
     if (mounted) {
       setState(() {});
     }
@@ -189,6 +198,7 @@ class _ContentEditWidgetState extends State<ContentEditWidget> {
 
   @override
   void dispose() {
+    _scheduleSubscription?.cancel();
     _savePrivateNote();
     privateNoteController.dispose();
     episodeController.dispose();

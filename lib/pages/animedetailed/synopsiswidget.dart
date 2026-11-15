@@ -61,6 +61,7 @@ class _SysonpsisWidgetState extends State<SysonpsisWidget>
   String? synopsis;
   final translator = GoogleTranslator();
   ScheduleData? scheduleData;
+  StreamSubscription<int>? _scheduleSubscription;
   Future<Translation>? transFuture;
   bool expanded = false;
   bool showExpand = false;
@@ -82,6 +83,7 @@ class _SysonpsisWidgetState extends State<SysonpsisWidget>
         transFuture = translator.translate(synopsis ?? '',
             from: "en", to: Intl.shortLocale(Intl.defaultLocale ?? 'en'));
       setScheduleData();
+      _listenForScheduleCorrections();
     }
   }
 
@@ -94,6 +96,27 @@ class _SysonpsisWidgetState extends State<SysonpsisWidget>
       setState(() {
         scheduleLoaded = true;
       });
+  }
+
+  /// Follows the live AnimeX overlay. The schedule map arrives from MAL's
+  /// weekly broadcast projection, which drifts by an episode after a skipped
+  /// week; the overlay carries AniList's reading, so a fetch that lands after
+  /// this widget was built must still correct the countdown on screen.
+  void _listenForScheduleCorrections() {
+    _scheduleSubscription?.cancel();
+    _scheduleSubscription = DalApi.i.scheduleVersion.stream.listen((_) {
+      final refreshed = widget.id == null
+          ? null
+          : DalApi.i.scheduleForMalIdsSync[widget.id];
+      if (!mounted || refreshed == scheduleData) return;
+      setState(() => scheduleData = refreshed);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scheduleSubscription?.cancel();
+    super.dispose();
   }
 
   @override

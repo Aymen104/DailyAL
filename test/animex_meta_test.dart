@@ -57,8 +57,29 @@ void main() {
       // Guards against a re-scrape shifting the key space under us.
       expect(index[9253]!.color, 0xFFD6AE); // Steins;Gate, pale peach
       expect(index[21]!.color, 0xE49335); // One Piece
-      expect(index[21]!.nextEpisode, 1180);
+      expect(index[21]!.nextEpisode, isNotNull);
       expect(index[21]!.status, 'RELEASING');
+    });
+
+    test('the bundled schedule has not aged past its own anchors', () {
+      // This is the guard for the whole airing feature. `tool/
+      // sync_animex_airing.py --write` re-pins `na`/`ne`/`st` against AniList;
+      // skipping it is silent, because the app happily projects a weekly slot
+      // forward and invents episodes. A snapshot whose furthest-future anchor
+      // is within two weeks is a snapshot nobody has refreshed in months, and
+      // every countdown built from it is a guess.
+      final anchors = index.values
+          .map((m) => m.nextAiringAt)
+          .whereType<DateTime>()
+          .toList();
+      expect(anchors, isNotEmpty, reason: 'no title carries a schedule any more');
+      final furthest = anchors.reduce((a, b) => a.isAfter(b) ? a : b);
+      expect(
+        furthest.isAfter(DateTime.now().toUtc().add(const Duration(days: 14))),
+        isTrue,
+        reason: 'bundled airing snapshot is stale (furthest anchor: $furthest) '
+            '- run: python tool/sync_animex_airing.py --write',
+      );
     });
   });
 
@@ -114,13 +135,17 @@ void main() {
     // while main() is still being declared, so `index` would not be assigned
     // yet and every use here would throw LateError.
     late DateTime anchor;
+    late int baseEpisode;
 
-    setUpAll(() => anchor = index[21]!.nextAiringAt!.toUtc());
+    setUpAll(() {
+      anchor = index[21]!.nextAiringAt!.toUtc();
+      baseEpisode = index[21]!.nextEpisode!;
+    });
 
     test('a fresh slot reports the bundled episode and a countdown', () {
       final now = anchor.subtract(const Duration(days: 3, hours: 4));
       final label = AnimeXService.i.nextAiringLabel(21, now: now)!;
-      expect(label, startsWith('EP 1180'));
+      expect(label, startsWith('EP $baseEpisode'));
       expect(label, contains('3d'));
     });
 
@@ -129,11 +154,11 @@ void main() {
       // 'EP $episode' verbatim once the timestamp passed, so an installed build
       // would show the same episode number forever.
       //
-      // One week past the anchor, EP 1181 is the one airing *now*, so the next
-      // one to wait for is EP 1182, a further week out.
+      // One week past the anchor, the anchored episode has aired, so the next
+      // one to wait for is two further weeks out from it.
       final now = anchor.add(const Duration(days: 7));
       final label = AnimeXService.i.nextAiringLabel(21, now: now)!;
-      expect(label, startsWith('EP 1182'),
+      expect(label, startsWith('EP ${baseEpisode + 2}'),
           reason: 'countdown did not roll forward a week');
       expect(label, contains('7d'));
     });
@@ -143,19 +168,25 @@ void main() {
       // The bundled episode is airing at this instant, so it is not what to
       // count down to.
       final label = AnimeXService.i.nextAiringLabel(21, now: anchor)!;
-      expect(label, startsWith('EP 1181'));
+      expect(label, startsWith('EP ${baseEpisode + 1}'));
     });
 
-    test('a slot three weeks old advances three episodes', () {
-      final now = anchor.add(const Duration(days: 21));
+    test('a slot two weeks old advances three episodes', () {
+      // The anchored episode has aired, and so have the next two weekly slots;
+      // the one being counted down to is the third.
+      final now = anchor.add(const Duration(days: 14));
       final label = AnimeXService.i.nextAiringLabel(21, now: now)!;
-      expect(label, startsWith('EP 1184'));
+      expect(label, startsWith('EP ${baseEpisode + 3}'));
       expect(label, contains('7d'));
     });
 
     test('gives up past the projection bound rather than inventing a date', () {
-      final now = anchor.add(const Duration(days: 56));
-      expect(AnimeXService.i.nextAiringLabel(21, now: now), isNull);
+      // Three weekly slots is the most a single frozen reading can justify; a
+      // fourth is a guess about a show that may have gone on break.
+      expect(AnimeXService.i.nextAiringLabel(21,
+          now: anchor.add(const Duration(days: 21))), isNull);
+      expect(AnimeXService.i.nextAiringLabel(21,
+          now: anchor.add(const Duration(days: 56))), isNull);
     });
 
     test('returns null for titles with no airing data', () {

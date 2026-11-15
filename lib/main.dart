@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dailyanimelist/animex/animex_meta.dart';
+import 'package:dailyanimelist/animex/animex_live.dart';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/cache/dubinfomanager.dart';
 import 'package:dailyanimelist/constant.dart';
@@ -64,8 +64,11 @@ void main() async {
     await FlutterDisplayMode.setHighRefreshRate();
     // Kick off without awaiting: ~19k records, and nothing should sit on the
     // first frame for an enhancement. Accessors degrade to neutral until it
-    // lands, so there is no need to block startup here.
-    unawaited(AnimeXService.i.ensureLoaded());
+    // lands, so there is no need to block startup here. The airing refresh
+    // indexes the asset first, then re-pins the schedule in the background --
+    // the bundled snapshot is correct on the day it was built and only the
+    // refresh keeps it that way.
+    unawaited(AnimeXAiringLive.i.start());
   } catch (e) {}
 
   Node? node;

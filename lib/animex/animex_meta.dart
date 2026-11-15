@@ -30,9 +30,12 @@ class AnimeXMeta {
   /// AniList status, e.g. `RELEASING`, `FINISHED`, `NOT_YET_RELEASED`.
   final String? status;
 
-  /// Exact next broadcast time. Present only for currently-airing titles
-  /// (~125 of them), which is the point: it is the only precise airing data
-  /// the app can get, since MAL only exposes a weekly `broadcast` string.
+  /// Exact next broadcast time, as of the moment this asset was built.
+  /// Present only for titles AniList scheduled that day (under a hundred of the
+  /// 19k), which is the point: it is the only precise airing data the app can
+  /// get, since MAL only exposes a weekly `broadcast` string. A build that has
+  /// been installed for a while is past its anchor date, so this is a starting
+  /// point for [AnimeXService.nextAiringLabel], never the last word.
   final DateTime? nextAiringAt;
 
   /// The episode number that will air at [nextAiringAt].
@@ -88,6 +91,63 @@ class AnimeXMeta {
       anilistId: (json['al'] as num?)?.toInt(),
     );
   }
+}
+
+/// A next-broadcast reading fetched from AniList at runtime.
+///
+/// The bundled asset can only describe the day it was built on; this is the
+/// same field asked again. It is kept beside [AnimeXMeta] rather than inside it
+/// so the nineteen-thousand-record index stays immutable: only the handful of
+/// titles that carry a schedule ever get an override, and clearing the overlay
+/// restores the bundled value exactly.
+///
+/// Serialised with the same short keys as the asset (`na`, `ne`, `st`) so the
+/// cache, the network payload and the bundled row all read through one parser.
+class AnimeXAiring {
+  /// The episode that airs at [airingAt]. Null when AniList had an entry but no
+  /// episode number, which is treated as "nothing to count down to".
+  final int? episode;
+
+  /// AniList status at fetch time.
+  final String? status;
+
+  /// Total episode count, when AniList publishes one. Only used to notice that
+  /// the numbered run is already over.
+  final int? episodes;
+
+  /// Next broadcast, or null when AniList schedules nothing for this title any
+  /// more (finished, cancelled, or on an unscheduled break).
+  final DateTime? airingAt;
+
+  const AnimeXAiring({
+    this.airingAt,
+    this.episode,
+    this.status,
+    this.episodes,
+  });
+
+  /// True when there is a real upcoming episode to count down to.
+  bool get hasNextEpisode => airingAt != null && episode != null;
+
+  factory AnimeXAiring.fromJson(Map<dynamic, dynamic> json) {
+    final na = json['na'];
+    return AnimeXAiring(
+      airingAt: na is num
+          ? DateTime.fromMillisecondsSinceEpoch(na.toInt() * 1000)
+          : null,
+      episode: (json['ne'] as num?)?.toInt(),
+      status: json['st'] as String?,
+      episodes: (json['t'] as num?)?.toInt(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        if (airingAt != null)
+          'na': airingAt!.toUtc().millisecondsSinceEpoch ~/ 1000,
+        if (episode != null) 'ne': episode,
+        if (status != null) 'st': status,
+        if (episodes != null) 't': episodes,
+      };
 }
 
 /// Lazily-loaded read-only index over `assets/animex_meta.json`.
@@ -161,6 +221,86 @@ class AnimeXService {
     return _byMalId?[malId];
   }
 
+  /// Runtime overrides, keyed by MAL id. Empty until a fetch lands.
+  final Map<int, AnimeXAiring> _live = {};
+
+  /// Called after [applyLive]/[mergeLive] change the overlay.
+  ///
+  /// Anything that cached a value derived from the overlay (a schedule
+  /// projection, a fetched row) registers here instead of guessing when to
+  /// re-read it. Registration lives outside the service so a derived cache does
+  /// not have to poll.
+  static final List<VoidCallback> onOverlayChanged = [];
+
+  /// Fires [onOverlayChanged] after every overlay change. A listener that
+  /// throws must not take the overlay down with it.
+  void _notifyOverlayChanged() {
+    for (final cb in onOverlayChanged) {
+      try {
+        cb();
+      } catch (_) {
+        // A broken listener is that listener's problem; the overlay is right.
+      }
+    }
+  }
+
+  /// Bumped on every overlay change so a derived cache can notice without a
+  /// callback. Callers compare it to the version they last derived against.
+  int _liveVersion = 0;
+
+  /// How many titles are currently running on live data rather than the asset.
+  /// Only ever read for logging and tests; the UI must not branch on it.
+  int get liveCount => _live.length;
+
+  /// The live reading for [malId], or null when the asset is still the only
+  /// source. A live reading saying "nothing scheduled" is still a reading.
+  AnimeXAiring? liveAiringOf(int? malId) {
+    if (malId == null) return null;
+    return _live[malId];
+  }
+
+  /// The overlay itself, for callers that need to fold it into another
+  /// projection (see `DalApi.scheduleForMalIdsSync`). Read-only by convention.
+  Map<int, AnimeXAiring> get liveRows => _live;
+
+  /// Version of [liveRows]. Any change -- hydrate, merge, clear -- bumps it.
+  int get liveVersion => _liveVersion;
+
+  /// Replaces the whole overlay. Used when hydrating from the on-disk cache,
+  /// which is itself the complete overlay; tests use it to reset state.
+  void applyLive(Map<int, AnimeXAiring> rows) {
+    _live
+      ..clear()
+      ..addAll(rows);
+    _liveVersion++;
+    _notifyOverlayChanged();
+  }
+
+  /// Folds a freshly fetched page into the overlay. Merging rather than
+  /// replacing means a request that failed halfway leaves the titles it did not
+  /// reach on their previous reading instead of silently reverting them to a
+  /// snapshot that may be weeks older.
+  void mergeLive(Map<int, AnimeXAiring> rows) {
+    _live.addAll(rows);
+    _liveVersion++;
+    _notifyOverlayChanged();
+  }
+
+  /// MAL ids worth asking AniList about: the ones that carry an anchor, plus
+  /// everything still airing. `tool/sync_animex_airing.py` narrows the bundled
+  /// asset with this same rule, so the snapshot and the refresh agree on what
+  /// "scheduled" means.
+  List<int> get scheduledIds {
+    final ids = <int>{};
+    for (final entry in (_byMalId ?? const <int, AnimeXMeta>{}).entries) {
+      final meta = entry.value;
+      if (meta.nextAiringAt != null || meta.status == 'RELEASING') {
+        ids.add(entry.key);
+      }
+    }
+    return ids.toList()..sort();
+  }
+
   /// Accent colour for [malId]. Never null.
   ///
   /// 90% of titles carry a real dominant colour; the remaining 10% get a stable
@@ -183,30 +323,54 @@ class AnimeXService {
   /// Lets a surface opt out of synthetic colours if it ever needs to.
   bool hasRealAccent(int? malId) => metaOf(malId)?.color != null;
 
-  /// How many weeks ahead a bundled airing slot is trusted before giving up.
+  /// How many weekly slots a frozen reading is projected forward.
   ///
-  /// AniList hands over a single upcoming broadcast, not a schedule, and the
-  /// asset is frozen into the APK at build time -- so an installed build can
-  /// never learn that the episode it names has since aired. Projecting the
-  /// weekly slot forward keeps the countdown self-correcting with no network
-  /// access, but an irregular slot (hiatus, split cour, a one-off delay) would
-  /// let it drift, so the projection is bounded and past the bound the honest
-  /// answer is "I do not know".
-  static const int _maxProjectionWeeks = 6;
+  /// AniList hands over a single upcoming broadcast, not a schedule, so the only
+  /// way to keep a countdown alive with no network is to assume the same weekly
+  /// slot repeats. That assumption holds for a healthy weekly run and breaks the
+  /// moment the show takes a break, ends, or shifts its slot -- and a broken
+  /// assumption invents both a date and an episode number, which is worse than
+  /// showing nothing. So it is bounded to three weeks, and a live reading (see
+  /// [mergeLive]) always wins over it. Past the bound the honest answer is "I do
+  /// not know".
+  static const int _maxProjectionWeeks = 3;
 
-  /// Compact airing label such as `EP 1180 · 3d 4h`, or null when this title has
+  static const String _finished = 'FINISHED';
+  static const String _cancelled = 'CANCELLED';
+
+  /// Compact airing label such as `EP 1181 · 3d 4h`, or null when this title has
   /// no schedule we can still stand behind.
   ///
-  /// Null is the honest answer in three cases: the title has no airing data, it
-  /// has a broadcast time but no episode number to pair with it, or the bundled
-  /// snapshot is too old to extrapolate from. Callers fall back to MAL's weekly
-  /// `broadcast` string on null, which is vague but not wrong -- a frozen
-  /// "EP 1180" that stopped three weeks ago is strictly worse than vague.
+  /// Null is the honest answer in five cases: the title has no airing data, it
+  /// has a broadcast time but no episode number to pair with it, the show is
+  /// finished or cancelled, projecting the weekly slot forward would run past
+  /// the announced last episode, or the bundled snapshot is too old to
+  /// extrapolate from. Callers fall back to MAL's weekly `broadcast` string on
+  /// null, which is vague but never wrong -- a frozen "EP 1180" that stopped
+  /// airing weeks ago is strictly worse than vague.
+  ///
+  /// A live reading outranks the asset completely, including when it reports no
+  /// upcoming episode: that is AniList saying the run is over, and falling back
+  /// to the bundled anchor there would resurrect the episode that just aired.
   String? nextAiringLabel(int? malId, {DateTime? now}) {
-    final m = metaOf(malId);
-    final anchor = m?.nextAiringAt;
-    final episode = m?.nextEpisode;
+    final live = liveAiringOf(malId);
+    final meta = metaOf(malId);
+
+    if (live != null && !live.hasNextEpisode) return null;
+
+    final anchor = live?.airingAt ?? meta?.nextAiringAt;
+    final episode = live?.episode ?? meta?.nextEpisode;
     if (anchor == null || episode == null) return null;
+
+    final status = live?.status ?? meta?.status;
+    if (status == _finished || status == _cancelled) return null;
+
+    // A live episode number is AniList's own reading, so it is taken as given
+    // even when it disagrees with the announced total -- some entries number
+    // episodes continuously across cours, and "correcting" that would hide a
+    // real countdown. The total is only used below, on a number this code
+    // invented itself.
+    final total = live?.episodes;
 
     final ref = now ?? DateTime.now();
     // Project in UTC so a DST boundary in the device's locale cannot slide the
@@ -220,6 +384,9 @@ class AnimeXService {
       weeks++;
     }
     if (!slot.isAfter(ref)) return null;
+    // Only a projected number is held to the announced run: with weeks == 0 the
+    // episode is AniList's own reading and is left alone (see above).
+    if (weeks > 0 && total != null && ep > total) return null;
 
     final remaining = slot.difference(ref);
     final days = remaining.inDays;

@@ -111,11 +111,30 @@ class CredMal {
           "bmacLink": false,
           "errorLogging": false,
           "maxLoad": 20,
-          "preferredServers": [],
+          "preferredServers": [
+            {"url": "$dalApiBase", "load": 1}
+          ],
           "strategy": "load"
         }
 ''';
   }
+
+  /// Base URL of the DAL API server.
+  ///
+  /// Defaults to the LOCAL server (`dal-api/bin/dal_api.dart`, a shelf server
+  /// that scrapes MyAnimeList's public HTML and is the replacement for the
+  /// remote `dal-rust-api.onrender.com` API, which answers 503 on every route).
+  /// `0.0.0.0:8080` is only reachable on the machine running it -- for the
+  /// phone, build with the PC's LAN address instead:
+  ///
+  ///     flutter build apk --dart-define=DAL_API_URL=http://192.168.1.20:8080/
+  ///
+  /// The same URL is also what the phone logs as `Cache ->> .../schedules` when
+  /// the server-config fetch fails.
+  static const String dalApiBase = String.fromEnvironment(
+    'DAL_API_URL',
+    defaultValue: 'http://0.0.0.0:8080/',
+  );
 
   static String get supabaseUrl {
     return '${environment['SUPABASE_URL']}';

@@ -2,6 +2,8 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:dailyanimelist/animex/animex_live.dart';
+import 'package:dailyanimelist/animex/animex_meta.dart';
 import 'package:dailyanimelist/api/credmal.dart';
 import 'package:dailyanimelist/api/jikahelper.dart';
 import 'package:dailyanimelist/api/malconnect.dart';
@@ -28,6 +30,20 @@ class DalApi {
   Map<int, ScheduleData> _scheduleForMalIdsSync = {};
   bool _debugMode = kDebugMode;
 
+  /// Live-overlay version the current [_scheduleForMalIdsSync] was derived
+  /// against. Every overlay change bumps `AnimeXService.liveVersion`, and the
+  /// map is re-derived lazily on the next read -- so a schedule that finished
+  /// loading before the AnimeX fetch landed still gets corrected, without a
+  /// callback or a refetch.
+  int _scheduleLiveApplied = -1;
+
+  /// Bumped whenever the schedule map is re-derived from a new overlay.
+  /// Screens that read the schedule once (the detail page banner, the calendar
+  /// editor) listen to this and re-read, so a late fetch cannot leave an
+  /// already-rendered countdown pointing at an episode that already aired.
+  final StreamListener<int> scheduleVersion = StreamListener(0);
+  int _scheduleVersionValue = 0;
+
   Future<Servers?> get dalConfigFuture async {
     return _dalConfigFuture;
   }
@@ -35,11 +51,56 @@ class DalApi {
   Future<Map<int, ScheduleData>> get scheduleForMalIds async {
     return await _scheduleForMalIds.then((value) {
       _scheduleForMalIdsSync = value;
-      return value;
+      // Same correction as the sync path: a map that finished loading before
+      // the AnimeX fetch landed is re-derived here, so a future-built widget
+      // cannot show an episode that already aired.
+      return reconciledSchedule();
     });
   }
 
-  Map<int, ScheduleData> get scheduleForMalIdsSync => _scheduleForMalIdsSync;
+  /// The schedule map with AniList's live reading applied.
+  ///
+  /// The raw map is a weekly broadcast projection (see
+  /// `AnimeXAiringLive.reconcileSchedules`); this getter is where that
+  /// projection is corrected, so every reader -- the calendar, the list cards,
+  /// the detail page countdown -- sees the same numbers.
+  Map<int, ScheduleData> get scheduleForMalIdsSync => reconciledSchedule();
+
+  Map<int, ScheduleData> reconciledSchedule() {
+    if (AnimeXService.i.liveVersion != _scheduleLiveApplied) {
+      _scheduleForMalIdsSync =
+          AnimeXAiringLive.reconcileSchedules(_scheduleForMalIdsSync);
+      _scheduleLiveApplied = AnimeXService.i.liveVersion;
+    }
+    return _scheduleForMalIdsSync;
+  }
+
+  /// Called by the AnimeX overlay whenever it changes. Re-derives the in-memory
+  /// schedule map (cheap, no network) and pokes [scheduleVersion] so screens
+  /// holding a stale row re-read it.
+  void reapplyAiringToSchedules() {
+    reconciledSchedule();
+    _scheduleVersionValue++;
+    scheduleVersion.update(_scheduleVersionValue);
+  }
+
+  /// Hands the schedule map's ids to the AnimeX refresh.
+  ///
+  /// The overlay only asks about ids the *bundled asset* believes can air, so a
+  /// title the asset does not carry -- or one it still calls
+  /// NOT_YET_RELEASED -- is never queried, and its card keeps the wrong
+  /// projection forever (that is the regression this closes). The schedule map
+  /// is built from what the app actually shows predictions for, so its keys are
+  /// the set that has to be covered. [map] is the map about to be published.
+  void _registerScheduleIdsWithLive([Map<int, ScheduleData>? map]) {
+    final ids = map?.keys ?? _scheduleForMalIdsSync.keys;
+    if (ids.isEmpty) return;
+    try {
+      AnimeXAiringLive.i.includeIds(ids);
+    } catch (e) {
+      logDal('AnimeX live: could not register schedule ids -> $e');
+    }
+  }
 
   void onScheduleLoaded(void Function() callback) {
     _scheduleForMalIds.then((value) {
@@ -56,6 +117,10 @@ class DalApi {
       logDal('autocomplete cache loaded');
       autoCompleteCacheLoaded.update(true);
     });
+    // The overlay is fetched at startup and can land after this object was
+    // built (or after a screen already read the schedule), so the schedule
+    // follows it rather than being corrected once at load time.
+    AnimeXService.onOverlayChanged.add(reapplyAiringToSchedules);
   }
 
   void resetScheduleForMalIds() {
@@ -100,7 +165,11 @@ class DalApi {
             .url;
       }
     }
-    return preferredServer ?? 'http://0.0.0.0:8080/';
+    // The local DAL API server (the replacement for the remote one, which is
+    // 503 on every route). `0.0.0.0:8080` is only reachable on the machine
+    // running it, so a phone build must override `CredMal.dalApiBase` with the
+    // PC's LAN address - see the dart-define doc on that constant.
+    return preferredServer ?? CredMal.dalApiBase;
   }
 
   Future<dynamic> httpGet(String endpoint,
@@ -279,10 +348,14 @@ class DalApi {
       final schedules = await getSchedules(
           season: season, type: type, year: year, fromCache: fromCache);
       if (schedules.isNotEmpty) {
-        return HashMap.fromEntries(schedules
-            .map((e) => MapEntry(PathUtils.getIdUrl(e.relatedLinks?.mal), e))
-            .where((e) => e.key != null)
-            .map((e) => MapEntry(e.key!, e.value)));
+        final map = <int, ScheduleData>{};
+        for (final e in schedules) {
+          final id = PathUtils.getIdUrl(e.relatedLinks?.mal);
+          if (id != null) map[id] = e;
+        }
+        _registerScheduleIdsWithLive();
+        return HashMap<int, ScheduleData>.from(
+            AnimeXAiringLive.reconcileSchedules(map));
       }
     } catch (e) {
       logDal(e);
@@ -332,7 +405,15 @@ class DalApi {
                 map[id] = schedule;
               }
             }
-            if (map.isNotEmpty) return map;
+            if (map.isNotEmpty) {
+              // Register the ids on the CACHE path too. This map is what the
+              // app shows predictions for, and a cold start that reads it from
+              // here would otherwise never ask AniList about the titles the
+              // bundled asset does not know (MAL 64084/61999) - the exact hole
+              // that left their cards on the derived, drifted number.
+              _registerScheduleIdsWithLive(map);
+              return map;
+            }
           }
         }
       }
@@ -354,8 +435,17 @@ class DalApi {
           while (true) {
             final i = next++;
             if (i >= pages.length) return;
-            outputs[i] = await _tenraiGet(
-                '${CredMal.jikanV4}schedules?sfw=false&page=${pages[i]}');
+            final url =
+                '${CredMal.jikanV4}schedules?sfw=false&page=${pages[i]}';
+            var page = await _tenraiGet(url);
+            if (page == null) {
+              // One failed page silently removes its titles from the schedule
+              // entirely -- the derivation then has nothing to correct for
+              // them, and the app shows nothing. Retry once before giving up.
+              await Future.delayed(const Duration(seconds: 2));
+              page = await _tenraiGet(url);
+            }
+            outputs[i] = page;
           }
         }
 
@@ -364,6 +454,14 @@ class DalApi {
         for (final r in outputs) {
           if (r != null) _fillTenraiSchedule(map, r);
         }
+        _registerScheduleIdsWithLive(map);
+        // Persist the corrected rows, not the raw weekly projection: the cache
+        // is what the next cold start reads, and a cached wrong episode number
+        // is exactly what the overlay is here to prevent.
+        final corrected = AnimeXAiringLive.reconcileSchedules(map);
+        map
+          ..clear()
+          ..addAll(corrected);
         await CacheManager.instance.setValueForServiceAutoExpireIn(
           serviceName,
           cacheKey,
@@ -549,6 +647,10 @@ class DalApi {
   }
 
   Future<UserAbout?> getUserAbout(String username) async {
+    // An empty username is a request the DAL server can only answer with an
+    // error, and that error reaches the screen as "no data". Ask for nothing
+    // instead.
+    if (username.isEmpty) return null;
     final result = await httpGet(
       'users/about?${buildQueryParams({'username': username})}',
       false,
