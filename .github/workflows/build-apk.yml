@@ -13,9 +13,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Java
+        # AGP 8.13 and compileSdk 36 need JDK 17. Pinned explicitly so the bare
+        # `gradle wrapper` call in the signing-prep step and the Flutter build
+        # both run on a known JDK instead of whatever the image happens to set.
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Set up Flutter
+        # Pinned on purpose. Flutter 3.50.0 ships a Dart whose const evaluator
+        # rejects the constant `Column` inside infinite_scroll_pagination 4.1.0
+        # (new_page_error_indicator.dart -> FooterTile -> Column's
+        # `crossAxisAlignment != CrossAxisAlignment.baseline` assert), so the
+        # whole dependency graph fails to compile there and no APK is produced.
+        # 4.1.0 is the last 4.x and 5.1.1 keeps the same const expression, so a
+        # bump does not fix it. 3.47.6 / Dart 3.13.5 is the toolchain this app is
+        # developed and verified against; pin it until the package ships a fix.
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.6'
           channel: stable
           cache: true
 
@@ -52,7 +70,13 @@ jobs:
         # which is the coverage hole the derived colour exists to close.
         #
         # Pure stdlib Python (zlib + struct), so no pip install is needed.
-        run: python3 tool/verify_accent_pixels.py test_output/animex_cards.png
+        run: |
+          if [ ! -f test_output/animex_cards.png ]; then
+            echo "::error::test_output/animex_cards.png was not produced - the"
+            echo "::error::render step failed before it wrote the bitmap."
+            exit 1
+          fi
+          python3 tool/verify_accent_pixels.py test_output/animex_cards.png
 
       - name: Upload render proof
         # The AnimeX card render is written here by the test suite. Kept even when
