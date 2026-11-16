@@ -16,7 +16,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 2026.2.5+107
+# Build number 2108, not 107: DailyAL releases upstream use the 2xxx scheme and
+# both devices carry versionCode 2107, so anything lower is refused as a
+# downgrade and `adb install -r` (the only install that keeps user data) cannot
+# land. Bump this whenever the interface version starts higher.
+version: 2026.2.5+2108
 
 environment:
   sdk: '>=3.2.6 <4.0.0'

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
@@ -184,6 +185,7 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
       _fieldValues.values.map((e) => e.title).toList();
   final _formKey = GlobalKey<FormState>();
   late ContentCardProps props;
+  StreamSubscription<int>? _scheduleSubscription;
 
   void showEditSheet() {
     dynamic _dynContent = widget.node;
@@ -221,6 +223,21 @@ class _CustomizableFieldWidgetState extends State<CustomizableFieldWidget> {
         }
       });
     });
+    // The schedule map is a weekly broadcast projection until the AniList
+    // overlay lands, and that landing happens seconds to minutes *after* this
+    // card was built: the countdown ticks inside its own widget, so the `Ep N`
+    // label next to it would keep the derived episode forever. `onScheduleLoaded`
+    // above fires once, when the map itself arrives, not when the overlay does.
+    _scheduleSubscription?.cancel();
+    _scheduleSubscription = DalApi.i.scheduleVersion.stream.listen((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _scheduleSubscription?.cancel();
+    super.dispose();
   }
 
   AnimeDetailed? get node => widget.node?.content as AnimeDetailed?;

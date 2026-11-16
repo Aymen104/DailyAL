@@ -139,6 +139,9 @@ class AnimeXAiringLive {
 
     final ids = refreshIds;
     if (ids.isEmpty) return 0;
+    logDal('AnimeX live: asking AniList about ${ids.length} ids '
+        '(${(ids.length / _pageSize).ceil()} request(s), '
+        '${_extraIds.length} registered by the schedule map)');
 
     final rows = <int, AnimeXAiring>{};
     var pages = 0;
@@ -254,7 +257,11 @@ class AnimeXAiringLive {
   /// Pure and non-destructive: [base] is not modified.
   static Map<int, ScheduleData> reconcileSchedules(
       Map<int, ScheduleData> base) {
-    if (base.isEmpty || AnimeXService.i.liveCount == 0) return base;
+    if (base.isEmpty || AnimeXService.i.liveCount == 0) {
+      logDal('AnimeX live: reconcile skipped (${base.length} rows, '
+          'overlay empty)');
+      return base;
+    }
     final out = <int, ScheduleData>{};
     for (final entry in base.entries) {
       final live = AnimeXService.i.liveAiringOf(entry.key);
@@ -273,6 +280,8 @@ class AnimeXAiringLive {
       );
       out[entry.key] = corrected;
     }
+    logDal('AnimeX live: reconciled ${base.length} rows -> ${out.length} kept '
+        '(overlay ${AnimeXService.i.liveCount} rows, v${AnimeXService.i.liveVersion})');
     return out;
   }
 

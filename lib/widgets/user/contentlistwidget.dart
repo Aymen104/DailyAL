@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -635,12 +636,8 @@ class _ContentAllWidgetState extends State<ContentAllWidget>
                 widget.displayType == DisplayType.list_horiz) &&
             (contentTypes.contains(widget.category) ||
                 widget.category.equals('news')))
-        ? CFutureBuilder(
-            future: DalApi.i.scheduleForMalIds,
-            loadingChild: _buildAnimeGridCard(null, nsv, context),
-            done: (AsyncSnapshot<Map<int, ScheduleData>> data) =>
-                _buildAnimeGridCard(data.data, nsv, context),
-          )
+        ? scheduleMapBuilder(
+            (map) => _buildAnimeGridCard(map, nsv, context))
         : _buildListTile(nsv, nodeTitle);
   }
 
@@ -1508,20 +1505,96 @@ Widget countdownWidget({
   return SB.z;
 }
 
-Widget usingScheduler(int id, Widget Function(ScheduleData) widget) {
-  return CFutureBuilder<Map<int, ScheduleData>>(
-    future: DalApi.i.scheduleForMalIds,
-    loadingChild: SB.z,
-    done: (sn) {
-      ScheduleData? data;
-      if (sn.hasData && sn.data!.containsKey(id)) {
-        data = sn.data![id]!;
-        return widget(data);
-      }
-      return SB.z;
-    },
-  );
+/// Reads the schedule row for [id] and rebuilds whenever AniList's overlay
+/// re-spells it.
+///
+/// The one-shot future this used to hold is the bug: the schedule map resolves
+/// once, before the overlay lands, so a card built from that snapshot kept the
+/// weekly projection's derived episode number forever. The countdown next to it
+/// kept ticking, which made the row look live while its `Ep N` was frozen.
+class SchedulerBuilder extends StatefulWidget {
+  const SchedulerBuilder({super.key, required this.id, required this.builder});
+
+  final int id;
+  final Widget Function(ScheduleData data) builder;
+
+  @override
+  State<SchedulerBuilder> createState() => _SchedulerBuilderState();
 }
+
+class _SchedulerBuilderState extends State<SchedulerBuilder> {
+  StreamSubscription<int>? _scheduleSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleSubscription =
+        DalApi.i.scheduleVersion.stream.listen((_) {
+      if (mounted) setState(() {});
+    });
+    // The map itself arrives asynchronously and is empty in the sync getter
+    // until it does; re-read once it lands.
+    DalApi.i.scheduleForMalIds.then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _scheduleSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = DalApi.i.scheduleForMalIdsSync[widget.id];
+    return data == null ? SB.z : widget.builder(data);
+  }
+}
+
+Widget usingScheduler(int id, Widget Function(ScheduleData) widget) {
+  return SchedulerBuilder(id: id, builder: widget);
+}
+
+/// The same staleness fix as [SchedulerBuilder], for callers that need the whole
+/// map rather than one row.
+class ScheduleMapBuilder extends StatefulWidget {
+  const ScheduleMapBuilder({super.key, required this.builder});
+
+  final Widget Function(Map<int, ScheduleData>? map) builder;
+
+  @override
+  State<ScheduleMapBuilder> createState() => _ScheduleMapBuilderState();
+}
+
+class _ScheduleMapBuilderState extends State<ScheduleMapBuilder> {
+  StreamSubscription<int>? _scheduleSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleSubscription =
+        DalApi.i.scheduleVersion.stream.listen((_) {
+      if (mounted) setState(() {});
+    });
+    DalApi.i.scheduleForMalIds.then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _scheduleSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      widget.builder(DalApi.i.scheduleForMalIdsSync);
+}
+
+Widget scheduleMapBuilder(Widget Function(Map<int, ScheduleData>? map) builder) =>
+    ScheduleMapBuilder(builder: builder);
 
 Widget usingSyncScheduler(int id, Widget Function(ScheduleData) widget) {
   final data = DalApi.i.scheduleForMalIdsSync[id];
