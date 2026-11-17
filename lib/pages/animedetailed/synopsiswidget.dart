@@ -473,18 +473,32 @@ class _CountDownWidgetState extends State<CountDownWidget> {
   Timer? timer;
   bool showExtra = false;
   bool timerOver = false;
+  late DateTime _localDate;
 
   @override
   void initState() {
     super.initState();
     timerOver = false;
-    final localDate =
-        DateTime.fromMillisecondsSinceEpoch(widget.timestamp * 1000);
-    _setTimeUnits(localDate);
+    _localDate = DateTime.fromMillisecondsSinceEpoch(widget.timestamp * 1000);
+    _setTimeUnits(_localDate);
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _setTimeUnits(localDate);
+      _setTimeUnits(_localDate);
       if (mounted) setState(() {});
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant CountDownWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The schedule row can be re-spelled by AniList after this State was
+    // created. The ticking closure captured initState's date, so without this
+    // the new `Ep N` would have been printed next to a countdown for the old
+    // weekly slot.
+    if (oldWidget.timestamp != widget.timestamp) {
+      _localDate = DateTime.fromMillisecondsSinceEpoch(widget.timestamp * 1000);
+      timerOver = false;
+      _setTimeUnits(_localDate);
+    }
   }
 
   void _setTimeUnits(DateTime localDate) {

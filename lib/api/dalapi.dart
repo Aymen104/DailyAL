@@ -48,14 +48,25 @@ class DalApi {
     return _dalConfigFuture;
   }
 
+  /// Set once, when [_scheduleForMalIds] first publishes its map. Without this
+  /// guard every caller of the getter would overwrite the reconciled map again.
+  bool _scheduleFuturePublished = false;
+
   Future<Map<int, ScheduleData>> get scheduleForMalIds async {
-    return await _scheduleForMalIds.then((value) {
-      _scheduleForMalIdsSync = value;
-      // Same correction as the sync path: a map that finished loading before
-      // the AnimeX fetch landed is re-derived here, so a future-built widget
-      // cannot show an episode that already aired.
-      return reconciledSchedule();
-    });
+    final value = await _scheduleForMalIds;
+    if (_scheduleFuturePublished) return reconciledSchedule();
+    _scheduleFuturePublished = true;
+    _scheduleForMalIdsSync = value;
+    // The overlay can land BEFORE this future on the slow Tenrai-cache path.
+    // In that case _scheduleLiveApplied already equals liveVersion, so a plain
+    // reconciledSchedule() would no-op and the raw weekly projection (ep 6)
+    // would stay published forever while the phone's overlay said ep 7.
+    // Force one re-derive against whatever overlay is live right now.
+    _scheduleLiveApplied = -1;
+    final corrected = reconciledSchedule();
+    final version = ++_scheduleVersionValue;
+    scheduleVersion.update(version);
+    return corrected;
   }
 
   /// The schedule map with AniList's live reading applied.
@@ -124,6 +135,7 @@ class DalApi {
   }
 
   void resetScheduleForMalIds() {
+    _scheduleFuturePublished = false;
     _scheduleForMalIds = _getScheduleForMalIds(fromCache: false);
   }
 
